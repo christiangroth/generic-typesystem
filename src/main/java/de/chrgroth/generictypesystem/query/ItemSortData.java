@@ -1,6 +1,11 @@
 package de.chrgroth.generictypesystem.query;
 
-public class ItemSortData {
+import java.io.Serializable;
+
+public class ItemSortData implements Serializable {
+
+    private static final long serialVersionUID = 5500148850674226875L;
+
     private String path;
     private boolean ascending;
 

@@ -62,7 +62,7 @@ public class GenericStructure {
         }
 
         // done
-        return attribute != null ? attribute.getName() : null;
+        return attribute.getName();
     }
 
     public GenericAttribute attribute(String name) {

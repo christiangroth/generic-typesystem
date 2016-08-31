@@ -1,7 +1,5 @@
 package de.chrgroth.generictypesystem.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class GenericType extends GenericStructure {
@@ -17,7 +15,7 @@ public class GenericType extends GenericStructure {
     private String group;
 
     // TODO use for 3rd party project customizing
-    private Map<String, Object> customAttributes = new HashMap<>();
+    // private Map<String, Object> customAttributes = new HashMap<>();
 
     // TODO move to custom attributes map
     private String description;

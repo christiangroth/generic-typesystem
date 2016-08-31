@@ -1,12 +1,13 @@
 package de.chrgroth.generictypesystem.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class GenericAttribute {
 
-    public static final List<Type> VALID_KEY_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE);
-    public static final List<Type> VALID_VALUE_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE);
+    public static final List<Type> VALID_KEY_TYPES = Collections.unmodifiableList(Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE));
+    public static final List<Type> VALID_VALUE_TYPES = Collections.unmodifiableList(Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE));
 
     // TODO external enum
     public enum Type {

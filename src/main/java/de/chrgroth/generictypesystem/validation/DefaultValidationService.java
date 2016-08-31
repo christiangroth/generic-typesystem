@@ -239,7 +239,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // validate type matches
-        if (type == null || item.getGenericTypeId() == null || item.getGenericTypeId() != type.getId()) {
+        if (item.getGenericTypeId() == null || !item.getGenericTypeId().equals(type.getId())) {
             result.error("", "item type invalid/mismatch: " + type);
             return result;
         }
@@ -299,10 +299,8 @@ public class DefaultValidationService implements ValidationService {
             } else {
                 result.error(a.getName(), "mismatching type " + a.getType() + " for attribute " + a.getName() + ": " + value.getClass().getName());
             }
-        } else {
-            if (value != null && valueAssignableToType) {
-                validateItemAttributeValue(result, a, value);
-            }
+        } else if (valueAssignableToType) {
+            validateItemAttributeValue(result, a, value);
         }
     }
 
