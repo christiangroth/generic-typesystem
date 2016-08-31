@@ -5,11 +5,11 @@ import java.util.List;
 
 public class GenericAttribute {
 
-    public static List<Type> VALID_KEY_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE);
-    public static List<Type> VALID_VALUE_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE);
+    public static final List<Type> VALID_KEY_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE);
+    public static final List<Type> VALID_VALUE_TYPES = Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE);
 
     // TODO external enum
-    public static enum Type {
+    public enum Type {
         STRING(true, false, true, true, false, String.class),
 
         LONG(true, true, false, false, true, Long.class, Integer.class), DOUBLE(true, true, false, false, true, Double.class, Long.class, Integer.class),
@@ -22,18 +22,18 @@ public class GenericAttribute {
 
         LIST(List.class);
 
-        public final boolean minMaxCapable;
-        public final boolean stepCapable;
-        public final boolean patternCapable;
-        public final boolean valueProposalDependenciesCapable;
-        public final boolean unitCapable;
+        private final boolean minMaxCapable;
+        private final boolean stepCapable;
+        private final boolean patternCapable;
+        private final boolean valueProposalDependenciesCapable;
+        private final boolean unitCapable;
         private final List<Class<?>> typeClasses;
 
-        private Type(Class<?>... typeClasses) {
+        Type(Class<?>... typeClasses) {
             this(false, false, false, false, false, typeClasses);
         }
 
-        private Type(boolean minMaxCapable, boolean stepCapable, boolean patternCapable, boolean valueProposalDependenciesCapable, boolean unitCapable, Class<?>... typeClasses) {
+        Type(boolean minMaxCapable, boolean stepCapable, boolean patternCapable, boolean valueProposalDependenciesCapable, boolean unitCapable, Class<?>... typeClasses) {
             this.minMaxCapable = minMaxCapable;
             this.stepCapable = stepCapable;
             this.patternCapable = patternCapable;

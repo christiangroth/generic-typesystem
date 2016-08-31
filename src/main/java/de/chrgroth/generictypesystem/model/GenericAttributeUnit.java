@@ -1,11 +1,15 @@
 package de.chrgroth.generictypesystem.model;
 
 public class GenericAttributeUnit {
+    private static final int HASH_CODE_SHIFT = 32;
+
+    public static final double FACTOR_BASE = 1.0d;
+
     private String name;
     private double factor;
 
     public boolean isBase() {
-        return factor == 1.0d;
+        return factor == FACTOR_BASE;
     }
 
     public String getName() {
@@ -30,7 +34,7 @@ public class GenericAttributeUnit {
         int result = 1;
         long temp;
         temp = Double.doubleToLongBits(factor);
-        result = prime * result + (int) (temp ^ temp >>> 32);
+        result = prime * result + (int) (temp ^ temp >>> HASH_CODE_SHIFT);
         return result;
     }
 

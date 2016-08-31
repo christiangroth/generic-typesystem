@@ -115,11 +115,11 @@ public class GenericTypesystemService {
         boolean moreAvailable = false;
         items.addAll(data);
 
+        // TODO filter and test
         // filter
-        if (filter != null) {
-
-            // TODO filter and test
-        }
+        // if (filter != null) {
+        //
+        // }
 
         // sorting
         // TODO case insensitive string compare + test
