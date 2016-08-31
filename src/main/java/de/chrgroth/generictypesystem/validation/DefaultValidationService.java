@@ -20,8 +20,9 @@ import de.chrgroth.generictypesystem.model.GenericType;
 // TODO replace hardcoded values by ids
 // TODO private -> protected, add hooks??
 // TODO unit tests
-public class DefaultValidationService {
+public class DefaultValidationService implements ValidationService {
 
+    @Override
     public ValidationResult validate(GenericType type) {
 
         // null guard
@@ -221,6 +222,7 @@ public class DefaultValidationService {
         }
     }
 
+    @Override
     public ValidationResult validate(GenericType type, GenericItem item) {
 
         // type null guard

@@ -3,7 +3,6 @@ package de.chrgroth.generictypesystem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +11,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.naming.Context;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,25 +30,25 @@ import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 
 // TODO add security / visibility service
-// TODO unit tests
+// TODO extract query service or move to data service??
+// TODO unit test coverage
+// TODO be sure services maybe null and nothing crashes
 public class GenericTypesystemService {
 
     private ValidationService validation;
     private PersistenceService persistence;
 
-    // TODO switch to default String methods
-    private final Comparator<String> ignoreCaseComparator;
-
-    public GenericTypesystemService() {
-        ignoreCaseComparator = (s1, s2) -> s1.toLowerCase().compareTo(s2.toLowerCase());
+    public GenericTypesystemService(ValidationService validation, PersistenceService persistence) {
+        this.validation = validation;
+        this.persistence = persistence;
     }
 
     public List<String> typeGroups() {
         return persistence.typeGroups();
     }
 
-    public List<GenericType> types(Context context) {
-        // TODO context handling
+    public List<GenericType> types() {
+        // TODO context / visibility handling
         return persistence.types();
     }
 
@@ -277,7 +274,7 @@ public class GenericTypesystemService {
         Stream<String> nonEmptyValuesStream = valuesStream.filter(Objects::nonNull).map(s -> s.toString().trim()).filter(s -> s.length() > 0);
 
         // create list of ordered distinct values
-        return nonEmptyValuesStream.sorted(ignoreCaseComparator).distinct().collect(Collectors.toList());
+        return nonEmptyValuesStream.sorted((s1, s2) -> s1.compareToIgnoreCase(s2)).distinct().collect(Collectors.toList());
     }
 
     public boolean deleteItem(Long typeId, long id) {
