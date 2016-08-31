@@ -142,7 +142,7 @@ public class GenericAttribute {
     // @JSON(include = false)
     // @JsonIgnore
     public boolean isList() {
-        return type != null && Type.LIST.equals(type);
+        return Type.LIST.equals(type);
     }
 
     // TODO json handling
@@ -150,9 +150,9 @@ public class GenericAttribute {
     // @JsonIgnore
     public boolean isStructure() {
         if (isList()) {
-            return valueType != null && Type.STRUCTURE.equals(valueType);
+            return Type.STRUCTURE.equals(valueType);
         } else {
-            return type != null && Type.STRUCTURE.equals(type);
+            return Type.STRUCTURE.equals(type);
         }
     }
 

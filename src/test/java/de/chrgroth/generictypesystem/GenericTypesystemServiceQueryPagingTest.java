@@ -14,7 +14,6 @@ import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
-import de.chrgroth.generictypesystem.query.ItemFilterData;
 import de.chrgroth.generictypesystem.query.ItemPagingData;
 import de.chrgroth.generictypesystem.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.query.ItemsQueryData;
@@ -94,7 +93,7 @@ public class GenericTypesystemServiceQueryPagingTest {
 
     public void paging(ItemPagingData paging, int results) {
         ItemsQueryData itemsQueryData = new ItemsQueryData();
-        itemsQueryData.setFilter(new ItemFilterData());
+        itemsQueryData.setFilter(null);
         itemsQueryData.setSorts(null);
         itemsQueryData.setPaging(paging);
         ItemQueryResult result = service.items(0l, itemsQueryData);

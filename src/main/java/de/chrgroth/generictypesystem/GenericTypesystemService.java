@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
@@ -34,6 +36,8 @@ import de.chrgroth.generictypesystem.validation.ValidationService;
 // TODO unit test coverage
 // TODO be sure services maybe null and nothing crashes
 public class GenericTypesystemService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
 
     private ValidationService validation;
     private PersistenceService persistence;
@@ -117,9 +121,9 @@ public class GenericTypesystemService {
 
         // TODO filter and test
         // filter
-        // if (filter != null) {
-        //
-        // }
+        if (filter != null) {
+            LOG.warn("filtering not implemented yet!!");
+        }
 
         // sorting
         // TODO case insensitive string compare + test
