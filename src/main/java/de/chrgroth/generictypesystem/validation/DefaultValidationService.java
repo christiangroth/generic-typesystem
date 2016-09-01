@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.model.UnitValue;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 // TODO replace hardcoded values by ids
 // TODO private -> protected, add hooks??
@@ -305,7 +305,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    private void vaidateItemAttributeCollectionValue(ValidationResult result, GenericAttribute a, Collection<?> value) {
+    private <T> void vaidateItemAttributeCollectionValue(ValidationResult result, GenericAttribute a, Collection<T> value) {
 
         // check mandatory value
         if (value.isEmpty() && a.isMandatory()) {
@@ -316,7 +316,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // check containing items
-        Set<?> mismatchingItems = value.stream().filter(i -> !a.getValueType().isAssignableFrom(i.getClass())).collect(Collectors.toSet());
+        Set<T> mismatchingItems = value.stream().filter(i -> !a.getValueType().isAssignableFrom(i.getClass())).collect(Collectors.toSet());
         if (!mismatchingItems.isEmpty()) {
             result.error(a.getName(), "mismatching items for collection of type " + a.getValueType() + " in attribute " + a.getName() + ": " + mismatchingItems);
         }
