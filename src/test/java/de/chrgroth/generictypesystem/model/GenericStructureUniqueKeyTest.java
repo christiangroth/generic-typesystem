@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.TestUtils;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 
 public class GenericStructureUniqueKeyTest {
 
@@ -65,7 +64,7 @@ public class GenericStructureUniqueKeyTest {
     }
 
     private void addAttribute(String name, boolean unique, String value) {
-        structure.getAttributes().add(new GenericAttribute(0l, 0, name, Type.STRING, null, null, unique, unique, unique, null));
+        structure.getAttributes().add(new GenericAttribute(0l, 0, name, GenericAttributeType.STRING, null, null, unique, unique, unique, null));
         item.set(name, value);
     }
 

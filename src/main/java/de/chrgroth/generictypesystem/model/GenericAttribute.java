@@ -4,85 +4,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+// TODO JSON handling for isList, isStructure, structure, defaultValue, valueProposalDependencies, isUnitBased, units
 public class GenericAttribute {
 
-    public static final List<Type> VALID_KEY_TYPES = Collections.unmodifiableList(Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE));
-    public static final List<Type> VALID_VALUE_TYPES = Collections.unmodifiableList(Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE));
-
-    // TODO external enum
-    public enum Type {
-        STRING(true, false, true, true, false, String.class),
-
-        LONG(true, true, false, false, true, Long.class, Integer.class), DOUBLE(true, true, false, false, true, Double.class, Long.class, Integer.class),
-
-        BOOLEAN(Boolean.class),
-
-        DATE(String.class), TIME(false, true, false, false, false, String.class), DATETIME(false, true, false, false, false, String.class),
-
-        STRUCTURE(GenericItem.class),
-
-        LIST(List.class);
-
-        private final boolean minMaxCapable;
-        private final boolean stepCapable;
-        private final boolean patternCapable;
-        private final boolean valueProposalDependenciesCapable;
-        private final boolean unitCapable;
-        private final List<Class<?>> typeClasses;
-
-        Type(Class<?>... typeClasses) {
-            this(false, false, false, false, false, typeClasses);
-        }
-
-        Type(boolean minMaxCapable, boolean stepCapable, boolean patternCapable, boolean valueProposalDependenciesCapable, boolean unitCapable, Class<?>... typeClasses) {
-            this.minMaxCapable = minMaxCapable;
-            this.stepCapable = stepCapable;
-            this.patternCapable = patternCapable;
-            this.valueProposalDependenciesCapable = valueProposalDependenciesCapable;
-            this.unitCapable = unitCapable;
-            this.typeClasses = Arrays.asList(typeClasses);
-        }
-
-        public boolean isMinMaxCapable() {
-            return minMaxCapable;
-        }
-
-        public boolean isStepCapable() {
-            return stepCapable;
-        }
-
-        public boolean isPatternCapable() {
-            return patternCapable;
-        }
-
-        public boolean isValueProposalDependenciesCapable() {
-            return valueProposalDependenciesCapable;
-        }
-
-        public boolean isUnitCapable() {
-            return unitCapable;
-        }
-
-        public boolean isAssignableFrom(Class<?> actualClass) {
-
-            // check all classes
-            for (Class<?> typeClass : typeClasses) {
-                if (typeClass.isAssignableFrom(actualClass)) {
-                    return true;
-                }
-            }
-
-            // none found
-            return false;
-        }
-    }
+    public static final List<GenericAttributeType> VALID_KEY_TYPES = Collections
+            .unmodifiableList(Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG, GenericAttributeType.DOUBLE));
+    public static final List<GenericAttributeType> VALID_VALUE_TYPES = Collections.unmodifiableList(Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG,
+            GenericAttributeType.DOUBLE, GenericAttributeType.BOOLEAN, GenericAttributeType.DATE, GenericAttributeType.STRUCTURE));
 
     private Long id;
     private int order;
     private String name;
-    private Type type;
-    private Type keyType;
-    private Type valueType;
+    private GenericAttributeType type;
+    private GenericAttributeType keyType;
+    private GenericAttributeType valueType;
     private boolean unique;
     private boolean indexed;
     private boolean mandatory;
@@ -104,22 +39,22 @@ public class GenericAttribute {
         this(null, 0, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, Type type) {
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type) {
         this(id, order, name, type, null, null, false, false, true, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, Type type, Type keyType, Type valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure) {
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
+            boolean indexed, boolean mandatory, GenericStructure structure) {
         this(id, order, name, type, keyType, valueType, unique, indexed, mandatory, structure, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, Type type, Type keyType, Type valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern) {
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
+            boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern) {
         this(id, order, name, type, keyType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, Type type, Type keyType, Type valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback) {
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
+            boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback) {
         this.id = id;
         this.order = order;
         this.name = name;
@@ -138,21 +73,15 @@ public class GenericAttribute {
         this.defaultValueCallback = defaultValueCallback;
     }
 
-    // TODO json handling
-    // @JSON(include = false)
-    // @JsonIgnore
     public boolean isList() {
-        return Type.LIST.equals(type);
+        return GenericAttributeType.LIST.equals(type);
     }
 
-    // TODO json handling
-    // @JSON(include = false)
-    // @JsonIgnore
     public boolean isStructure() {
         if (isList()) {
-            return Type.STRUCTURE.equals(valueType);
+            return GenericAttributeType.STRUCTURE.equals(valueType);
         } else {
-            return Type.STRUCTURE.equals(type);
+            return GenericAttributeType.STRUCTURE.equals(type);
         }
     }
 
@@ -180,27 +109,27 @@ public class GenericAttribute {
         this.name = name;
     }
 
-    public Type getType() {
+    public GenericAttributeType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(GenericAttributeType type) {
         this.type = type;
     }
 
-    public Type getKeyType() {
+    public GenericAttributeType getKeyType() {
         return keyType;
     }
 
-    public void setKeyType(Type keyType) {
+    public void setKeyType(GenericAttributeType keyType) {
         this.keyType = keyType;
     }
 
-    public Type getValueType() {
+    public GenericAttributeType getValueType() {
         return valueType;
     }
 
-    public void setValueType(Type valueType) {
+    public void setValueType(GenericAttributeType valueType) {
         this.valueType = valueType;
     }
 
@@ -228,9 +157,6 @@ public class GenericAttribute {
         this.mandatory = mandatory;
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public GenericStructure getStructure() {
         return structure;
     }
@@ -271,9 +197,6 @@ public class GenericAttribute {
         this.pattern = pattern;
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -290,9 +213,6 @@ public class GenericAttribute {
         this.defaultValueCallback = defaultValueCallback;
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public List<Long> getValueProposalDependencies() {
         return valueProposalDependencies;
     }
@@ -301,16 +221,10 @@ public class GenericAttribute {
         this.valueProposalDependencies = valueProposalDependencies;
     }
 
-    // TODO json handling
-    // @JSON(include = false)
-    // @JsonIgnore
     public boolean isUnitBased() {
         return units != null && !units.isEmpty();
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public List<GenericAttributeUnit> getUnits() {
         return units;
     }

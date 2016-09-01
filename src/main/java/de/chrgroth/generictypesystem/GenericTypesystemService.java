@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -33,8 +33,8 @@ import de.chrgroth.generictypesystem.validation.ValidationService;
 
 // TODO add security / visibility service
 // TODO extract query service or move to data service??
+// TODO be sure to have default services and nothing crashes
 // TODO unit test coverage
-// TODO be sure services maybe null and nothing crashes
 public class GenericTypesystemService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
@@ -87,7 +87,8 @@ public class GenericTypesystemService {
         allAttributes.addAll(structure.getAttributes());
 
         // recurse into all structures
-        structure.getAttributes().stream().filter(a -> a.getType() == Type.STRUCTURE || a.getType() == Type.LIST && a.getValueType() == Type.STRUCTURE)
+        structure.getAttributes().stream()
+                .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
                 .forEach(a -> allAttributes.addAll(collectAllTypeAttributes(a.getStructure())));
 
         return allAttributes;
@@ -212,11 +213,12 @@ public class GenericTypesystemService {
         Collection<String> paths = new HashSet<>();
 
         // recurse into all structures
-        structure.getAttributes().stream().filter(a -> a.getType() == Type.STRUCTURE || a.getType() == Type.LIST && a.getValueType() == Type.STRUCTURE)
+        structure.getAttributes().stream()
+                .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
                 .forEach(a -> paths.addAll(collectValuePaths(a.getStructure(), buildAttributePath(pathPrefix, a))));
 
         // add all string attributes
-        structure.getAttributes().stream().filter(a -> a.getType() == Type.STRING).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
+        structure.getAttributes().stream().filter(a -> a.getType() == GenericAttributeType.STRING).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
 
         // done
         return paths;
@@ -247,7 +249,7 @@ public class GenericTypesystemService {
         }
 
         // validate type
-        if (attribute.getType() != Type.STRING) {
+        if (attribute.getType() != GenericAttributeType.STRING) {
             return new ArrayList<>();
         }
 

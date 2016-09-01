@@ -26,5 +26,4 @@ public interface PersistenceService {
     boolean removeItem(long typeId, long id);
 
     boolean removeType(long typeId);
-
 }

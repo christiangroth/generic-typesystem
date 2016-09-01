@@ -1,9 +1,10 @@
 package de.chrgroth.generictypesystem.model;
 
 public class GenericAttributeUnit {
-    private static final int HASH_CODE_SHIFT = 32;
 
     public static final double FACTOR_BASE = 1.0d;
+
+    private static final int HASH_CODE_SHIFT = 32;
 
     private String name;
     private double factor;

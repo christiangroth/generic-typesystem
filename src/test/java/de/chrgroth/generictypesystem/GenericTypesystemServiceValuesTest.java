@@ -13,9 +13,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 
 public class GenericTypesystemServiceValuesTest {
@@ -39,8 +39,8 @@ public class GenericTypesystemServiceValuesTest {
         service = new GenericTypesystemService(null, persistence);
 
         // prepare type
-        type.getAttributes().add(new GenericAttribute(0l, 0, STRING_ATTRIBUTE, Type.STRING));
-        type.getAttributes().add(new GenericAttribute(1l, 1, DOUBLE_ATTRIBUTE, Type.DOUBLE));
+        type.getAttributes().add(new GenericAttribute(0l, 0, STRING_ATTRIBUTE, GenericAttributeType.STRING));
+        type.getAttributes().add(new GenericAttribute(1l, 1, DOUBLE_ATTRIBUTE, GenericAttributeType.DOUBLE));
         Mockito.when(persistence.type(Mockito.eq(type.getId().longValue()))).thenReturn(type);
 
         // prepare items

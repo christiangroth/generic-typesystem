@@ -4,10 +4,10 @@ import org.junit.Test;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 public class ValidationServiceItemTest {
 
@@ -50,33 +50,33 @@ public class ValidationServiceItemTest {
 
     @Test
     public void missingMandatoryDoubleValue() {
-        attribute(Type.DOUBLE, null, null, true, null);
+        attribute(GenericAttributeType.DOUBLE, null, null, true, null);
         TestUtils.expectInvalidItem(service, type, item);
     }
 
     @Test
     public void mandatoryDoubleValue() {
-        attribute(Type.DOUBLE, null, null, true, null);
+        attribute(GenericAttributeType.DOUBLE, null, null, true, null);
         value(2.0d);
         TestUtils.expectValidItem(service, type, item);
     }
 
     @Test
     public void missingMandatoryStringValue() {
-        attribute(Type.STRING, null, null, true, null);
+        attribute(GenericAttributeType.STRING, null, null, true, null);
         TestUtils.expectInvalidItem(service, type, item);
     }
 
     @Test
     public void emptyMandatoryStringValue() {
-        attribute(Type.STRING, null, null, true, null);
+        attribute(GenericAttributeType.STRING, null, null, true, null);
         value(" ");
         TestUtils.expectInvalidItem(service, type, item);
     }
 
     @Test
     public void mandatoryStringValue() {
-        attribute(Type.STRING, null, null, true, null);
+        attribute(GenericAttributeType.STRING, null, null, true, null);
         value("foo");
         TestUtils.expectValidItem(service, type, item);
     }
@@ -87,7 +87,7 @@ public class ValidationServiceItemTest {
         TestUtils.expectInvalidItem(service, type, item);
     }
 
-    private <T, K, V> void attribute(Type type, Type keyType, Type valueType, boolean mandatory, GenericStructure structure) {
+    private <T, K, V> void attribute(GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
         this.type.getAttributes().add(new GenericAttribute(0l, 0, "name", type, keyType, valueType, false, false, mandatory, structure));
     }
 

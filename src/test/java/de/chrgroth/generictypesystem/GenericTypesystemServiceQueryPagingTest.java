@@ -10,9 +10,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.query.ItemPagingData;
 import de.chrgroth.generictypesystem.query.ItemQueryResult;
@@ -37,7 +37,7 @@ public class GenericTypesystemServiceQueryPagingTest {
         service = new GenericTypesystemService(null, persistence);
 
         // prepare type
-        type.getAttributes().add(new GenericAttribute(0l, 0, DOUBLE_ATTRIBUTE, Type.DOUBLE));
+        type.getAttributes().add(new GenericAttribute(0l, 0, DOUBLE_ATTRIBUTE, GenericAttributeType.DOUBLE));
         Mockito.when(persistence.type(Mockito.eq(type.getId().longValue()))).thenReturn(type);
 
         // prepare items

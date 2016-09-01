@@ -5,50 +5,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+// TODO JSON handling for values
+// TODO add visibility??
 public class GenericItem {
-
-    // TODO extract to class
-    public static final class UnitValue {
-        private String unit;
-        private Object value;
-        private Object baseValue;
-
-        public String getUnit() {
-            return unit;
-        }
-
-        public void setUnit(String unit) {
-            this.unit = unit;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public void setValue(Object value) {
-            this.value = value;
-        }
-
-        public Object getBaseValue() {
-            return baseValue;
-        }
-
-        public void setBaseValue(Object baseValue) {
-            this.baseValue = baseValue;
-        }
-
-        @Override
-        public String toString() {
-            return "UnitValue [unit=" + unit + ", value=" + value + ", baseValue=" + baseValue + "]";
-        }
-    }
 
     public static final Integer VERSION = 1;
 
     private Long id;
     private Long genericTypeId;
     private Map<String, Object> values;
-    // TODO add visibility??
 
     public GenericItem() {
         this(null, null, new HashMap<>());
@@ -191,9 +156,6 @@ public class GenericItem {
         this.genericTypeId = genericTypeId;
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public Map<String, Object> getValues() {
         return values;
     }

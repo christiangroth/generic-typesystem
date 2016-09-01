@@ -15,19 +15,19 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 @RunWith(Parameterized.class)
 public class ValidationServiceTypeAttributeTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
-    private static List<Type> untestedTypes;
+    private static List<GenericAttributeType> untestedTypes;
 
     @BeforeClass
     public static void setup() {
-        untestedTypes = new ArrayList<>(Arrays.asList(Type.values()));
+        untestedTypes = new ArrayList<>(Arrays.asList(GenericAttributeType.values()));
     }
 
     @AfterClass
@@ -36,16 +36,16 @@ public class ValidationServiceTypeAttributeTest {
     }
 
     public static class TestData {
-        Type type;
-        List<Type> keyTypes;
-        List<Type> valueTypes;
+        GenericAttributeType type;
+        List<GenericAttributeType> keyTypes;
+        List<GenericAttributeType> valueTypes;
         boolean structured;
         boolean minAllowed;
         boolean maxAllowed;
         boolean stepAllowed;
         boolean patternAllowed;
 
-        public TestData(Type type, List<Type> keyTypes, List<Type> valueTypes, boolean structured, boolean minAllowed, boolean maxAllowed, boolean stepAllowed,
+        public TestData(GenericAttributeType type, List<GenericAttributeType> keyTypes, List<GenericAttributeType> valueTypes, boolean structured, boolean minAllowed, boolean maxAllowed, boolean stepAllowed,
                 boolean patternAllowed) {
             this.type = type;
             this.keyTypes = keyTypes;
@@ -66,15 +66,15 @@ public class ValidationServiceTypeAttributeTest {
     @Parameters(name = "{0}")
     public static Iterable<TestData> data() {
         List<TestData> testdata = new ArrayList<>();
-        testdata.add(new TestData(Type.STRING, null, null, false, true, true, false, true));
-        testdata.add(new TestData(Type.LONG, null, null, false, true, true, true, false));
-        testdata.add(new TestData(Type.DOUBLE, null, null, false, true, true, true, false));
-        testdata.add(new TestData(Type.BOOLEAN, null, null, false, false, false, false, false));
-        testdata.add(new TestData(Type.DATE, null, null, false, false, false, false, false));
-        testdata.add(new TestData(Type.TIME, null, null, false, false, false, true, false));
-        testdata.add(new TestData(Type.DATETIME, null, null, false, false, false, true, false));
-        testdata.add(new TestData(Type.LIST, null, Arrays.asList(Type.STRING, Type.LONG, Type.DOUBLE, Type.BOOLEAN, Type.DATE, Type.STRUCTURE), true, false, false, false, false));
-        testdata.add(new TestData(Type.STRUCTURE, null, null, true, false, false, false, false));
+        testdata.add(new TestData(GenericAttributeType.STRING, null, null, false, true, true, false, true));
+        testdata.add(new TestData(GenericAttributeType.LONG, null, null, false, true, true, true, false));
+        testdata.add(new TestData(GenericAttributeType.DOUBLE, null, null, false, true, true, true, false));
+        testdata.add(new TestData(GenericAttributeType.BOOLEAN, null, null, false, false, false, false, false));
+        testdata.add(new TestData(GenericAttributeType.DATE, null, null, false, false, false, false, false));
+        testdata.add(new TestData(GenericAttributeType.TIME, null, null, false, false, false, true, false));
+        testdata.add(new TestData(GenericAttributeType.DATETIME, null, null, false, false, false, true, false));
+        testdata.add(new TestData(GenericAttributeType.LIST, null, Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG, GenericAttributeType.DOUBLE, GenericAttributeType.BOOLEAN, GenericAttributeType.DATE, GenericAttributeType.STRUCTURE), true, false, false, false, false));
+        testdata.add(new TestData(GenericAttributeType.STRUCTURE, null, null, true, false, false, false, false));
         return testdata;
     }
 
@@ -88,17 +88,17 @@ public class ValidationServiceTypeAttributeTest {
     public void typeChecks() {
 
         // null guards
-        List<Type> keyTypes = testData.keyTypes == null ? new ArrayList<>() : testData.keyTypes;
-        List<Type> valueTypes = testData.valueTypes == null ? new ArrayList<>() : testData.valueTypes;
+        List<GenericAttributeType> keyTypes = testData.keyTypes == null ? new ArrayList<>() : testData.keyTypes;
+        List<GenericAttributeType> valueTypes = testData.valueTypes == null ? new ArrayList<>() : testData.valueTypes;
 
         // type only check
         expect(new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testData.type, null, null, false, false, false, null),
                 keyTypes.isEmpty() && valueTypes.isEmpty() && !testData.structured);
 
         // key and value type checks
-        for (Type keyType : Type.values()) {
-            for (Type valueType : Type.values()) {
-                boolean needStructure = valueType == Type.STRUCTURE && testData.structured;
+        for (GenericAttributeType keyType : GenericAttributeType.values()) {
+            for (GenericAttributeType valueType : GenericAttributeType.values()) {
+                boolean needStructure = valueType == GenericAttributeType.STRUCTURE && testData.structured;
 
                 expect(new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testData.type, keyType, null, false, false, false, null),
                         keyTypes.contains(keyType) && valueTypes.isEmpty() && !needStructure);
@@ -107,7 +107,7 @@ public class ValidationServiceTypeAttributeTest {
                 expect(new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testData.type, keyType, valueType, false, false, false, null),
                         keyTypes.contains(keyType) && valueTypes.contains(valueType) && !needStructure);
 
-                if (valueType == Type.STRUCTURE) {
+                if (valueType == GenericAttributeType.STRUCTURE) {
                     expect(new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testData.type, keyType, null, false, false, false, new GenericStructure()),
                             keyTypes.contains(keyType) && valueTypes.isEmpty() && testData.structured);
                     expect(new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testData.type, null, valueType, false, false, false, new GenericStructure()),

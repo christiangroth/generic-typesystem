@@ -12,10 +12,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.UnitValue;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 // TODO replace hardcoded values by ids
 // TODO private -> protected, add hooks??
@@ -185,9 +186,9 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // no structure is allowed
-        if (a.getValueType() == Type.STRUCTURE && a.getStructure() == null) {
+        if (a.getValueType() == GenericAttributeType.STRUCTURE && a.getStructure() == null) {
             result.error(path + a.getName(), "nested structure must be provided for collection with value type " + a.getValueType());
-        } else if (a.getValueType() != Type.STRUCTURE && a.getStructure() != null) {
+        } else if (a.getValueType() != GenericAttributeType.STRUCTURE && a.getStructure() != null) {
             result.error(path + a.getName(), "nested structure is not allowed for collection with value type " + a.getValueType());
         }
     }
@@ -265,18 +266,18 @@ public class DefaultValidationService implements ValidationService {
 
         // check mandatory value
         Object value = item.get(a.getName());
-        boolean unitValue = value instanceof GenericItem.UnitValue;
+        boolean unitValue = value instanceof UnitValue;
         if (a.isMandatory()) {
             Object checkValue = value;
             if (a.isUnitBased()) {
                 if (!unitValue && value != null) {
                     result.error(a.getName(), "non unit based value for unit based attribute " + a.getName());
                 } else if (unitValue) {
-                    checkValue = ((GenericItem.UnitValue) value).getValue();
+                    checkValue = ((UnitValue) value).getValue();
                 }
             }
 
-            if (checkValue == null || a.getType() == Type.STRING && StringUtils.isBlank(checkValue.toString())) {
+            if (checkValue == null || a.getType() == GenericAttributeType.STRING && StringUtils.isBlank(checkValue.toString())) {
                 result.error(a.getName(), "missing value for mandatory attribute " + a.getName());
             }
         }
@@ -285,7 +286,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // check type value
-        Class<?> checkClass = unitValue ? ((GenericItem.UnitValue) value).getValue().getClass() : value.getClass();
+        Class<?> checkClass = unitValue ? ((UnitValue) value).getValue().getClass() : value.getClass();
         boolean valueAssignableToType = a.getType().isAssignableFrom(checkClass);
         if (!valueAssignableToType) {
             result.error(a.getName(), "mismatching type " + a.getType() + " for attribute " + a.getName() + ": " + checkClass.getName());

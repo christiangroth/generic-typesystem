@@ -7,13 +7,13 @@ import org.junit.Test;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 public class ValidationServiceTypeTest {
 
     private ValidationService service = new DefaultValidationService();
-    private GenericAttribute attribute = new GenericAttribute(0l, 0, "foo", Type.STRING, null, null, false, false, false, null);
+    private GenericAttribute attribute = new GenericAttribute(0l, 0, "foo", GenericAttributeType.STRING, null, null, false, false, false, null);
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)));
 
     @Test
@@ -48,7 +48,7 @@ public class ValidationServiceTypeTest {
 
     @Test
     public void attributeAmbigiousId() {
-        type.getAttributes().add(new GenericAttribute(0l, 1, "some other", Type.LONG));
+        type.getAttributes().add(new GenericAttribute(0l, 1, "some other", GenericAttributeType.LONG));
         TestUtils.expectInvalidType(service, type);
     }
 

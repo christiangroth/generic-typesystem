@@ -5,32 +5,8 @@ import java.util.List;
 
 public class ValidationResult {
 
-    // TODO external class
-    public static class Error {
-        private final String path;
-        private final String message;
-
-        public Error(String path, String message) {
-            this.path = path;
-            this.message = message;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        @Override
-        public String toString() {
-            return "Error [path=" + path + ", message=" + message + "]";
-        }
-    }
-
     private final Object item;
-    private final List<Error> errors;
+    private final List<ValidationError> errors;
 
     public ValidationResult(Object item) {
         this.item = item;
@@ -38,7 +14,7 @@ public class ValidationResult {
     }
 
     public void error(String path, String error) {
-        errors.add(new Error(path, error));
+        errors.add(new ValidationError(path, error));
     }
 
     public boolean isValid() {
@@ -49,7 +25,7 @@ public class ValidationResult {
         return item;
     }
 
-    public List<Error> getErrors() {
+    public List<ValidationError> getErrors() {
         return errors;
     }
 

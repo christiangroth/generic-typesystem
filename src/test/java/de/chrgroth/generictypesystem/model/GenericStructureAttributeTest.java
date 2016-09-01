@@ -3,8 +3,6 @@ package de.chrgroth.generictypesystem.model;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
-
 public class GenericStructureAttributeTest {
 
     private GenericStructure structure = new GenericStructure();
@@ -28,7 +26,7 @@ public class GenericStructureAttributeTest {
     @Test
     public void pathByIdNested() {
         GenericAttribute attribute = attribute(structure, 1l, "foo");
-        attribute.setType(Type.STRUCTURE);
+        attribute.setType(GenericAttributeType.STRUCTURE);
         GenericStructure nested = new GenericStructure();
         attribute.setStructure(nested);
         attribute(nested, 2l, "bar");
@@ -87,7 +85,7 @@ public class GenericStructureAttributeTest {
     }
 
     private GenericAttribute attribute(GenericStructure structure, Long id, String name) {
-        GenericAttribute attribute = new GenericAttribute(id, 0, name, Type.STRING);
+        GenericAttribute attribute = new GenericAttribute(id, 0, name, GenericAttributeType.STRING);
         structure.getAttributes().add(attribute);
         return attribute;
     }

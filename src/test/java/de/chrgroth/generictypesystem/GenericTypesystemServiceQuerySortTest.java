@@ -12,9 +12,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.query.ItemPagingData;
 import de.chrgroth.generictypesystem.query.ItemQueryResult;
@@ -44,10 +44,10 @@ public class GenericTypesystemServiceQuerySortTest {
         service = new GenericTypesystemService(null, persistence);
 
         // prepare type
-        type.getAttributes().add(new GenericAttribute(0l, 0, S, Type.STRING));
-        type.getAttributes().add(new GenericAttribute(0l, 1, D, Type.DOUBLE));
-        type.getAttributes().add(new GenericAttribute(0l, 1, B, Type.BOOLEAN));
-        type.getAttributes().add(new GenericAttribute(0l, 1, L, Type.LONG));
+        type.getAttributes().add(new GenericAttribute(0l, 0, S, GenericAttributeType.STRING));
+        type.getAttributes().add(new GenericAttribute(0l, 1, D, GenericAttributeType.DOUBLE));
+        type.getAttributes().add(new GenericAttribute(0l, 1, B, GenericAttributeType.BOOLEAN));
+        type.getAttributes().add(new GenericAttribute(0l, 1, L, GenericAttributeType.LONG));
         Mockito.when(persistence.type(Mockito.eq(type.getId().longValue()))).thenReturn(type);
 
         // add items

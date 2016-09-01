@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.chrgroth.generictypesystem.model.GenericAttribute.Type;
-
+// TODO JSON handling for attributes
 public class GenericStructure {
 
     private Set<GenericAttribute> attributes;
@@ -57,7 +56,8 @@ public class GenericStructure {
         if (attribute == null) {
 
             // search recursive
-            return attributes.stream().filter(a -> a.getType() == Type.STRUCTURE || a.getType() == Type.LIST && a.getValueType() == Type.STRUCTURE)
+            return attributes.stream()
+                    .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
                     .filter(a -> a.getStructure().attribute(id) != null).map(a -> a.getName() + "." + a.getStructure().attribute(id)).findFirst().orElse(null);
         }
 
@@ -93,9 +93,6 @@ public class GenericStructure {
         return getAttributes().stream().filter(a -> a.getName().equals(name)).findFirst().orElse(null);
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public Set<GenericAttribute> getAttributes() {
         return attributes;
     }
