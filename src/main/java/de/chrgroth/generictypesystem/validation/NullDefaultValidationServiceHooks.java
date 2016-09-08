@@ -73,16 +73,4 @@ public class NullDefaultValidationServiceHooks implements DefaultValidationServi
 
         // empty implementation
     }
-
-    @Override
-    public void itemSimpleAttributeStringValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, String value) {
-
-        // empty implementation
-    }
-
-    @Override
-    public void itemSimpleAttributeDoubleValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Double value) {
-
-        // empty implementation
-    }
 }
