@@ -2,6 +2,8 @@ package de.chrgroth.generictypesystem.validation;
 
 import java.util.Arrays;
 
+// TODO this class is tied to ValidationMessageKey but this block extensibility!!
+// TODO maybe use Object[] instead of String[] for parameters?
 /**
  * Represents a validation error with path and message information.
  *

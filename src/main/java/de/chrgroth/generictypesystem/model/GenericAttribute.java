@@ -73,10 +73,21 @@ public class GenericAttribute {
         this.defaultValueCallback = defaultValueCallback;
     }
 
+    /**
+     * Returns true if the attributes type equals to {@link GenericAttributeType#LIST}.
+     *
+     * @return true if list, false otherwise
+     */
     public boolean isList() {
         return GenericAttributeType.LIST.equals(type);
     }
 
+    /**
+     * Returns true if {@link #isList()} returns true and the attributes value type equals to {@link GenericAttributeType#STRUCTURE} or if {@link #isList()}
+     * returns false and the attributes type equals to {@link GenericAttributeType#STRUCTURE}.
+     *
+     * @return true if list, false otherwise
+     */
     public boolean isStructure() {
         if (isList()) {
             return GenericAttributeType.STRUCTURE.equals(valueType);

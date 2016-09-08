@@ -21,6 +21,7 @@ import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.persistence.InMemoryPersistenceService;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.query.ItemFilterData;
 import de.chrgroth.generictypesystem.query.ItemPagingData;
@@ -28,35 +29,36 @@ import de.chrgroth.generictypesystem.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.query.ItemSortData;
 import de.chrgroth.generictypesystem.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.util.CascadingAttributeComparator;
+import de.chrgroth.generictypesystem.validation.DefaultValidationService;
+import de.chrgroth.generictypesystem.validation.NullDefaultValidationServiceHooks;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 
 // TODO add security / visibility service
 // TODO extract query service or move to data service??
-// TODO be sure to have default services and nothing crashes
 // TODO unit test coverage
 public class GenericTypesystemService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
 
-    private ValidationService validation;
-    private PersistenceService persistence;
+    private final ValidationService validation;
+    private final PersistenceService persistence;
 
     public GenericTypesystemService(ValidationService validation, PersistenceService persistence) {
-        this.validation = validation;
-        this.persistence = persistence;
+        this.validation = validation != null ? validation : new DefaultValidationService(new NullDefaultValidationServiceHooks());
+        this.persistence = persistence != null ? persistence : new InMemoryPersistenceService();
     }
 
-    public List<String> typeGroups() {
+    public Set<String> typeGroups() {
         return persistence.typeGroups();
     }
 
-    public List<GenericType> types() {
+    public Set<GenericType> types() {
         // TODO context / visibility handling
         return persistence.types();
     }
 
-    public ValidationResult createOrUpdate(GenericType type) {
+    public ValidationResult<GenericType> createOrUpdate(GenericType type) {
 
         // ensure all type attributes have an id
         if (type != null && type.getAttributes() != null) {
@@ -69,7 +71,7 @@ public class GenericTypesystemService {
         }
 
         // validate
-        ValidationResult validationResult = validation.validate(type);
+        ValidationResult<GenericType> validationResult = validation.validate(type);
 
         // save / update
         if (validationResult.isValid()) {
@@ -164,7 +166,7 @@ public class GenericTypesystemService {
         return persistence.item(typeId, id);
     }
 
-    public ValidationResult createOrUpdate(Long typeId, GenericItem item) {
+    public ValidationResult<GenericItem> createOrUpdate(Long typeId, GenericItem item) {
 
         // get type
         GenericType type = persistence.type(typeId);
@@ -173,7 +175,7 @@ public class GenericTypesystemService {
         item.setGenericTypeId(typeId);
 
         // validate
-        ValidationResult validationResult = validation.validate(type, item);
+        ValidationResult<GenericItem> validationResult = validation.validate(type, item);
 
         // save / update
         if (validationResult.isValid()) {

@@ -18,10 +18,14 @@ import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.model.UnitValue;
 
-// TODO complete unit tests
-// TODO change unittests to check for message key enums
-// TODO private -> protected, add hooks??
+// TODO unittests: reorganize, increase code coverage, assert message key enums, assert hooks called
 public class DefaultValidationService implements ValidationService {
+
+    private final DefaultValidationServiceHooks hooks;
+
+    public DefaultValidationService(DefaultValidationServiceHooks hooks) {
+        this.hooks = hooks != null ? hooks : new NullDefaultValidationServiceHooks();
+    }
 
     @Override
     public ValidationResult<GenericType> validate(GenericType type) {
@@ -48,6 +52,9 @@ public class DefaultValidationService implements ValidationService {
             result.error("pageSize", ValidationMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
         }
 
+        // call type hook
+        hooks.typeValidation(result, type);
+
         // validate structure
         validateStructure(result, type, "");
 
@@ -71,6 +78,9 @@ public class DefaultValidationService implements ValidationService {
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
             result.error(path, ValidationMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
         });
+
+        // call structure hook
+        hooks.structureValidation(result, structure, path);
     }
 
     private void validateTypeAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
@@ -161,9 +171,12 @@ public class DefaultValidationService implements ValidationService {
             }
         }
 
+        // call type attribute hook
+        hooks.typeAttributeValidation(result, a, path);
+
         // check collection attribute
         if (a.isList()) {
-            validateTypeCollectionAttribute(result, a, path);
+            validateTypeListAttribute(result, a, path);
         } else if (a.isStructure()) {
             validateTypeStructureAttribute(result, a, path);
         } else {
@@ -171,7 +184,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    private void validateTypeCollectionAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+    private void validateTypeListAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
         // no key type allowed
         if (a.getKeyType() != null) {
@@ -191,6 +204,9 @@ public class DefaultValidationService implements ValidationService {
         } else if (a.getValueType() != null && a.getValueType() != GenericAttributeType.STRUCTURE && a.getStructure() != null) {
             result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
         }
+
+        // call list type attribute hook
+        hooks.typeListAttributeValidation(result, a, path);
     }
 
     private void validateTypeStructureAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
@@ -211,6 +227,9 @@ public class DefaultValidationService implements ValidationService {
 
         // delegate
         validateStructure(result, a.getStructure(), path + a.getName() + ".");
+
+        // call structure type attribute hook
+        hooks.typeStructureAttributeValidation(result, a, path);
     }
 
     private void validateTypeSingleAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
@@ -227,6 +246,9 @@ public class DefaultValidationService implements ValidationService {
         if (a.getStructure() != null) {
             result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED);
         }
+
+        // call simple type attribute hook
+        hooks.typeSimpleAttributeValidation(result, a, path);
     }
 
     @Override
@@ -267,6 +289,9 @@ public class DefaultValidationService implements ValidationService {
 
         // check all values
         item.get().entrySet().forEach(e -> validateItemValue(result, e, type));
+
+        // call item hook
+        hooks.itemValidation(result, item);
 
         // done
         return result;
@@ -317,20 +342,24 @@ public class DefaultValidationService implements ValidationService {
             result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
         }
 
-        // check collection and map type
+        // call item attribute hook
+        hooks.itemAttributeValidation(result, item, a);
+
+        // TODO check nested structures
+        // check list type
         boolean isListType = a.isList();
         if (isListType) {
             if (checkValue instanceof Collection<?>) {
-                vaidateItemAttributeCollectionValue(result, a, (Collection<?>) checkValue);
+                validateItemAttributeListValue(result, item, a, (Collection<?>) checkValue);
             } else {
                 result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkValue.getClass().getName());
             }
         } else if (valueAssignableToType) {
-            validateItemAttributeValue(result, a, checkValue);
+            validateItemAttributeValue(result, item, a, checkValue);
         }
     }
 
-    private <T> void vaidateItemAttributeCollectionValue(ValidationResult<GenericItem> result, GenericAttribute a, Collection<T> value) {
+    private <T> void validateItemAttributeListValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Collection<T> value) {
 
         // check mandatory value
         if (value.isEmpty() && a.isMandatory()) {
@@ -345,12 +374,15 @@ public class DefaultValidationService implements ValidationService {
         if (!mismatchingItems.isEmpty()) {
             result.error(a.getName(), ValidationMessageKey.ITEM_LIST_VALUE_TYPE_INVALID, a.getValueType().toString());
         }
+
+        // call item list attribute value hook
+        hooks.itemListAttributeValueValidation(result, item, a, value);
     }
 
-    private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericAttribute a, Object value) {
+    private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {
         switch (a.getType()) {
             case STRING:
-                validateItemAttributeStringValue(result, a, value.toString());
+                validateItemAttributeStringValue(result, item, a, value.toString());
                 break;
             case LONG:
             case DOUBLE:
@@ -367,14 +399,17 @@ public class DefaultValidationService implements ValidationService {
                     result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), a.getClass().getName());
                     return;
                 }
-                validateItemAttributeDoubleValue(result, a, dValue);
+                validateItemAttributeDoubleValue(result, item, a, dValue);
                 break;
             default:
                 break;
         }
+
+        // call item simple attribute value hook
+        hooks.itemSimpleAttributeValueValidation(result, item, a, value);
     }
 
-    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericAttribute a, String value) {
+    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, String value) {
 
         // validate min
         int length = value.length();
@@ -397,7 +432,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericAttribute a, Double value) {
+    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Double value) {
 
         // validate min
         if (a.getMin() != null && a.getMin() > value) {
