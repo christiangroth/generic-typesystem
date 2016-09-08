@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
+import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -304,22 +305,22 @@ public class DefaultValidationService implements ValidationService {
         // check mandatory value
         Object value = item.get(a.getName());
 
+        // check if value is unit based
+        boolean isUnitValue = value instanceof UnitValue;
+
         // check unit based / non unit based value
         Object checkValue = value;
         if (checkValue != null) {
 
-            // check if value is unit based
-            boolean unitValue = value instanceof UnitValue;
-
             // validate unit based value
-            if (a.isUnitBased() && !unitValue) {
+            if (a.isUnitBased() && !isUnitValue) {
                 result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_NOT_UNIT_BASED);
-            } else if (!a.isUnitBased() && unitValue) {
+            } else if (!a.isUnitBased() && isUnitValue) {
                 result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED);
             }
 
             // unbox unit based value
-            if (unitValue) {
+            if (isUnitValue) {
                 checkValue = ((UnitValue) value).getValue();
             }
         }
@@ -330,11 +331,21 @@ public class DefaultValidationService implements ValidationService {
             result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
 
-        // TODO more unit based checks??
-
         // no more checks if we don't have a value
         if (checkValue == null) {
             return;
+        }
+
+        // unit based checks
+        if (isUnitValue) {
+            UnitValue unitValue = (UnitValue) value;
+
+            // check unit is registered for attribute
+            GenericAttributeUnit attributeUnit = a.getUnits() != null
+                    ? a.getUnits().stream().filter(u -> StringUtils.equals(u.getName(), unitValue.getUnit())).findFirst().orElse(null) : null;
+            if (attributeUnit == null) {
+                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
+            }
         }
 
         // check type value

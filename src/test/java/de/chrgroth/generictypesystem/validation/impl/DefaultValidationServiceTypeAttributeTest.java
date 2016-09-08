@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.validation;
+package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +18,11 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.ValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 
 @RunWith(Parameterized.class)
-public class ValidationServiceTypeAttributeTest {
+public class DefaultValidationServiceTypeAttributeTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
     private static List<GenericAttributeType> untestedTypes;

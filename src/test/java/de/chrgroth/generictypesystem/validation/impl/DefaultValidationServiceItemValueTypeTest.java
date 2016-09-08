@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.validation;
+package de.chrgroth.generictypesystem.validation.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,10 +21,11 @@ import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.ValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 
 @RunWith(Parameterized.class)
-public class ValidationServiceItemValueTypeTest {
+public class DefaultValidationServiceItemValueTypeTest {
 
     private static List<GenericAttributeType> untestedTypes;
 

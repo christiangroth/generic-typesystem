@@ -4,6 +4,7 @@ import java.util.Set;
 
 public class GenericType extends GenericStructure {
 
+    // TODO move somewhere else
     public static final Integer VERSION = 3;
 
     // TODO move somewhere else

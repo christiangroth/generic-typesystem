@@ -4,7 +4,6 @@ package de.chrgroth.generictypesystem.model;
 public final class UnitValue {
     private String unit;
     private Object value;
-    private Object baseValue;
 
     public String getUnit() {
         return unit;
@@ -22,16 +21,8 @@ public final class UnitValue {
         this.value = value;
     }
 
-    public Object getBaseValue() {
-        return baseValue;
-    }
-
-    public void setBaseValue(Object baseValue) {
-        this.baseValue = baseValue;
-    }
-
     @Override
     public String toString() {
-        return "UnitValue [unit=" + unit + ", value=" + value + ", baseValue=" + baseValue + "]";
+        return "UnitValue [unit=" + unit + ", value=" + value + "]";
     }
 }

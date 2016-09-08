@@ -58,6 +58,7 @@ public enum DefaultValidationServiceMessageKey implements ValidationMessageKey {
 
     ITEM_VALUE_UNIT_BASED,
     ITEM_VALUE_NOT_UNIT_BASED,
+    ITEM_VALUE_UNIT_INVALID,
 
     ITEM_VALUE_MANDATORY,
     ITEM_VALUE_TYPE_INVALID,

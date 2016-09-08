@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 // TODO add visibility??
 public class GenericItem {
 
+    // TODO move somewhere else
     public static final Integer VERSION = 1;
 
     private Long id;
