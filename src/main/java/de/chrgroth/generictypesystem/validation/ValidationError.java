@@ -1,24 +1,63 @@
 package de.chrgroth.generictypesystem.validation;
 
-public class ValidationError {
-    private final String path;
-    private final String message;
+import java.util.Arrays;
 
-    public ValidationError(String path, String message) {
+/**
+ * Represents a validation error with path and message information.
+ *
+ * @author Christian Groth
+ */
+public class ValidationError {
+
+    private final String path;
+    private final ValidationMessageKey messageKey;
+    private String[] messageParameters;
+
+    /**
+     * Creates a new error instance.
+     *
+     * @param path
+     *            the message path
+     * @param messageKey
+     *            the message key
+     * @param messageParameters
+     *            the message parameters
+     */
+    public ValidationError(String path, ValidationMessageKey messageKey, String... messageParameters) {
         this.path = path;
-        this.message = message;
+        this.messageKey = messageKey;
+        this.messageParameters = messageParameters;
     }
 
+    /**
+     * Returns the message path.
+     *
+     * @return message path
+     */
     public String getPath() {
         return path;
     }
 
-    public String getMessage() {
-        return message;
+    /**
+     * Returns the message key.
+     *
+     * @return message key
+     */
+    public ValidationMessageKey getMessageKey() {
+        return messageKey;
+    }
+
+    /**
+     * Returns the message parameters
+     *
+     * @return message parameters
+     */
+    public String[] getMessageParameters() {
+        return messageParameters;
     }
 
     @Override
     public String toString() {
-        return "ValidationError [path=" + path + ", message=" + message + "]";
+        return "ValidationError [path=" + path + ", messageKey=" + messageKey + ", messageParameters=" + Arrays.toString(messageParameters) + "]";
     }
 }

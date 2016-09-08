@@ -3,9 +3,31 @@ package de.chrgroth.generictypesystem.validation;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 
+/**
+ * Common validation service interface for instances of {@link GenericType} and {@link GenericItem}. A {@link GenericItem} can only be validated in combination
+ * with its {@link GenericType}.
+ *
+ * @author Christian Groth
+ */
 public interface ValidationService {
 
-    ValidationResult validate(GenericType type);
+    /**
+     * Validates the given {@link GenericType} and returns the {@link ValidationResult}.
+     *
+     * @param type
+     *            the type to be validates
+     * @return validation results
+     */
+    ValidationResult<GenericType> validate(GenericType type);
 
-    ValidationResult validate(GenericType type, GenericItem item);
+    /**
+     * Validates the given {@link GenericItem} with belonging {@link GenericType} and returns the {@link ValidationResult}.
+     *
+     * @param type
+     *            the type belonging to given item
+     * @param item
+     *            the item to be validates
+     * @return validation results
+     */
+    ValidationResult<GenericItem> validate(GenericType type, GenericItem item);
 }
