@@ -15,9 +15,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 @RunWith(Parameterized.class)
 public class ValidationServiceTypeAttributeTest {
@@ -45,8 +45,8 @@ public class ValidationServiceTypeAttributeTest {
         boolean stepAllowed;
         boolean patternAllowed;
 
-        public TestData(GenericAttributeType type, List<GenericAttributeType> keyTypes, List<GenericAttributeType> valueTypes, boolean structured, boolean minAllowed, boolean maxAllowed, boolean stepAllowed,
-                boolean patternAllowed) {
+        public TestData(GenericAttributeType type, List<GenericAttributeType> keyTypes, List<GenericAttributeType> valueTypes, boolean structured, boolean minAllowed,
+                boolean maxAllowed, boolean stepAllowed, boolean patternAllowed) {
             this.type = type;
             this.keyTypes = keyTypes;
             this.valueTypes = valueTypes;
@@ -73,7 +73,8 @@ public class ValidationServiceTypeAttributeTest {
         testdata.add(new TestData(GenericAttributeType.DATE, null, null, false, false, false, false, false));
         testdata.add(new TestData(GenericAttributeType.TIME, null, null, false, false, false, true, false));
         testdata.add(new TestData(GenericAttributeType.DATETIME, null, null, false, false, false, true, false));
-        testdata.add(new TestData(GenericAttributeType.LIST, null, Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG, GenericAttributeType.DOUBLE, GenericAttributeType.BOOLEAN, GenericAttributeType.DATE, GenericAttributeType.STRUCTURE), true, false, false, false, false));
+        testdata.add(new TestData(GenericAttributeType.LIST, null, Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG, GenericAttributeType.DOUBLE,
+                GenericAttributeType.BOOLEAN, GenericAttributeType.DATE, GenericAttributeType.STRUCTURE), true, false, false, false, false));
         testdata.add(new TestData(GenericAttributeType.STRUCTURE, null, null, true, false, false, false, false));
         return testdata;
     }
@@ -81,7 +82,7 @@ public class ValidationServiceTypeAttributeTest {
     @Parameter
     public TestData testData;
 
-    private ValidationService service = new DefaultValidationService();
+    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null);
 
     @Test

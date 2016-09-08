@@ -17,10 +17,10 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 @RunWith(Parameterized.class)
 public class ValidationServiceItemValueTypeTest {
@@ -52,7 +52,8 @@ public class ValidationServiceItemValueTypeTest {
             this(type, keyType, valueType, mandatory, null, null, null, value, valid);
         }
 
-        public TestData(GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean mandatory, Double min, Double max, String pattern, Object value, boolean valid) {
+        public TestData(GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean mandatory, Double min, Double max, String pattern,
+                Object value, boolean valid) {
             this.type = type;
             this.keyType = keyType;
             this.valueType = valueType;
@@ -219,7 +220,7 @@ public class ValidationServiceItemValueTypeTest {
     @Parameter
     public TestData testData;
 
-    private ValidationService service = new DefaultValidationService();
+    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null);
     private GenericItem item = new GenericItem(0l, type.getId(), null);
 
@@ -238,7 +239,8 @@ public class ValidationServiceItemValueTypeTest {
         }
     }
 
-    private <T, K, V> void attribute(GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean mandatory, GenericStructure structure, Double min, Double max, String pattern) {
+    private <T, K, V> void attribute(GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean mandatory, GenericStructure structure,
+            Double min, Double max, String pattern) {
         this.type.getAttributes().add(new GenericAttribute(0l, 0, "name", type, keyType, valueType, false, false, mandatory, structure, min, max, null, pattern));
     }
 

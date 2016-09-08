@@ -4,14 +4,14 @@ import org.junit.Test;
 
 import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 
 public class ValidationServiceItemTest {
 
-    private ValidationService service = new DefaultValidationService();
+    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null);
     private GenericItem item = new GenericItem(0l, type.getId(), null);
 
