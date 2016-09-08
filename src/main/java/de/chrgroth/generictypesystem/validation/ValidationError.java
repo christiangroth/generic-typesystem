@@ -2,8 +2,6 @@ package de.chrgroth.generictypesystem.validation;
 
 import java.util.Arrays;
 
-// TODO this class is tied to ValidationMessageKey but this block extensibility!!
-// TODO maybe use Object[] instead of String[] for parameters?
 /**
  * Represents a validation error with path and message information.
  *
@@ -13,7 +11,7 @@ public class ValidationError {
 
     private final String path;
     private final ValidationMessageKey messageKey;
-    private String[] messageParameters;
+    private final Object[] messageParameters;
 
     /**
      * Creates a new error instance.
@@ -25,7 +23,7 @@ public class ValidationError {
      * @param messageParameters
      *            the message parameters
      */
-    public ValidationError(String path, ValidationMessageKey messageKey, String... messageParameters) {
+    public ValidationError(String path, ValidationMessageKey messageKey, Object... messageParameters) {
         this.path = path;
         this.messageKey = messageKey;
         this.messageParameters = messageParameters;
@@ -54,8 +52,8 @@ public class ValidationError {
      *
      * @return message parameters
      */
-    public String[] getMessageParameters() {
-        return messageParameters;
+    public Object[] getMessageParameters() {
+        return Arrays.asList(messageParameters).toArray();
     }
 
     @Override

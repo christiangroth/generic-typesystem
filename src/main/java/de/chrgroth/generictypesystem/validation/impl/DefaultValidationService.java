@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.validation;
+package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.Collection;
 import java.util.Map;
@@ -17,6 +17,8 @@ import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.model.UnitValue;
+import de.chrgroth.generictypesystem.validation.ValidationResult;
+import de.chrgroth.generictypesystem.validation.ValidationService;
 
 // TODO unittests: reorganize, increase code coverage, assert message key enums, assert hooks called
 public class DefaultValidationService implements ValidationService {
@@ -24,7 +26,7 @@ public class DefaultValidationService implements ValidationService {
     private final DefaultValidationServiceHooks hooks;
 
     public DefaultValidationService(DefaultValidationServiceHooks hooks) {
-        this.hooks = hooks != null ? hooks : new NullDefaultValidationServiceHooks();
+        this.hooks = hooks != null ? hooks : new DefaultValidationServiceEmptyHooks();
     }
 
     @Override
@@ -33,23 +35,23 @@ public class DefaultValidationService implements ValidationService {
         // null guard
         ValidationResult<GenericType> result = new ValidationResult<>(type);
         if (type == null) {
-            result.error("", ValidationMessageKey.GENERAL_TYPE_NOT_PROVIDED);
+            result.error("", DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
             return result;
         }
 
         // name mandatory
         if (StringUtils.isBlank(type.getName())) {
-            result.error("name", ValidationMessageKey.TYPE_NAME_MANDATORY);
+            result.error("name", DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY);
         }
 
         // group mandatory
         if (StringUtils.isBlank(type.getGroup())) {
-            result.error("group", ValidationMessageKey.TYPE_GROUP_MANDATORY);
+            result.error("group", DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
         }
 
         // paging mandatory
         if (type.getPageSize() < 1) {
-            result.error("pageSize", ValidationMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
+            result.error("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
         }
 
         // call type hook
@@ -66,7 +68,7 @@ public class DefaultValidationService implements ValidationService {
 
         // null guard
         if (structure == null) {
-            result.error(path, ValidationMessageKey.GENERAL_STRUCTURE_NOT_PROVIDED);
+            result.error(path, DefaultValidationServiceMessageKey.GENERAL_STRUCTURE_NOT_PROVIDED);
             return;
         }
 
@@ -76,7 +78,7 @@ public class DefaultValidationService implements ValidationService {
         // validate attribute ids are unique
         Map<Long, Long> countByIds = structure.getAttributes().stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
-            result.error(path, ValidationMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
+            result.error(path, DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
         });
 
         // call structure hook
@@ -87,52 +89,52 @@ public class DefaultValidationService implements ValidationService {
 
         // validate id
         if (a.getId() == null) {
-            result.error(path, ValidationMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY, a.getName());
+            result.error(path, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY, a.getName());
         }
 
         // validate name
         if (StringUtils.isBlank(a.getName())) {
-            result.error(path, ValidationMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
+            result.error(path, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
         } else if (a.getName().indexOf(".") >= 0) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NAME_CONTAINS_DOT);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_CONTAINS_DOT);
         }
 
         // type must be be set
         if (a.getType() == null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_TYPE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_TYPE_MANDATORY);
             return;
         }
 
         // must be mandatory if unique
         if (a.isUnique() && !a.isMandatory()) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_UNIQUE_BUT_NOT_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIQUE_BUT_NOT_MANDATORY);
         }
 
         // check min and max values
         boolean minMaxAppliable = a.getType().isMinMaxCapable();
         if (!minMaxAppliable && a.getMin() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_MIN_CAPABLE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MIN_CAPABLE, a.getType().toString());
         }
         if (!minMaxAppliable && a.getMax() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_MAX_CAPABLE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MAX_CAPABLE, a.getType().toString());
         }
         if (minMaxAppliable && a.getMin() != null && a.getMax() != null && a.getMin() >= a.getMax()) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX);
         }
 
         // check step value
         boolean stepAppliable = a.getType().isStepCapable();
         if (stepAppliable && a.getStep() != null && a.getStep().doubleValue() <= 0.0) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE, a.getType().toString());
         }
         if (!stepAppliable && a.getStep() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_STEP_CAPABLE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_STEP_CAPABLE, a.getType().toString());
         }
 
         // check pattern value
         boolean patternAppliable = a.getType().isPatternCapable();
         if (!patternAppliable && StringUtils.isNotBlank(a.getPattern())) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_PATTERN_CAPABLE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_PATTERN_CAPABLE, a.getType().toString());
         }
 
         // TODO validate default values
@@ -140,33 +142,33 @@ public class DefaultValidationService implements ValidationService {
 
         // validate valueProposalDependencies
         if (a.getValueProposalDependencies() != null && !a.getValueProposalDependencies().isEmpty() && !a.getType().isValueProposalDependenciesCapable()) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
         }
 
         // validate units
         if (a.getUnits() != null && !a.getUnits().isEmpty()) {
             if (!a.getType().isUnitCapable()) {
-                result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, a.getType().toString());
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, a.getType().toString());
             } else {
 
                 // be sure to have a base unit
                 if (a.getUnits().stream().filter(u -> u.isBase()).count() != 1) {
-                    result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_BASE_UNIT_MANDATORY);
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_BASE_UNIT_MANDATORY);
                 }
 
                 // be sure all units are named
                 if (a.getUnits().stream().filter(u -> StringUtils.isBlank(u.getName())).count() > 0) {
-                    result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY);
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY);
                 }
 
                 // be sure all unit names are distinct
                 if (a.getUnits().size() != a.getUnits().stream().map(u -> u.getName()).distinct().count()) {
-                    result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME);
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME);
                 }
 
                 // be sure all unit factors are distinct
                 if (a.getUnits().size() != a.getUnits().stream().map(u -> u.getFactor()).distinct().count()) {
-                    result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR);
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR);
                 }
             }
         }
@@ -188,21 +190,21 @@ public class DefaultValidationService implements ValidationService {
 
         // no key type allowed
         if (a.getKeyType() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_KEY_TYPE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_KEY_TYPE_NOT_ALLOWED);
         }
 
         // value type mandatory
         if (a.getValueType() == null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
         } else if (!GenericAttribute.VALID_VALUE_TYPES.contains(a.getValueType())) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_INVALID, GenericAttribute.VALID_VALUE_TYPES.toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_INVALID, GenericAttribute.VALID_VALUE_TYPES.toString());
         }
 
         // no structure is allowed
         if (a.getValueType() == GenericAttributeType.STRUCTURE && a.getStructure() == null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
         } else if (a.getValueType() != null && a.getValueType() != GenericAttributeType.STRUCTURE && a.getStructure() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
         }
 
         // call list type attribute hook
@@ -213,15 +215,15 @@ public class DefaultValidationService implements ValidationService {
 
         // no key and value types allowed
         if (a.getKeyType() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STRUCTURE_KEY_TYPE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_KEY_TYPE_NOT_ALLOWED);
         }
         if (a.getValueType() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
         }
 
         // structure is mandaory
         if (a.getStructure() == null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
             return;
         }
 
@@ -236,15 +238,15 @@ public class DefaultValidationService implements ValidationService {
 
         // no key and value types allowed
         if (a.getKeyType() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_KEY_TYPE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_KEY_TYPE_NOT_ALLOWED);
         }
         if (a.getValueType() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED);
         }
 
         // no structure is allowed
         if (a.getStructure() != null) {
-            result.error(path + a.getName(), ValidationMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED);
         }
 
         // call simple type attribute hook
@@ -257,30 +259,30 @@ public class DefaultValidationService implements ValidationService {
         // type null guard
         ValidationResult<GenericItem> result = new ValidationResult<>(item);
         if (type == null) {
-            result.error("", ValidationMessageKey.GENERAL_TYPE_NOT_PROVIDED);
+            result.error("", DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
             return result;
         }
 
         // null guard
         if (item == null) {
-            result.error("", ValidationMessageKey.GENERAL_ITEM_NOT_PROVIDED);
+            result.error("", DefaultValidationServiceMessageKey.GENERAL_ITEM_NOT_PROVIDED);
             return result;
         }
 
         // validate valid and type matches
         if (item.getGenericTypeId() == null) {
-            result.error("", ValidationMessageKey.ITEM_TYPE_MANDATORY);
+            result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_MANDATORY);
             return result;
         }
         if (!item.getGenericTypeId().equals(type.getId())) {
-            result.error("", ValidationMessageKey.ITEM_TYPE_DOES_NOT_MATCH);
+            result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_DOES_NOT_MATCH);
             return result;
         }
 
         // abort on invalid type
         ValidationResult<GenericType> typeValidationResult = validate(type);
         if (!typeValidationResult.isValid()) {
-            result.error("", ValidationMessageKey.ITEM_TYPE_INVALID);
+            result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_INVALID);
             return result;
         }
 
@@ -311,9 +313,9 @@ public class DefaultValidationService implements ValidationService {
 
             // validate unit based value
             if (a.isUnitBased() && !unitValue) {
-                result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_NOT_UNIT_BASED);
+                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_NOT_UNIT_BASED);
             } else if (!a.isUnitBased() && unitValue) {
-                result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_UNIT_BASED);
+                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED);
             }
 
             // unbox unit based value
@@ -325,7 +327,7 @@ public class DefaultValidationService implements ValidationService {
         // check mandatory value
         boolean nullOrEmptyValue = checkValue == null || a.getType() == GenericAttributeType.STRING && StringUtils.isBlank(checkValue.toString());
         if (a.isMandatory() && nullOrEmptyValue) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MANDATORY);
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
 
         // TODO more unit based checks??
@@ -339,7 +341,7 @@ public class DefaultValidationService implements ValidationService {
         Class<?> checkClass = checkValue.getClass();
         boolean valueAssignableToType = a.getType().isAssignableFrom(checkClass);
         if (!valueAssignableToType) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
         }
 
         // call item attribute hook
@@ -352,7 +354,7 @@ public class DefaultValidationService implements ValidationService {
             if (checkValue instanceof Collection<?>) {
                 validateItemAttributeListValue(result, item, a, (Collection<?>) checkValue);
             } else {
-                result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkValue.getClass().getName());
+                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkValue.getClass().getName());
             }
         } else if (valueAssignableToType) {
             validateItemAttributeValue(result, item, a, checkValue);
@@ -363,7 +365,7 @@ public class DefaultValidationService implements ValidationService {
 
         // check mandatory value
         if (value.isEmpty() && a.isMandatory()) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MANDATORY);
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
         if (value.isEmpty()) {
             return;
@@ -372,7 +374,7 @@ public class DefaultValidationService implements ValidationService {
         // check containing items
         Set<T> mismatchingItems = value.stream().filter(i -> !a.getValueType().isAssignableFrom(i.getClass())).collect(Collectors.toSet());
         if (!mismatchingItems.isEmpty()) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_LIST_VALUE_TYPE_INVALID, a.getValueType().toString());
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_LIST_VALUE_TYPE_INVALID, a.getValueType().toString());
         }
 
         // call item list attribute value hook
@@ -382,7 +384,7 @@ public class DefaultValidationService implements ValidationService {
     private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {
         switch (a.getType()) {
             case STRING:
-                validateItemAttributeStringValue(result, item, a, value.toString());
+                validateItemAttributeStringValue(result, a, value.toString());
                 break;
             case LONG:
             case DOUBLE:
@@ -396,10 +398,10 @@ public class DefaultValidationService implements ValidationService {
                 } else if (value instanceof Double) {
                     dValue = (Double) value;
                 } else {
-                    result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), a.getClass().getName());
+                    result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), a.getClass().getName());
                     return;
                 }
-                validateItemAttributeDoubleValue(result, item, a, dValue);
+                validateItemAttributeDoubleValue(result, a, dValue);
                 break;
             default:
                 break;
@@ -409,17 +411,17 @@ public class DefaultValidationService implements ValidationService {
         hooks.itemSimpleAttributeValueValidation(result, item, a, value);
     }
 
-    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, String value) {
+    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericAttribute a, String value) {
 
         // validate min
         int length = value.length();
         if (a.getMin() != null && a.getMin() > length) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < length) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
         }
 
         // validate pattern
@@ -427,27 +429,27 @@ public class DefaultValidationService implements ValidationService {
             Pattern pattern = Pattern.compile(a.getPattern());
             Matcher matcher = pattern.matcher(value);
             if (!matcher.matches()) {
-                result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_PATTERN_VIOLATED, a.getPattern());
+                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_PATTERN_VIOLATED, a.getPattern());
             }
         }
     }
 
-    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Double value) {
+    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericAttribute a, Double value) {
 
         // validate min
         if (a.getMin() != null && a.getMin() > value) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < value) {
-            result.error(a.getName(), ValidationMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
         }
     }
 
     private void validateItemValue(ValidationResult<GenericItem> result, Entry<String, Object> e, GenericType type) {
         if (type.attribute(e.getKey()) == null) {
-            result.error(e.getKey(), ValidationMessageKey.ITEM_ATTRIBUTE_UNDEFINED, e.getKey());
+            result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED, e.getKey());
         }
     }
 }

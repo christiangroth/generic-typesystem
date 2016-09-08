@@ -18,6 +18,7 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 
 @RunWith(Parameterized.class)
 public class ValidationServiceTypeAttributeTest {
@@ -82,7 +83,7 @@ public class ValidationServiceTypeAttributeTest {
     @Parameter
     public TestData testData;
 
-    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
+    private ValidationService service = new DefaultValidationService(null);
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null);
 
     @Test

@@ -9,10 +9,11 @@ import de.chrgroth.generictypesystem.TestUtils;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 
 public class ValidationServiceTypeTest {
 
-    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
+    private ValidationService service = new DefaultValidationService(null);
     private GenericAttribute attribute = new GenericAttribute(0l, 0, "foo", GenericAttributeType.STRING, null, null, false, false, false, null);
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)));
 

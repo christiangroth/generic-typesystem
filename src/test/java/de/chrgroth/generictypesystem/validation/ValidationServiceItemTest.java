@@ -8,10 +8,11 @@ import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 
 public class ValidationServiceItemTest {
 
-    private ValidationService service = new DefaultValidationService(new NullDefaultValidationServiceHooks());
+    private ValidationService service = new DefaultValidationService(null);
     private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null);
     private GenericItem item = new GenericItem(0l, type.getId(), null);
 

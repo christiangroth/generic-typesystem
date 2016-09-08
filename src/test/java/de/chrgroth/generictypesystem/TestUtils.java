@@ -13,6 +13,7 @@ import de.chrgroth.generictypesystem.validation.ValidationService;
 
 // TODO clean up
 // TODO clean up tests: use before instead of constructor
+@Deprecated
 public final class TestUtils {
 
     private TestUtils() {

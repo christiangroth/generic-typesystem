@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.validation;
+package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.Collection;
 
@@ -6,6 +6,7 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.validation.ValidationResult;
 
 /**
  * Defines hooks to be used to enhance {@link DefaultValidationService}.

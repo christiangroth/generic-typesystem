@@ -29,10 +29,10 @@ import de.chrgroth.generictypesystem.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.query.ItemSortData;
 import de.chrgroth.generictypesystem.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.util.CascadingAttributeComparator;
-import de.chrgroth.generictypesystem.validation.DefaultValidationService;
-import de.chrgroth.generictypesystem.validation.NullDefaultValidationServiceHooks;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmptyHooks;
 
 // TODO add security / visibility service
 // TODO extract query service or move to data service??
@@ -45,7 +45,7 @@ public class GenericTypesystemService {
     private final PersistenceService persistence;
 
     public GenericTypesystemService(ValidationService validation, PersistenceService persistence) {
-        this.validation = validation != null ? validation : new DefaultValidationService(new NullDefaultValidationServiceHooks());
+        this.validation = validation != null ? validation : new DefaultValidationService(new DefaultValidationServiceEmptyHooks());
         this.persistence = persistence != null ? persistence : new InMemoryPersistenceService();
     }
 

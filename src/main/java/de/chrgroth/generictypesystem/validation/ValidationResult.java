@@ -34,7 +34,7 @@ public class ValidationResult<T> {
      * @param messageParameters
      *            message parameters
      */
-    public void error(String path, ValidationMessageKey messageKey, String... messageParameters) {
+    public void error(String path, ValidationMessageKey messageKey, Object... messageParameters) {
         errors.add(new ValidationError(path, messageKey, messageParameters));
     }
 
