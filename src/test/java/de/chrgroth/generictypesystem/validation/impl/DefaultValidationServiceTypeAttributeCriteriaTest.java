@@ -109,6 +109,21 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // validate type
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+
+        // no further checks if not step capable
+        if (!testType.isStepCapable()) {
+            return;
+        }
+
+        // create attribute with negative step
+        clearAttributes();
+        createAttribute(null, false, false, false, null, null, null, -0.1d, null, null, null, null, null);
+
+        // define expected error message keys
+        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE);
+
+        // validate type
+        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
     }
 
     @Test

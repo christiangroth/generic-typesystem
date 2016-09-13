@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.persistence;
+package de.chrgroth.generictypesystem.persistence.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,8 +9,13 @@ import java.util.stream.Collectors;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.persistence.PersistenceService;
 
-// TODO add unittest
+/**
+ * Very simple in memory persistence service storing all types ad items in internal transient collections.
+ *
+ * @author Christian Groth
+ */
 public class InMemoryPersistenceService implements PersistenceService {
 
     private final Set<GenericType> types = new HashSet<>();
@@ -33,9 +38,11 @@ public class InMemoryPersistenceService implements PersistenceService {
 
     @Override
     public void type(GenericType type) {
-        types.add(type);
-        if (type.getId() != null && !items.containsKey(type.getId())) {
-            items.put(type.getId(), new HashSet<>());
+        if (type != null) {
+            types.add(type);
+            if (type.getId() != null && !items.containsKey(type.getId())) {
+                items.put(type.getId(), new HashSet<>());
+            }
         }
     }
 
@@ -54,9 +61,11 @@ public class InMemoryPersistenceService implements PersistenceService {
 
     @Override
     public void item(GenericType type, GenericItem item) {
-        type(type);
-        if (type.getId() != null) {
-            items.get(type.getId()).add(item);
+        if (type != null && item != null) {
+            type(type);
+            if (type.getId() != null) {
+                items.get(type.getId()).add(item);
+            }
         }
     }
 
@@ -64,7 +73,10 @@ public class InMemoryPersistenceService implements PersistenceService {
     public boolean removeItem(long typeId, long id) {
 
         // just remove
-        items(typeId).removeIf(i -> i.getId() != null && i.getId().longValue() == id);
+        Set<GenericItem> typeItems = items.get(typeId);
+        if (typeItems != null) {
+            typeItems.removeIf(i -> i.getId() != null && i.getId().longValue() == id);
+        }
 
         // always success, no error handling
         return true;

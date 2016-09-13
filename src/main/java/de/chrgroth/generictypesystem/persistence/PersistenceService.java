@@ -5,7 +5,6 @@ import java.util.Set;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 
-// TODO add exception to interface to indicate persistence problems??
 /**
  * Common persistence service interface for instances of {@link GenericType} and {@link GenericItem}.
  *

@@ -399,7 +399,7 @@ public class DefaultValidationService implements ValidationService {
             // numeric validation
             case LONG:
             case DOUBLE:
-                Double dValue;
+                Double dValue = null;
                 if (value instanceof Integer) {
                     dValue = new Double((Integer) value);
                 } else if (value instanceof Long) {
@@ -408,9 +408,6 @@ public class DefaultValidationService implements ValidationService {
                     dValue = new Double((Float) value);
                 } else if (value instanceof Double) {
                     dValue = (Double) value;
-                } else {
-                    result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), a.getClass().getName());
-                    return;
                 }
                 validateItemAttributeDoubleValue(result, a, dValue);
                 break;
