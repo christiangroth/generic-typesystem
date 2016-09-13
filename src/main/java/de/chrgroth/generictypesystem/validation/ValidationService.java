@@ -21,7 +21,8 @@ public interface ValidationService {
     ValidationResult<GenericType> validate(GenericType type);
 
     /**
-     * Validates the given {@link GenericItem} with belonging {@link GenericType} and returns the {@link ValidationResult}.
+     * Validates the given {@link GenericItem} with belonging {@link GenericType} and returns the {@link ValidationResult}. The item can only be validated if it
+     * belongs to the given type and the type itself can be validated successfully.
      *
      * @param type
      *            the type belonging to given item

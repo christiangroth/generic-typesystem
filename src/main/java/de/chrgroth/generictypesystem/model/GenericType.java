@@ -2,6 +2,7 @@ package de.chrgroth.generictypesystem.model;
 
 import java.util.Set;
 
+// TODO use builder pattern
 public class GenericType extends GenericStructure {
 
     // TODO move somewhere else

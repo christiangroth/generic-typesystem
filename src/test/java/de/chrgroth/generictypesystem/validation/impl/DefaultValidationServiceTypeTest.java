@@ -3,140 +3,117 @@ package de.chrgroth.generictypesystem.validation.impl;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.validation.ValidationResult;
-import de.chrgroth.generictypesystem.validation.ValidationService;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 
-// TODO assert message keys
-public class DefaultValidationServiceTypeTest {
-
-    private ValidationService service;
-
-    private GenericType type;
-    private GenericAttribute attribute;
+public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest {
 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        attribute = new GenericAttribute(0l, 0, "foo", GenericAttributeType.STRING, null, null, false, false, false, null);
+        attribute = new GenericAttribute(0l, 0, "foo", GenericAttributeType.STRING, null, false, false, false, null);
         type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)));
     }
 
     @Test
     public void nullType() {
         type = null;
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
     }
 
     @Test
     public void nullName() {
         type.setName(null);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY);
     }
 
     @Test
     public void emptyName() {
         type.setName("");
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY);
     }
 
     @Test
     public void nullGroup() {
         type.setGroup(null);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
     }
 
     @Test
     public void emptyGroup() {
         type.setGroup("");
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
     }
 
     @Test
     public void pageSizeZero() {
         type.setPageSize(0);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
     }
 
     @Test
     public void pageSizeNegative() {
         type.setPageSize(-1);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
     }
 
     @Test
     public void noAttributes() {
         type.getAttributes().clear();
-        expectValidType(service, type);
+        validateType();
     }
 
     @Test
     public void attributeNullId() {
         attribute.setId(null);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY);
     }
 
     @Test
     public void attributeAmbigiousId() {
         type.getAttributes().add(new GenericAttribute(0l, 1, "some other", GenericAttributeType.LONG));
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID);
     }
 
     @Test
     public void attributeNullName() {
         attribute.setName(null);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
     }
 
     @Test
     public void attributeEmptyName() {
         attribute.setName("");
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
     }
 
     @Test
     public void attributeDottedName() {
         attribute.setName("foo.bar");
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_CONTAINS_DOT);
     }
 
     @Test
     public void attributeNoType() {
         attribute.setType(null);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_TYPE_MANDATORY);
     }
 
     @Test
     public void attributeUniqueNotMandatory() {
         attribute.setUnique(true);
-        expectInvalidType(service, type);
+        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIQUE_BUT_NOT_MANDATORY);
     }
 
     @Test
     public void attributeUniqueAndMandatory() {
         attribute.setUnique(true);
         attribute.setMandatory(true);
-        expectValidType(service, type);
-    }
-
-    private void expectValidType(ValidationService service, GenericType type) {
-        ValidationResult<GenericType> result = validateType(service, type);
-        Assert.assertTrue("got errors: " + result.getErrors(), result.isValid());
-    }
-
-    private void expectInvalidType(ValidationService service, GenericType type) {
-        Assert.assertFalse("got no errors", validateType(service, type).isValid());
-    }
-
-    private ValidationResult<GenericType> validateType(ValidationService service, GenericType type) {
-        ValidationResult<GenericType> result = service.validate(type);
-        Assert.assertEquals(type, result.getItem());
-        return result;
+        validateType();
     }
 }

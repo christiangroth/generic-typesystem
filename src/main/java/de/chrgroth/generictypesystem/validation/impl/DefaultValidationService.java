@@ -1,6 +1,6 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -21,6 +21,7 @@ import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 
+// TODO javadocs
 // TODO unittests: reorganize, increase code coverage, assert message key enums, assert hooks called
 public class DefaultValidationService implements ValidationService {
 
@@ -30,6 +31,7 @@ public class DefaultValidationService implements ValidationService {
         this.hooks = hooks != null ? hooks : new DefaultValidationServiceEmptyHooks();
     }
 
+    // TODO cleanup, check comments
     @Override
     public ValidationResult<GenericType> validate(GenericType type) {
 
@@ -76,6 +78,7 @@ public class DefaultValidationService implements ValidationService {
         // validate structure attributes
         structure.getAttributes().forEach(a -> validateTypeAttribute(result, a, path));
 
+        // TODO also consider nested structures
         // validate attribute ids are unique
         Map<Long, Long> countByIds = structure.getAttributes().stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
@@ -146,6 +149,8 @@ public class DefaultValidationService implements ValidationService {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
         }
 
+        // TODO check all dependencies do exist and is no self dependency
+
         // validate units
         if (a.getUnits() != null && !a.getUnits().isEmpty()) {
             if (!a.getType().isUnitCapable()) {
@@ -154,7 +159,7 @@ public class DefaultValidationService implements ValidationService {
 
                 // be sure to have a base unit
                 if (a.getUnits().stream().filter(u -> u.isBase()).count() != 1) {
-                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_BASE_UNIT_MANDATORY);
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_EXACTLY_ONE_BASE_UNIT_MANDATORY);
                 }
 
                 // be sure all units are named
@@ -189,19 +194,14 @@ public class DefaultValidationService implements ValidationService {
 
     private void validateTypeListAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
-        // no key type allowed
-        if (a.getKeyType() != null) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_KEY_TYPE_NOT_ALLOWED);
-        }
-
         // value type mandatory
         if (a.getValueType() == null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
-        } else if (!GenericAttribute.VALID_VALUE_TYPES.contains(a.getValueType())) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_INVALID, GenericAttribute.VALID_VALUE_TYPES.toString());
+        } else if (a.getValueType().isList()) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED);
         }
 
-        // no structure is allowed
+        // list structure
         if (a.getValueType() == GenericAttributeType.STRUCTURE && a.getStructure() == null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
         } else if (a.getValueType() != null && a.getValueType() != GenericAttributeType.STRUCTURE && a.getStructure() != null) {
@@ -214,10 +214,7 @@ public class DefaultValidationService implements ValidationService {
 
     private void validateTypeStructureAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
-        // no key and value types allowed
-        if (a.getKeyType() != null) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_KEY_TYPE_NOT_ALLOWED);
-        }
+        // no value type allowed
         if (a.getValueType() != null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
         }
@@ -237,10 +234,7 @@ public class DefaultValidationService implements ValidationService {
 
     private void validateTypeSingleAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
-        // no key and value types allowed
-        if (a.getKeyType() != null) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_KEY_TYPE_NOT_ALLOWED);
-        }
+        // no value type allowed
         if (a.getValueType() != null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED);
         }
@@ -254,6 +248,7 @@ public class DefaultValidationService implements ValidationService {
         hooks.typeSimpleAttributeValidation(result, a, path);
     }
 
+    // TODO cleanup, check comments
     @Override
     public ValidationResult<GenericItem> validate(GenericType type, GenericItem item) {
 
@@ -331,11 +326,6 @@ public class DefaultValidationService implements ValidationService {
             result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
 
-        // no more checks if we don't have a value
-        if (checkValue == null) {
-            return;
-        }
-
         // unit based checks
         if (isUnitValue) {
             UnitValue unitValue = (UnitValue) value;
@@ -348,31 +338,35 @@ public class DefaultValidationService implements ValidationService {
             }
         }
 
+        // no more checks if we don't have a value
+        if (checkValue == null) {
+            return;
+        }
+
         // check type value
         Class<?> checkClass = checkValue.getClass();
         boolean valueAssignableToType = a.getType().isAssignableFrom(checkClass);
         if (!valueAssignableToType) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
+            return;
         }
 
         // call item attribute hook
         hooks.itemAttributeValidation(result, item, a);
 
-        // TODO check nested structures
+        // TODO check nested structures, they currently end in validateItemAttributeValue
         // check list type
         boolean isListType = a.isList();
         if (isListType) {
-            if (checkValue instanceof Collection<?>) {
-                validateItemAttributeListValue(result, item, a, (Collection<?>) checkValue);
-            } else {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkValue.getClass().getName());
-            }
+
+            // the type check above guarantees that check value is an instance of java.util.List
+            validateItemAttributeListValue(result, item, a, (List<?>) checkValue);
         } else if (valueAssignableToType) {
             validateItemAttributeValue(result, item, a, checkValue);
         }
     }
 
-    private <T> void validateItemAttributeListValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Collection<T> value) {
+    private <T> void validateItemAttributeListValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, List<T> value) {
 
         // check mandatory value
         if (value.isEmpty() && a.isMandatory()) {

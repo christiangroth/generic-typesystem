@@ -9,6 +9,15 @@ public class GenericAttributeUnit {
     private String name;
     private double factor;
 
+    public GenericAttributeUnit() {
+        this(null, 0.0d);
+    }
+
+    public GenericAttributeUnit(String name, double factor) {
+        this.name = name;
+        this.factor = factor;
+    }
+
     public boolean isBase() {
         return factor == FACTOR_BASE;
     }

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 // TODO JSON handling for values
 // TODO add visibility??
+// TODO use builder pattern
 public class GenericItem {
 
     // TODO move somewhere else
@@ -17,7 +18,7 @@ public class GenericItem {
     private Map<String, Object> values;
 
     public GenericItem() {
-        this(null, null, new HashMap<>());
+        this(null, null, null);
     }
 
     public GenericItem(Long id, Long genericTypeId, Map<String, Object> values) {

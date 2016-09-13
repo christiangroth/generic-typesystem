@@ -1,22 +1,16 @@
 package de.chrgroth.generictypesystem.model;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO JSON handling for isList, isStructure, structure, defaultValue, valueProposalDependencies, isUnitBased, units
+// TODO use builder pattern
 public class GenericAttribute {
-
-    public static final List<GenericAttributeType> VALID_KEY_TYPES = Collections
-            .unmodifiableList(Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG, GenericAttributeType.DOUBLE));
-    public static final List<GenericAttributeType> VALID_VALUE_TYPES = Collections.unmodifiableList(Arrays.asList(GenericAttributeType.STRING, GenericAttributeType.LONG,
-            GenericAttributeType.DOUBLE, GenericAttributeType.BOOLEAN, GenericAttributeType.DATE, GenericAttributeType.STRUCTURE));
 
     private Long id;
     private int order;
     private String name;
     private GenericAttributeType type;
-    private GenericAttributeType keyType;
     private GenericAttributeType valueType;
     private boolean unique;
     private boolean indexed;
@@ -40,26 +34,31 @@ public class GenericAttribute {
     }
 
     public GenericAttribute(Long id, int order, String name, GenericAttributeType type) {
-        this(id, order, name, type, null, null, false, false, true, null);
+        this(id, order, name, type, null, false, false, true, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
-            boolean indexed, boolean mandatory, GenericStructure structure) {
-        this(id, order, name, type, keyType, valueType, unique, indexed, mandatory, structure, null, null, null, null);
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+            GenericStructure structure) {
+        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
-            boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern) {
-        this(id, order, name, type, keyType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, null, null);
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+            GenericStructure structure, Double min, Double max, Double step, String pattern) {
+        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType keyType, GenericAttributeType valueType, boolean unique,
-            boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback) {
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback) {
+        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback, null, null);
+    }
+
+    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies,
+            List<GenericAttributeUnit> units) {
         this.id = id;
         this.order = order;
         this.name = name;
         this.type = type;
-        this.keyType = keyType;
         this.valueType = valueType;
         this.unique = unique;
         this.indexed = indexed;
@@ -71,6 +70,12 @@ public class GenericAttribute {
         this.pattern = pattern;
         this.defaultValue = defaultValue;
         this.defaultValueCallback = defaultValueCallback;
+        if (valueProposalDependencies != null) {
+            this.valueProposalDependencies = new ArrayList<>(valueProposalDependencies);
+        }
+        if (units != null) {
+            this.units = new ArrayList<>(units);
+        }
     }
 
     /**
@@ -126,14 +131,6 @@ public class GenericAttribute {
 
     public void setType(GenericAttributeType type) {
         this.type = type;
-    }
-
-    public GenericAttributeType getKeyType() {
-        return keyType;
-    }
-
-    public void setKeyType(GenericAttributeType keyType) {
-        this.keyType = keyType;
     }
 
     public GenericAttributeType getValueType() {
@@ -276,9 +273,8 @@ public class GenericAttribute {
 
     @Override
     public String toString() {
-        return "GenericAttribute [order=" + order + ", name=" + name + ", type=" + type + ", keyType=" + keyType + ", valueType=" + valueType + ", unique=" + unique + ", indexed="
-                + indexed + ", mandatory=" + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern
-                + ", defaultValue=" + defaultValue + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units="
-                + units + "]";
+        return "GenericAttribute [order=" + order + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed
+                + ", mandatory=" + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue="
+                + defaultValue + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
     }
 }
