@@ -31,6 +31,7 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertFalse(service.types().isEmpty());
         Assert.assertEquals(1, service.types().size());
         Assert.assertEquals(type, service.types().iterator().next());
+        Assert.assertNotNull(service.type(type.getId()));
         Assert.assertFalse(service.typeGroups().isEmpty());
         Assert.assertEquals(1, service.typeGroups().size());
         Assert.assertEquals(type.getGroup(), service.typeGroups().iterator().next());
@@ -84,6 +85,7 @@ public class InMemoryPersistenceServiceTest {
         // remove type
         service.removeType(type.getId().longValue());
         Assert.assertTrue(service.types().isEmpty());
+        Assert.assertNull(service.type(type.getId()));
         Assert.assertTrue(service.typeGroups().isEmpty());
     }
 }
