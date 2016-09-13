@@ -15,7 +15,7 @@ public enum DefaultValidationServiceMessageKey implements ValidationMessageKey {
 
     TYPE_NAME_MANDATORY,
     TYPE_GROUP_MANDATORY,
-    TYPE_PAGE_SIZE_NEGATIVE,
+    TYPE_PAGE_SIZE_INVALID,
     TYPE_AMBIGIOUS_ATTRIBUTE_ID,
 
     TYPE_ATTRIBUTE_ID_MANDATORY,

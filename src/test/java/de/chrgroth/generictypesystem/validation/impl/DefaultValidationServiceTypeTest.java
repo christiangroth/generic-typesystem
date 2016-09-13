@@ -53,13 +53,13 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Test
     public void pageSizeZero() {
         type.setPageSize(0);
-        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
+        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
     }
 
     @Test
     public void pageSizeNegative() {
         type.setPageSize(-1);
-        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
+        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
     }
 
     @Test

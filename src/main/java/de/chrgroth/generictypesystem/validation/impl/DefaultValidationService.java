@@ -21,8 +21,12 @@ import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 
-// TODO javadocs
-// TODO unittests: reorganize, increase code coverage, assert message key enums, assert hooks called
+/**
+ * The default validation service for all type and item validations. You may pass an instance of {@link DefaultValidationServiceHooks} to customize or enhance
+ * the validation logic rather than implementing a new validation service by yourself.
+ *
+ * @author Christian Groth
+ */
 public class DefaultValidationService implements ValidationService {
 
     private final DefaultValidationServiceHooks hooks;
@@ -31,7 +35,6 @@ public class DefaultValidationService implements ValidationService {
         this.hooks = hooks != null ? hooks : new DefaultValidationServiceEmptyHooks();
     }
 
-    // TODO cleanup, check comments
     @Override
     public ValidationResult<GenericType> validate(GenericType type) {
 
@@ -52,9 +55,9 @@ public class DefaultValidationService implements ValidationService {
             result.error("group", DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
         }
 
-        // paging mandatory
+        // paging valid
         if (type.getPageSize() < 1) {
-            result.error("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_NEGATIVE);
+            result.error("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
         }
 
         // call type hook
@@ -78,8 +81,8 @@ public class DefaultValidationService implements ValidationService {
         // validate structure attributes
         structure.getAttributes().forEach(a -> validateTypeAttribute(result, a, path));
 
-        // TODO also consider nested structures
         // validate attribute ids are unique
+        // TODO also consider nested structures to ensure unique attribute ids
         Map<Long, Long> countByIds = structure.getAttributes().stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
             result.error(path, DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
@@ -219,7 +222,7 @@ public class DefaultValidationService implements ValidationService {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
         }
 
-        // structure is mandaory
+        // structure is mandatory
         if (a.getStructure() == null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
             return;
@@ -248,7 +251,6 @@ public class DefaultValidationService implements ValidationService {
         hooks.typeSimpleAttributeValidation(result, a, path);
     }
 
-    // TODO cleanup, check comments
     @Override
     public ValidationResult<GenericItem> validate(GenericType type, GenericItem item) {
 
@@ -265,7 +267,7 @@ public class DefaultValidationService implements ValidationService {
             return result;
         }
 
-        // validate valid and type matches
+        // validate type matches
         if (item.getGenericTypeId() == null) {
             result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_MANDATORY);
             return result;
@@ -354,7 +356,7 @@ public class DefaultValidationService implements ValidationService {
         // call item attribute hook
         hooks.itemAttributeValidation(result, item, a);
 
-        // TODO check nested structures, they currently end in validateItemAttributeValue
+        // TODO check nested structures separately, currently handled in validateItemAttributeValue
         // check list type
         boolean isListType = a.isList();
         if (isListType) {
@@ -388,9 +390,13 @@ public class DefaultValidationService implements ValidationService {
 
     private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {
         switch (a.getType()) {
+
+            // string validation
             case STRING:
                 validateItemAttributeStringValue(result, a, value.toString());
                 break;
+
+            // numeric validation
             case LONG:
             case DOUBLE:
                 Double dValue;
@@ -453,6 +459,8 @@ public class DefaultValidationService implements ValidationService {
     }
 
     private void validateItemValue(ValidationResult<GenericItem> result, Entry<String, Object> e, GenericType type) {
+
+        // check for unknown attribute to value
         if (type.attribute(e.getKey()) == null) {
             result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED, e.getKey());
         }
