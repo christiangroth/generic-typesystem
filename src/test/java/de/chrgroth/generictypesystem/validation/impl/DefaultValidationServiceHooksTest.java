@@ -70,6 +70,7 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceTest
         Mockito.verify(hooks, Mockito.times(1)).itemValidation(Mockito.any(), Mockito.any());
         Mockito.verify(hooks, Mockito.times(3)).itemAttributeValidation(Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(hooks, Mockito.times(1)).itemListAttributeValueValidation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(hooks, Mockito.times(2)).itemSimpleAttributeValueValidation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(hooks, Mockito.times(1)).itemNestedItemAttributeValueValidation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(hooks, Mockito.times(1)).itemSimpleAttributeValueValidation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 }

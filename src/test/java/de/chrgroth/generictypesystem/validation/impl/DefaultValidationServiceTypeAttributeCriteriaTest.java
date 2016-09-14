@@ -19,6 +19,7 @@ import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
 
+// TODO validate default values
 @RunWith(Parameterized.class)
 public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
 
@@ -91,9 +92,6 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // validate type
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
-
-        // TODO validate default values
-        // TODO validate default values callback
     }
 
     @Test
@@ -139,16 +137,20 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // validate type
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
-
-        // TODO validate default values
-        // TODO validate default values callback
     }
 
     @Test
     public void valueProposalDependenciesTest() {
 
-        // create attribute with value proposal dependencies
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(0l), null);
+        // create attribute to depend upon
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, null);
+        attribute.setType(GenericAttributeType.STRING);
+        attribute.setId(100l);
+        attribute.setName("dependOnMe");
+        GenericAttribute attributeToDependUpon = attribute;
+
+        // create attribute with value proposal dependency
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(attributeToDependUpon.getId()), null);
 
         // define expected error message keys
         if (!testType.isValueProposalDependenciesCapable()) {
@@ -158,7 +160,32 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         // validate type
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
 
-        // TODO check all dependencies do exist and is no self dependency
+        // no further checks if not unit capable
+        if (!testType.isValueProposalDependenciesCapable()) {
+            return;
+        }
+
+        // value proposal dependency on non existing attribute
+        clearAttributes();
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(123l), null);
+
+        // define expected error message keys
+        errorKeys.clear();
+        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_INVALID);
+
+        // validate type
+        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+
+        // value proposal dependency on myself
+        clearAttributes();
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(0l), null);
+
+        // define expected error message keys
+        errorKeys.clear();
+        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_SELF_REFERENCE_INVALID);
+
+        // validate type
+        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
     }
 
     @Test
@@ -244,9 +271,6 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // validate type
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
-
-        // TODO validate default values
-        // TODO validate default values callback
     }
 
     public GenericAttributeUnit baseUnit() {

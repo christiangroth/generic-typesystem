@@ -67,7 +67,9 @@ public interface PersistenceService {
      * Saves the given item or updates it if an item with same id is already known.
      *
      * @param type
-     *            type to be saved
+     *            type the item belongs to
+     * @param item
+     *            item to be saved
      */
     void item(GenericType type, GenericItem item);
 

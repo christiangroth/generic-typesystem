@@ -79,11 +79,11 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // validate structure attributes
-        structure.getAttributes().forEach(a -> validateTypeAttribute(result, a, path));
+        Set<GenericAttribute> allAttributes = structure.attributes();
+        structure.getAttributes().forEach(a -> validateTypeAttribute(result, allAttributes, a, path));
 
         // validate attribute ids are unique
-        // TODO also consider nested structures to ensure unique attribute ids
-        Map<Long, Long> countByIds = structure.getAttributes().stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
+        Map<Long, Long> countByIds = allAttributes.stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
             result.error(path, DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
         });
@@ -92,7 +92,8 @@ public class DefaultValidationService implements ValidationService {
         hooks.structureValidation(result, structure, path);
     }
 
-    private void validateTypeAttribute(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+    // TODO validate default values
+    private void validateTypeAttribute(ValidationResult<GenericType> result, Set<GenericAttribute> allAttributes, GenericAttribute a, String path) {
 
         // validate id
         if (a.getId() == null) {
@@ -144,15 +145,26 @@ public class DefaultValidationService implements ValidationService {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_PATTERN_CAPABLE, a.getType().toString());
         }
 
-        // TODO validate default values
-        // TODO validate default values callback
-
         // validate valueProposalDependencies
-        if (a.getValueProposalDependencies() != null && !a.getValueProposalDependencies().isEmpty() && !a.getType().isValueProposalDependenciesCapable()) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
-        }
+        if (a.getValueProposalDependencies() != null && !a.getValueProposalDependencies().isEmpty()) {
+            if (!a.getType().isValueProposalDependenciesCapable()) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
+            } else {
 
-        // TODO check all dependencies do exist and is no self dependency
+                // no self dependency
+                Long selfDependency = a.getValueProposalDependencies().stream().filter(d -> a.getId() != null && a.getId().equals(d)).findAny().orElse(null);
+                if (selfDependency != null) {
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_SELF_REFERENCE_INVALID);
+                }
+
+                // check all dependencies do exist
+                Set<Long> allAttributeIds = allAttributes.stream().map(att -> att.getId()).collect(Collectors.toSet());
+                Set<Long> invalidDependencies = a.getValueProposalDependencies().stream().filter(d -> !allAttributeIds.contains(d)).collect(Collectors.toSet());
+                if (invalidDependencies != null && !invalidDependencies.isEmpty()) {
+                    invalidDependencies.forEach(d -> result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_INVALID, d));
+                }
+            }
+        }
 
         // validate units
         if (a.getUnits() != null && !a.getUnits().isEmpty()) {
@@ -356,13 +368,12 @@ public class DefaultValidationService implements ValidationService {
         // call item attribute hook
         hooks.itemAttributeValidation(result, item, a);
 
-        // TODO check nested structures separately, currently handled in validateItemAttributeValue
-        // check list type
-        boolean isListType = a.isList();
-        if (isListType) {
-
-            // the type check above guarantees that check value is an instance of java.util.List
+        // check list type - the type check above guarantees that checkValue is of correct type
+        if (a.isList()) {
             validateItemAttributeListValue(result, item, a, (List<?>) checkValue);
+        } else if (a.isStructure()) {
+
+            validateNestedItemAttributeValue(result, item, a, (GenericItem) checkValue);
         } else if (valueAssignableToType) {
             validateItemAttributeValue(result, item, a, checkValue);
         }
@@ -386,6 +397,14 @@ public class DefaultValidationService implements ValidationService {
 
         // call item list attribute value hook
         hooks.itemListAttributeValueValidation(result, item, a, value);
+    }
+
+    private void validateNestedItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, GenericItem nestedItem) {
+
+        // TODO implement nested checks
+
+        // call nested item attribute value hook
+        hooks.itemNestedItemAttributeValueValidation(result, item, a, nestedItem);
     }
 
     private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {

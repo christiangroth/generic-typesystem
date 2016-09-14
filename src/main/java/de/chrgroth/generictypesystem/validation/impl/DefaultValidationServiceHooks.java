@@ -126,6 +126,20 @@ public interface DefaultValidationServiceHooks {
     void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Collection<?> value);
 
     /**
+     * Called to validate the given nested item for given attribute and item.
+     *
+     * @param result
+     *            the result to be updated
+     * @param item
+     *            item the nested item belongs to
+     * @param attribute
+     *            attribute definition the nested item is based on
+     * @param nestedItem
+     *            nested item to be validated
+     */
+    void itemNestedItemAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, GenericItem nestedItem);
+
+    /**
      * Called to validate the given value for given attribute and item.
      *
      * @param result

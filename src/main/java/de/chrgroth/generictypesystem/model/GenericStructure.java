@@ -44,6 +44,16 @@ public class GenericStructure {
         return attributes.stream().filter(a -> a.isUnique()).collect(Collectors.toSet());
     }
 
+    public Set<GenericAttribute> attributes() {
+        HashSet<GenericAttribute> allAttributes = new HashSet<>();
+        if (attributes != null) {
+            allAttributes.addAll(attributes);
+            allAttributes.addAll(
+                    attributes.stream().filter(a -> a.isStructure() && a.getStructure() != null).flatMap(a -> a.getStructure().attributes().stream()).collect(Collectors.toSet()));
+        }
+        return allAttributes;
+    }
+
     public String attribute(Long id) {
 
         // null guard

@@ -66,6 +66,11 @@ public class DefaultValidationServiceEmptyHooks implements DefaultValidationServ
     @Override
     public void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Collection<?> value) {
 
+    }
+
+    @Override
+    public void itemNestedItemAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, GenericItem nestedItem) {
+
         // empty implementation
     }
 

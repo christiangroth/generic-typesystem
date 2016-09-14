@@ -59,7 +59,7 @@ public class ValidationResult<T> {
     /**
      * Returns all errors.
      *
-     * @return
+     * @return all errors
      */
     public List<ValidationError> getErrors() {
         return errors;
