@@ -27,13 +27,13 @@ public class InMemoryPersistenceService implements PersistenceService {
     private final InMemoryItemsQueryService query;
 
     public InMemoryPersistenceService(int defaultPageSize) {
+        this(new InMemoryItemsQueryService(defaultPageSize));
+    }
 
-        // init storage
+    public InMemoryPersistenceService(InMemoryItemsQueryService query) {
         types = new HashSet<>();
         items = new HashMap<>();
-
-        // init querying
-        query = new InMemoryItemsQueryService(defaultPageSize);
+        this.query = query;
     }
 
     @Override
