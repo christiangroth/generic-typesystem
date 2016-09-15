@@ -79,7 +79,7 @@ public class DefaultValidationService implements ValidationService {
         // validate attribute ids are unique
         Map<Long, Long> countByIds = allAttributes.stream().map(a -> a.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(a -> a, Collectors.counting()));
         countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
-            result.error(path, DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, String.valueOf(e.getKey().longValue()));
+            result.error(path, DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, e.getKey().longValue());
         });
 
         // call structure hook
@@ -91,7 +91,7 @@ public class DefaultValidationService implements ValidationService {
 
         // validate id
         if (a.getId() == null) {
-            result.error(path, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY, a.getName());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY);
         }
 
         // validate name
@@ -127,7 +127,7 @@ public class DefaultValidationService implements ValidationService {
         // check step value
         boolean stepAppliable = a.getType().isStepCapable();
         if (stepAppliable && a.getStep() != null && a.getStep().doubleValue() <= 0.0) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE);
         }
         if (!stepAppliable && a.getStep() != null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_STEP_CAPABLE, a.getType().toString());
@@ -437,12 +437,12 @@ public class DefaultValidationService implements ValidationService {
         // validate min
         int length = value.length();
         if (a.getMin() != null && a.getMin() > length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
         }
 
         // validate pattern
@@ -459,12 +459,12 @@ public class DefaultValidationService implements ValidationService {
 
         // validate min
         if (a.getMin() != null && a.getMin() > value) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, String.valueOf(a.getMin().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < value) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, String.valueOf(a.getMax().intValue()));
+            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
         }
     }
 
@@ -472,7 +472,7 @@ public class DefaultValidationService implements ValidationService {
 
         // check for unknown attribute to value
         if (type.attribute(e.getKey()) == null) {
-            result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED, e.getKey());
+            result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED);
         }
     }
 }

@@ -10,44 +10,48 @@ import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.ValidationError;
 
 public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest {
+
+    private static final String ATTRIBUTE_NAME = "foo";
 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        attribute = new GenericAttribute(0l, 0, "foo", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null,
+                null);
         type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)), null, null, null, null, null);
     }
 
     @Test
     public void nullType() {
         type = null;
-        validateType(DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
+        validateType(new ValidationError("", DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED));
     }
 
     @Test
     public void nullName() {
         type.setName(null);
-        validateType(DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY);
+        validateType(new ValidationError("name", DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY));
     }
 
     @Test
     public void emptyName() {
         type.setName("");
-        validateType(DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY);
+        validateType(new ValidationError("name", DefaultValidationServiceMessageKey.TYPE_NAME_MANDATORY));
     }
 
     @Test
     public void nullGroup() {
         type.setGroup(null);
-        validateType(DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
+        validateType(new ValidationError("group", DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY));
     }
 
     @Test
     public void emptyGroup() {
         type.setGroup("");
-        validateType(DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY);
+        validateType(new ValidationError("group", DefaultValidationServiceMessageKey.TYPE_GROUP_MANDATORY));
     }
 
     @Test
@@ -59,13 +63,13 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Test
     public void pageSizeZero() {
         type.setPageSize(0l);
-        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
+        validateType(new ValidationError("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID));
     }
 
     @Test
     public void pageSizeNegative() {
         type.setPageSize(-1l);
-        validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
+        validateType(new ValidationError("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID));
     }
 
     @Test
@@ -77,44 +81,44 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Test
     public void attributeNullId() {
         attribute.setId(null);
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY);
+        validateType(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ID_MANDATORY));
     }
 
     @Test
     public void attributeAmbigiousId() {
         type.getAttributes()
                 .add(new GenericAttribute(0l, 1, "some other", DefaultGenericAttributeType.LONG, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        validateType(DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID);
+        validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, attribute.getId().longValue()));
     }
 
     @Test
     public void attributeNullName() {
         attribute.setName(null);
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
+        validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY));
     }
 
     @Test
     public void attributeEmptyName() {
         attribute.setName("");
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY);
+        validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_MANDATORY));
     }
 
     @Test
     public void attributeDottedName() {
         attribute.setName("foo.bar");
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_CONTAINS_DOT);
+        validateType(new ValidationError("foo.bar", DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NAME_CONTAINS_DOT));
     }
 
     @Test
     public void attributeNoType() {
         attribute.setType(null);
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_TYPE_MANDATORY);
+        validateType(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_TYPE_MANDATORY));
     }
 
     @Test
     public void attributeUniqueNotMandatory() {
         attribute.setUnique(true);
-        validateType(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIQUE_BUT_NOT_MANDATORY);
+        validateType(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIQUE_BUT_NOT_MANDATORY));
     }
 
     @Test

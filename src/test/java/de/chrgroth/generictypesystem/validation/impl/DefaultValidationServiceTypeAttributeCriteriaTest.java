@@ -17,7 +17,7 @@ import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
-import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
+import de.chrgroth.generictypesystem.validation.ValidationError;
 
 // TODO validate default values
 // TODO validate nested item values
@@ -25,12 +25,6 @@ import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
 public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
-
-    @Before
-    public void setup() {
-        service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
-    }
 
     @Parameters(name = "attribute type {0}")
     public static Iterable<DefaultGenericAttributeType> data() {
@@ -40,15 +34,17 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     @Parameter
     public DefaultGenericAttributeType testType;
 
-    private List<ValidationMessageKey> errorKeys = new ArrayList<>();
+    private List<ValidationError> errorKeys = new ArrayList<>();
 
     @Before
-    public void etup() {
+    public void setup() {
+        service = new DefaultValidationService(null);
+        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
         } else if (testType.isStructure()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY));
         }
     }
 
@@ -60,12 +56,12 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         if (!testType.isMinMaxCapable()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MIN_CAPABLE);
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MAX_CAPABLE);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MIN_CAPABLE, testType.toString()));
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_MAX_CAPABLE, testType.toString()));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // no further checks if not min / max capable
         if (!testType.isMinMaxCapable()) {
@@ -78,10 +74,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with min / max and min > max
         clearAttributes();
@@ -89,10 +85,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_MIN_GREATER_MAX));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     @Test
@@ -103,11 +99,11 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         if (!testType.isStepCapable()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_STEP_CAPABLE);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_STEP_CAPABLE, testType.toString()));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // no further checks if not step capable
         if (!testType.isStepCapable()) {
@@ -119,10 +115,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         createAttribute(null, false, false, false, null, null, null, -0.1d, null, null, null, null, null);
 
         // define expected error message keys
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STEP_NEGATIVE));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     @Test
@@ -133,11 +129,11 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         if (!testType.isPatternCapable()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_PATTERN_CAPABLE);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_PATTERN_CAPABLE, testType.toString()));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     @Test
@@ -155,11 +151,11 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         if (!testType.isValueProposalDependenciesCapable()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, testType.toString()));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // no further checks if not unit capable
         if (!testType.isValueProposalDependenciesCapable()) {
@@ -172,10 +168,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_INVALID);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_INVALID, 123l));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // value proposal dependency on myself
         clearAttributes();
@@ -183,10 +179,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_SELF_REFERENCE_INVALID);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_PROPOSAL_SELF_REFERENCE_INVALID));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     @Test
@@ -197,11 +193,11 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         if (!testType.isUnitCapable()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, testType.toString()));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // no further checks if not unit capable
         if (!testType.isUnitCapable()) {
@@ -214,10 +210,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_EXACTLY_ONE_BASE_UNIT_MANDATORY);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_EXACTLY_ONE_BASE_UNIT_MANDATORY));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with both units - name missing
         clearAttributes();
@@ -227,10 +223,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with both units - ambigious name
         clearAttributes();
@@ -240,10 +236,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with both units - ambigious factor
         clearAttributes();
@@ -258,10 +254,10 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // define expected error message keys
         errorKeys.clear();
-        errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR);
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR));
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with both units
         clearAttributes();
@@ -271,7 +267,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         errorKeys.clear();
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     public GenericAttributeUnit baseUnit() {

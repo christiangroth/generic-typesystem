@@ -16,7 +16,7 @@ import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
-import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
+import de.chrgroth.generictypesystem.validation.ValidationError;
 
 @RunWith(Parameterized.class)
 public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidationServiceTest {
@@ -53,15 +53,15 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, null);
 
         // define expected error message keys
-        List<ValidationMessageKey> errorKeys = new ArrayList<>();
+        List<ValidationError> errorKeys = new ArrayList<>();
         if (testType.isList()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
         } else if (testType.isStructure()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with value type
         clearAttributes();
@@ -71,21 +71,21 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
             if (testValueType.isList()) {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED));
             } else if (testValueType.isStructure()) {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY));
             }
         } else {
             if (testType.isStructure()) {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY);
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY));
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED));
             } else {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED));
             }
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with structure
         clearAttributes();
@@ -94,13 +94,13 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         // define expected error message keys
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
         } else if (!testType.isStructure()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
         // create attribute with value type and structure
         clearAttributes();
@@ -110,20 +110,20 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
             if (testValueType.isList()) {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED));
             }
             if (!testValueType.isStructure()) {
-                errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED);
+                errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, testValueType.toString()));
             }
         } else if (testType.isStructure()) {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_VALUE_TYPE_NOT_ALLOWED));
         } else {
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED);
-            errorKeys.add(DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED);
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_VALUE_TYPE_NOT_ALLOWED));
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_NOT_ALLOWED));
         }
 
         // validate type
-        validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
