@@ -48,7 +48,7 @@ public class InMemoryItemsQueryService {
     public ItemQueryResult query(Set<GenericItem> allItems, ItemFilterData filter, List<ItemSortData> sorts, ItemPagingData paging) {
 
         // get items
-        if (allItems == null) {
+        if (allItems == null || allItems.isEmpty()) {
             return new ItemQueryResult(Collections.emptyList(), false);
         }
 
@@ -101,7 +101,7 @@ public class InMemoryItemsQueryService {
             } else {
 
                 // return empty result
-                LOG.error("query page is out of bounds: " + page + "/" + pageSize + "!!");
+                LOG.error("query page is out of bounds: " + page + "x" + pageSize + "!!");
                 moreAvailable = false;
                 items.clear();
             }

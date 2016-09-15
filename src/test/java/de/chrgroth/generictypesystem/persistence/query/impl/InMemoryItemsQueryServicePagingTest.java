@@ -1,5 +1,6 @@
 package de.chrgroth.generictypesystem.persistence.query.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public class InMemoryItemsQueryServicePagingTest {
     public void setup() {
 
         // init query service
-        service = new InMemoryItemsQueryService(10);
+        service = new InMemoryItemsQueryService(5);
 
         // prepare items
         items = new HashSet<>();
@@ -40,46 +41,89 @@ public class InMemoryItemsQueryServicePagingTest {
         items.add(new GenericItem(9l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 9.0d).build()));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void initWithInvalidDefaultPageSize() {
+        new InMemoryItemsQueryService(0);
+    }
+
+    @Test
+    public void nullItems() {
+        ItemQueryResult result = service.query(null, null, null, null);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        Assert.assertTrue(result.getItems().isEmpty());
+        Assert.assertFalse(result.isMoreAvailable());
+    }
+
+    @Test
+    public void emptyItems() {
+        ItemQueryResult result = service.query(Collections.emptySet(), null, null, null);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getItems());
+        Assert.assertTrue(result.getItems().isEmpty());
+        Assert.assertFalse(result.isMoreAvailable());
+    }
+
     @Test
     public void nullPaging() {
-        paging(null, 10);
+        paging(null, 10, false);
+    }
+
+    @Test
+    public void beforeFirstPage() {
+        paging(-1, 2, 2, true);
+    }
+
+    @Test
+    public void invalidPageSize() {
+        paging(0, -1, 5, true);
     }
 
     @Test
     public void beginning() {
-        paging(0, 2, 2);
+        paging(0, 2, 2, true);
     }
 
     @Test
     public void middle() {
-        paging(2, 2, 2);
+        paging(2, 2, 2, true);
     }
 
     @Test
     public void end() {
-        paging(5, 2, 2);
+        paging(5, 2, 2, false);
     }
 
     @Test
     public void endOverflow() {
-        paging(3, 4, 2);
+        paging(3, 4, 2, false);
     }
 
-    public void paging(int page, int size, int results) {
-        paging(pagingData(page, size), results);
+    @Test
+    public void outOfBounds() {
+        paging(6, 2, 0, false);
     }
 
-    private ItemPagingData pagingData(int page, int size) {
+    private void paging(int page, int size, int results, boolean moreAvailable) {
+
+        // create paging data
         ItemPagingData paging = new ItemPagingData();
         paging.setPage(page);
         paging.setSize(size);
-        return paging;
+
+        // delegate
+        paging(paging, results, moreAvailable);
     }
 
-    public void paging(ItemPagingData paging, int results) {
+    public void paging(ItemPagingData paging, int results, boolean moreAvailable) {
+
+        // query
         ItemQueryResult result = service.query(items, null, null, paging);
+
+        // assert
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getItems());
         Assert.assertEquals(results, result.getItems().size());
+        Assert.assertEquals(moreAvailable, result.isMoreAvailable());
     }
 }
