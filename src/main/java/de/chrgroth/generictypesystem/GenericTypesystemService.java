@@ -26,7 +26,8 @@ import de.chrgroth.generictypesystem.validation.ValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmptyHooks;
 
-// TODO add security / visibility service and some kind of context
+// TODO extract values(...) to service similar to query service
+// TODO add security / visibility service and some kind of context ... might be placed in persistence service??
 public class GenericTypesystemService {
 
     // TODO private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
@@ -49,7 +50,7 @@ public class GenericTypesystemService {
         return persistence.types();
     }
 
-    public ValidationResult<GenericType> createOrUpdate(GenericType type) {
+    public ValidationResult<GenericType> type(GenericType type) {
 
         // ensure all type attributes have an id
         if (type != null && type.getAttributes() != null) {
@@ -85,7 +86,7 @@ public class GenericTypesystemService {
         return persistence.item(typeId, id);
     }
 
-    public ValidationResult<GenericItem> createOrUpdate(Long typeId, GenericItem item) {
+    public ValidationResult<GenericItem> item(Long typeId, GenericItem item) {
 
         // get type
         GenericType type = persistence.type(typeId);
