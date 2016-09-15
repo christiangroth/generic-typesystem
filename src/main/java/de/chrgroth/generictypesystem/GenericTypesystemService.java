@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
@@ -28,7 +27,6 @@ import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmptyHooks;
 
 // TODO add security / visibility service and some kind of context
-// TODO unit test coverage
 public class GenericTypesystemService {
 
     // TODO private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
@@ -140,7 +138,7 @@ public class GenericTypesystemService {
                 .forEach(a -> paths.addAll(collectValuePaths(a.getStructure(), buildAttributePath(pathPrefix, a))));
 
         // add all string attributes
-        structure.getAttributes().stream().filter(a -> a.getType() == DefaultGenericAttributeType.STRING).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
+        structure.getAttributes().stream().filter(a -> a.getType().isValueProposalDependenciesCapable()).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
 
         // done
         return paths;
@@ -171,7 +169,7 @@ public class GenericTypesystemService {
         }
 
         // validate type
-        if (attribute.getType() != DefaultGenericAttributeType.STRING) {
+        if (!attribute.getType().isValueProposalDependenciesCapable()) {
             return new ArrayList<>();
         }
 

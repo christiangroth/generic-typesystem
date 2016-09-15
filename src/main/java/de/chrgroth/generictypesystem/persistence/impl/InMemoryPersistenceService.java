@@ -20,6 +20,7 @@ import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQuerySe
  *
  * @author Christian Groth
  */
+// TODO type/item id handling before save
 public class InMemoryPersistenceService implements PersistenceService {
 
     private final Set<GenericType> types;

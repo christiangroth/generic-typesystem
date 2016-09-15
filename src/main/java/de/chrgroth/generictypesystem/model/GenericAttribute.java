@@ -44,14 +44,13 @@ import java.util.List;
  *
  * @author Christian Groth
  */
-// TODO simplify calls to isList, isStructure and remove all hardcoded checks
 public class GenericAttribute {
 
     private Long id;
     private long order;
     private String name;
-    private DefaultGenericAttributeType type;
-    private DefaultGenericAttributeType valueType;
+    private GenericAttributeType type;
+    private GenericAttributeType valueType;
     private boolean unique;
     private boolean indexed;
     private boolean mandatory;
@@ -74,9 +73,9 @@ public class GenericAttribute {
         this(null, 0, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, long order, String name, DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean unique, boolean indexed,
-            boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback,
-            List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
+    public GenericAttribute(Long id, long order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies,
+            List<GenericAttributeUnit> units) {
         this.id = id;
         this.order = order;
         this.name = name;
@@ -101,25 +100,25 @@ public class GenericAttribute {
     }
 
     /**
-     * Returns true if the attributes type equals to {@link DefaultGenericAttributeType#LIST}.
+     * Returns true if the attributes type returns true for {@link GenericAttributeType#isList()}.
      *
      * @return true if list, false otherwise
      */
     public boolean isList() {
-        return DefaultGenericAttributeType.LIST.equals(type);
+        return type != null && type.isList();
     }
 
     /**
-     * Returns true if {@link #isList()} returns true and the attributes value type equals to {@link DefaultGenericAttributeType#STRUCTURE} or if
-     * {@link #isList()} returns false and the attributes type equals to {@link DefaultGenericAttributeType#STRUCTURE}.
+     * Returns true if {@link #isList()} returns true and the attributes value type return true for {@link GenericAttributeType#isStructure()} or if
+     * {@link #isList()} returns false and the attributes type returns true for {@link GenericAttributeType#isStructure()}.
      *
      * @return true if list, false otherwise
      */
     public boolean isStructure() {
         if (isList()) {
-            return DefaultGenericAttributeType.STRUCTURE.equals(valueType);
+            return valueType != null && valueType.isStructure();
         } else {
-            return DefaultGenericAttributeType.STRUCTURE.equals(type);
+            return type != null && type.isStructure();
         }
     }
 
@@ -147,19 +146,19 @@ public class GenericAttribute {
         this.name = name;
     }
 
-    public DefaultGenericAttributeType getType() {
+    public GenericAttributeType getType() {
         return type;
     }
 
-    public void setType(DefaultGenericAttributeType type) {
+    public void setType(GenericAttributeType type) {
         this.type = type;
     }
 
-    public DefaultGenericAttributeType getValueType() {
+    public GenericAttributeType getValueType() {
         return valueType;
     }
 
-    public void setValueType(DefaultGenericAttributeType valueType) {
+    public void setValueType(GenericAttributeType valueType) {
         this.valueType = valueType;
     }
 

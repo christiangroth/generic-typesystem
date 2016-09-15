@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
@@ -211,10 +210,12 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // list structure
-        if (a.getValueType() == DefaultGenericAttributeType.STRUCTURE && a.getStructure() == null) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
-        } else if (a.getValueType() != null && a.getValueType() != DefaultGenericAttributeType.STRUCTURE && a.getStructure() != null) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
+        if (a.getValueType() != null) {
+            if (a.getValueType().isStructure() && a.getStructure() == null) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
+            } else if (!a.getValueType().isStructure() && a.getStructure() != null) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
+            }
         }
 
         // call list type attribute hook
@@ -329,7 +330,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // check mandatory value
-        boolean nullOrEmptyValue = checkValue == null || a.getType() == DefaultGenericAttributeType.STRING && StringUtils.isBlank(checkValue.toString());
+        boolean nullOrEmptyValue = checkValue == null || a.getType().isText() && StringUtils.isBlank(checkValue.toString());
         if (a.isMandatory() && nullOrEmptyValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
@@ -402,30 +403,25 @@ public class DefaultValidationService implements ValidationService {
     }
 
     private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {
-        switch (a.getType()) {
 
-            // string validation
-            case STRING:
-                validateItemAttributeStringValue(result, a, value.toString());
-                break;
+        // string validation
+        if (a.getType().isText()) {
+            validateItemAttributeStringValue(result, a, value.toString());
+        }
 
-            // numeric validation
-            case LONG:
-            case DOUBLE:
-                Double dValue = null;
-                if (value instanceof Integer) {
-                    dValue = new Double((Integer) value);
-                } else if (value instanceof Long) {
-                    dValue = new Double((Long) value);
-                } else if (value instanceof Float) {
-                    dValue = new Double((Float) value);
-                } else if (value instanceof Double) {
-                    dValue = (Double) value;
-                }
-                validateItemAttributeDoubleValue(result, a, dValue);
-                break;
-            default:
-                break;
+        // numeric validation
+        if (a.getType().isNumeric()) {
+            Double dValue = null;
+            if (value instanceof Integer) {
+                dValue = new Double((Integer) value);
+            } else if (value instanceof Long) {
+                dValue = new Double((Long) value);
+            } else if (value instanceof Float) {
+                dValue = new Double((Float) value);
+            } else if (value instanceof Double) {
+                dValue = (Double) value;
+            }
+            validateItemAttributeDoubleValue(result, a, dValue);
         }
 
         // call item simple attribute value hook

@@ -10,56 +10,55 @@ import java.util.List;
  */
 public enum DefaultGenericAttributeType implements GenericAttributeType {
 
-    STRING(true, false, true, true, false, String.class),
-    LONG(true, true, false, false, true, Long.class, Integer.class),
-    DOUBLE(true, true, false, false, true, Double.class, Float.class, Long.class, Integer.class),
-    BOOLEAN(false, false, false, false, false, Boolean.class),
-    DATE(false, false, false, false, false, String.class),
-    TIME(false, true, false, false, false, String.class),
-    DATETIME(false, true, false, false, false, String.class),
-    STRUCTURE(false, false, false, false, false, GenericItem.class),
-    LIST(false, false, false, false, false, List.class);
+    STRING(String.class),
+    LONG(Long.class, Integer.class),
+    DOUBLE(Double.class, Float.class, Long.class, Integer.class),
+    BOOLEAN(Boolean.class),
+    DATE(String.class),
+    TIME(String.class),
+    DATETIME(String.class),
+    STRUCTURE(GenericItem.class),
+    LIST(List.class);
 
-    private final boolean minMaxCapable;
-    private final boolean stepCapable;
-    private final boolean patternCapable;
-    private final boolean valueProposalDependenciesCapable;
-    private final boolean unitCapable;
     private final List<Class<?>> typeClasses;
 
-    DefaultGenericAttributeType(boolean minMaxCapable, boolean stepCapable, boolean patternCapable, boolean valueProposalDependenciesCapable, boolean unitCapable,
-            Class<?>... typeClasses) {
-        this.minMaxCapable = minMaxCapable;
-        this.stepCapable = stepCapable;
-        this.patternCapable = patternCapable;
-        this.valueProposalDependenciesCapable = valueProposalDependenciesCapable;
-        this.unitCapable = unitCapable;
+    DefaultGenericAttributeType(Class<?>... typeClasses) {
         this.typeClasses = Arrays.asList(typeClasses);
     }
 
     @Override
+    public boolean isNumeric() {
+        return this == LONG || this == DOUBLE;
+    }
+
+    @Override
+    public boolean isText() {
+        return this == STRING;
+    }
+
+    @Override
     public boolean isMinMaxCapable() {
-        return minMaxCapable;
+        return isNumeric() || isText();
     }
 
     @Override
     public boolean isStepCapable() {
-        return stepCapable;
+        return isNumeric() || this == TIME || this == DATETIME;
     }
 
     @Override
     public boolean isPatternCapable() {
-        return patternCapable;
+        return isText();
     }
 
     @Override
     public boolean isValueProposalDependenciesCapable() {
-        return valueProposalDependenciesCapable;
+        return isText();
     }
 
     @Override
     public boolean isUnitCapable() {
-        return unitCapable;
+        return isNumeric();
     }
 
     @Override
@@ -69,7 +68,7 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
 
     @Override
     public boolean isStructure() {
-        return this == DefaultGenericAttributeType.STRUCTURE;
+        return this == STRUCTURE;
     }
 
     @Override

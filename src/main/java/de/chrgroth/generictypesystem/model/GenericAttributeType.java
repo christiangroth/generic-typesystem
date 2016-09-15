@@ -8,6 +8,20 @@ package de.chrgroth.generictypesystem.model;
 public interface GenericAttributeType {
 
     /**
+     * Checks if the type is numeric.
+     *
+     * @return true if the attribute type is numeric, false otherwise
+     */
+    boolean isNumeric();
+
+    /**
+     * Checks if the type is text.
+     *
+     * @return true if the attribute type is text, false otherwise
+     */
+    boolean isText();
+
+    /**
      * Checks if the type is capable of min and max bounds.
      *
      * @return true if the attribute type is min and max capable, false otherwise
