@@ -44,6 +44,7 @@ import java.util.List;
  *
  * @author Christian Groth
  */
+// TODO simplify calls to isList, isStructure and remove all hardcoded checks
 public class GenericAttribute {
 
     private Long id;

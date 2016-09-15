@@ -1,6 +1,7 @@
 package de.chrgroth.generictypesystem;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
@@ -47,16 +51,18 @@ public class GenericTypesystemServiceValuesTest {
 
         // prepare items
         Set<GenericItem> items = new HashSet<>();
-        items.add(new GenericItem(0l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "foo", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(1l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "bar", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(2l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "bar", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(3l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, " bar", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(4l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, " bar ", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(5l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "Bar", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(6l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "Foo", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(7l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, null, DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(8l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, "", DOUBLE_ATTRIBUTE, 0.0d), null, null));
-        items.add(new GenericItem(9l, type.getId(), TestUtils.buildStringKeyMap(STRING_ATTRIBUTE, " ", DOUBLE_ATTRIBUTE, 0.0d), null, null));
+        items.add(new GenericItem(0l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "foo").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(1l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(2l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(3l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(4l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " bar ").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(5l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "Bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(6l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "Foo").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        HashMap<String, Object> valuesWithNull = Maps.newHashMap(ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 0.0d).build());
+        valuesWithNull.put(STRING_ATTRIBUTE, null);
+        items.add(new GenericItem(7l, type.getId(), valuesWithNull, null, null));
+        items.add(new GenericItem(8l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(9l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " ").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         Mockito.when(persistence.items(Mockito.eq(type.getId().longValue()))).thenReturn(items);
     }
 

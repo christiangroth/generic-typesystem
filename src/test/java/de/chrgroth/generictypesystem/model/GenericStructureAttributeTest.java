@@ -1,11 +1,17 @@
 package de.chrgroth.generictypesystem.model;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class GenericStructureAttributeTest {
 
-    private GenericStructure structure = new GenericStructure();
+    private GenericStructure structure;
+
+    @Before
+    public void init() {
+        structure = new GenericStructure();
+    }
 
     @Test
     public void pathByIdNullArgument() {

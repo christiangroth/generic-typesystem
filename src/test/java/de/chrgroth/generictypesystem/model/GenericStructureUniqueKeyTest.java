@@ -1,9 +1,12 @@
 package de.chrgroth.generictypesystem.model;
 
+import java.util.Map;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import de.chrgroth.generictypesystem.TestUtils;
+import com.google.common.collect.ImmutableMap;
 
 public class GenericStructureUniqueKeyTest {
 
@@ -11,7 +14,13 @@ public class GenericStructureUniqueKeyTest {
     private static final String ATTRIBUTE_ONE = "two";
 
     private GenericStructure structure = new GenericStructure();
-    private GenericItem item = new GenericItem();
+    private GenericItem item;
+
+    @Before
+    public void init() {
+        structure = new GenericStructure();
+        item = new GenericItem();
+    }
 
     @Test
     public void nullArgumentNoUniqueKey() {
@@ -20,19 +29,19 @@ public class GenericStructureUniqueKeyTest {
 
     @Test
     public void noAttributes() {
-        assertUniqueKey(false);
+        assertUniqueKey(false, null);
     }
 
     @Test
     public void nonUniqueAttributes() {
         addNonUniqueAttribute(ATTRIBUTE_ONE, "foo");
-        assertUniqueKey(false);
+        assertUniqueKey(false, null);
     }
 
     @Test
     public void uniqueAttribute() {
         addUniqueAttribute(ATTRIBUTE_ONE, "foo");
-        assertUniqueKey(true, ATTRIBUTE_ONE, "foo");
+        assertUniqueKey(true, ImmutableMap.<String, Object> builder().put(ATTRIBUTE_ONE, "foo").build());
     }
 
     @Test
@@ -45,14 +54,14 @@ public class GenericStructureUniqueKeyTest {
     public void mixedAttributes() {
         addUniqueAttribute(ATTRIBUTE_ONE, "foo");
         addNonUniqueAttribute(ATTRIBUTE_TWO, "bar");
-        assertUniqueKey(true, ATTRIBUTE_ONE, "foo");
+        assertUniqueKey(true, ImmutableMap.<String, Object> builder().put(ATTRIBUTE_ONE, "foo").build());
     }
 
     @Test
     public void uniqueAttributes() {
         addUniqueAttribute(ATTRIBUTE_ONE, "foo");
         addUniqueAttribute(ATTRIBUTE_TWO, "bar");
-        assertUniqueKey(true, ATTRIBUTE_ONE, "foo", ATTRIBUTE_TWO, "bar");
+        assertUniqueKey(true, ImmutableMap.<String, Object> builder().put(ATTRIBUTE_ONE, "foo").put(ATTRIBUTE_TWO, "bar").build());
     }
 
     private void addNonUniqueAttribute(String name, String value) {
@@ -69,8 +78,8 @@ public class GenericStructureUniqueKeyTest {
         item.set(name, value);
     }
 
-    private void assertUniqueKey(boolean hasUniqueKey, Object... uniqueKey) {
+    private void assertUniqueKey(boolean hasUniqueKey, Map<String, Object> uniqueKey) {
         Assert.assertEquals(hasUniqueKey, structure.hasUniqueKey());
-        Assert.assertEquals(TestUtils.buildMap(uniqueKey), structure.computeUniqueKey(item));
+        Assert.assertEquals(uniqueKey, structure.computeUniqueKey(item));
     }
 }
