@@ -1,5 +1,10 @@
 package de.chrgroth.generictypesystem.model;
 
+/**
+ * A simple POJO class holding information about attribute unit definitions.
+ *
+ * @author Christian Groth
+ */
 public class GenericAttributeUnit {
 
     public static final double FACTOR_BASE = 1.0d;

@@ -7,8 +7,8 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
@@ -22,8 +22,8 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null);
-        item = new GenericItem(0l, type.getId(), null);
+        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+        item = new GenericItem(0l, type.getId(), null, null, null);
     }
 
     @Test
@@ -41,13 +41,13 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void itemWithoutTypeId() {
-        item.setGenericTypeId(null);
+        item.setTypeId(null);
         validateItem(DefaultValidationServiceMessageKey.ITEM_TYPE_MANDATORY);
     }
 
     @Test
     public void itemWithMismatchingTypeId() {
-        item.setGenericTypeId(type.getId() + 1);
+        item.setTypeId(type.getId() + 1);
         validateItem(DefaultValidationServiceMessageKey.ITEM_TYPE_DOES_NOT_MATCH);
     }
 
@@ -64,7 +64,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void unitValueForNonUnitBasedAttribute() {
-        attribute(GenericAttributeType.DOUBLE, null, true, null);
+        attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         UnitValue value = new UnitValue();
         value.setUnit("minutes");
         value.setValue(1);
@@ -74,7 +74,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void nonUnitValueForUnitBasedAttribute() {
-        GenericAttribute attribute = attribute(GenericAttributeType.DOUBLE, null, true, null);
+        GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         attribute.setUnits(new ArrayList<>());
         GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
         minutesUnit.setName("minutes");
@@ -90,7 +90,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void validUnitBasedValue() {
-        GenericAttribute attribute = attribute(GenericAttributeType.DOUBLE, null, true, null);
+        GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         attribute.setUnits(new ArrayList<>());
         GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
         minutesUnit.setName("minutes");
@@ -109,33 +109,33 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void missingMandatoryDoubleValue() {
-        attribute(GenericAttributeType.DOUBLE, null, true, null);
+        attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
     }
 
     @Test
     public void mandatoryDoubleValue() {
-        attribute(GenericAttributeType.DOUBLE, null, true, null);
+        attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         value(2.0d);
         validateItem();
     }
 
     @Test
     public void missingMandatoryStringValue() {
-        attribute(GenericAttributeType.STRING, null, true, null);
+        attribute(DefaultGenericAttributeType.STRING, null, true, null);
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
     }
 
     @Test
     public void emptyMandatoryStringValue() {
-        attribute(GenericAttributeType.STRING, null, true, null);
+        attribute(DefaultGenericAttributeType.STRING, null, true, null);
         value(" ");
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
     }
 
     @Test
     public void mandatoryStringValue() {
-        attribute(GenericAttributeType.STRING, null, true, null);
+        attribute(DefaultGenericAttributeType.STRING, null, true, null);
         value("foo");
         validateItem();
     }
@@ -148,35 +148,35 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void valueTypeMismatch() {
-        attribute(GenericAttributeType.STRING, null, true, null);
+        attribute(DefaultGenericAttributeType.STRING, null, true, null);
         value(2.0d);
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID);
     }
 
     @Test
     public void collectionValueTypeMismatch() {
-        attribute(GenericAttributeType.LIST, GenericAttributeType.STRING, false, null);
+        attribute(DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.STRING, false, null);
         value(new HashSet<>());
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID);
     }
 
     @Test
     public void emptyMandatoryList() {
-        attribute(GenericAttributeType.LIST, GenericAttributeType.STRING, true, null);
+        attribute(DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.STRING, true, null);
         value(new ArrayList<>());
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
     }
 
     @Test
     public void listElementTypeMismatch() {
-        attribute(GenericAttributeType.LIST, GenericAttributeType.STRING, false, null);
+        attribute(DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.STRING, false, null);
         value(Arrays.asList(2.0d));
         validateItem(DefaultValidationServiceMessageKey.ITEM_LIST_VALUE_TYPE_INVALID);
     }
 
     @Test
     public void stringUndercut() {
-        GenericAttribute a = attribute(GenericAttributeType.STRING, null, false, null);
+        GenericAttribute a = attribute(DefaultGenericAttributeType.STRING, null, false, null);
         a.setMin(10.0d);
         value("012345");
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
@@ -184,7 +184,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void stringExceeded() {
-        GenericAttribute a = attribute(GenericAttributeType.STRING, null, false, null);
+        GenericAttribute a = attribute(DefaultGenericAttributeType.STRING, null, false, null);
         a.setMax(10.0d);
         value("01234567890");
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
@@ -192,7 +192,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void stringPatternMismatch() {
-        GenericAttribute a = attribute(GenericAttributeType.STRING, null, false, null);
+        GenericAttribute a = attribute(DefaultGenericAttributeType.STRING, null, false, null);
         a.setPattern("\\d+");
         value("12345abc");
         validateItem(DefaultValidationServiceMessageKey.ITEM_VALUE_PATTERN_VIOLATED);
@@ -200,65 +200,65 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
 
     @Test
     public void longIntegerMinUndercut() {
-        assertNumericValue(GenericAttributeType.LONG, 2.0d, null, 1, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.LONG, 2.0d, null, 1, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void longIntegerMaxExceeded() {
-        assertNumericValue(GenericAttributeType.LONG, null, 2.0d, 3, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.LONG, null, 2.0d, 3, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
     @Test
     public void longLongMinUndercut() {
-        assertNumericValue(GenericAttributeType.LONG, 2.0d, null, 1l, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.LONG, 2.0d, null, 1l, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void longLongMaxExceeded() {
-        assertNumericValue(GenericAttributeType.LONG, null, 2.0d, 3l, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.LONG, null, 2.0d, 3l, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
     @Test
     public void doubleIntegerMinUndercut() {
-        assertNumericValue(GenericAttributeType.DOUBLE, 2.0d, null, 1, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, 2.0d, null, 1, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void doubleIntegerMaxExceeded() {
-        assertNumericValue(GenericAttributeType.DOUBLE, null, 2.0d, 3, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, null, 2.0d, 3, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
     @Test
     public void doubleLongMinUndercut() {
-        assertNumericValue(GenericAttributeType.DOUBLE, 2.0d, null, 1l, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, 2.0d, null, 1l, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void doubleLongMaxExceeded() {
-        assertNumericValue(GenericAttributeType.DOUBLE, null, 2.0d, 3l, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, null, 2.0d, 3l, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
     @Test
     public void doubleFloatMinUndercut() {
-        assertNumericValue(GenericAttributeType.DOUBLE, 2.0d, null, 1.0f, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, 2.0d, null, 1.0f, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void doubleFloatMaxExceeded() {
-        assertNumericValue(GenericAttributeType.DOUBLE, null, 2.0d, 3.0f, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, null, 2.0d, 3.0f, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
     @Test
     public void doubleDoubleMinUndercut() {
-        assertNumericValue(GenericAttributeType.DOUBLE, 2.0d, null, 1.0d, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, 2.0d, null, 1.0d, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT);
     }
 
     @Test
     public void doubleDoubleMaxExceeded() {
-        assertNumericValue(GenericAttributeType.DOUBLE, null, 2.0d, 3.0d, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
+        assertNumericValue(DefaultGenericAttributeType.DOUBLE, null, 2.0d, 3.0d, DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED);
     }
 
-    private void assertNumericValue(GenericAttributeType attributeType, Double min, Double max, Object value, ValidationMessageKey... errorKeys) {
+    private void assertNumericValue(DefaultGenericAttributeType attributeType, Double min, Double max, Object value, ValidationMessageKey... errorKeys) {
         GenericAttribute a = attribute(attributeType, null, false, null);
         a.setMin(min);
         a.setMax(max);
@@ -266,8 +266,8 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
         validateItem(errorKeys);
     }
 
-    private <T, K, V> GenericAttribute attribute(GenericAttributeType type, GenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
-        GenericAttribute a = new GenericAttribute(0l, 0, "name", type, valueType, false, false, mandatory, structure);
+    private <T, K, V> GenericAttribute attribute(DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
+        GenericAttribute a = new GenericAttribute(0l, 0, "name", type, valueType, false, false, mandatory, structure, null, null, null, null, null, null, null, null);
         this.type.getAttributes().add(a);
         return a;
     }

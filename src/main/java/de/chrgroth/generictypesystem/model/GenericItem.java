@@ -5,31 +5,42 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-// TODO JSON handling for values
-// TODO add visibility??
-// TODO use builder pattern
+/**
+ * Represents a generic item belonging to a {@link GenericType} and holding the attribute values.
+ *
+ * @author Christian Groth
+ */
 public class GenericItem {
 
-    // TODO move somewhere else
-    public static final Integer VERSION = 1;
-
     private Long id;
-    private Long genericTypeId;
+    private Long typeId;
     private Map<String, Object> values;
 
+    private Long owner;
+    private Visibility visibility;
+
     public GenericItem() {
-        this(null, null, null);
+        this(null, null, null, null, null);
     }
 
-    public GenericItem(Long id, Long genericTypeId, Map<String, Object> values) {
+    public GenericItem(Long id, Long typeId, Map<String, Object> values, Long owner, Visibility visibility) {
         this.id = id;
-        this.genericTypeId = genericTypeId;
+        this.typeId = typeId;
         this.values = new HashMap<>();
         if (values != null) {
             this.values.putAll(values);
         }
+        this.owner = owner;
+        this.visibility = visibility;
     }
 
+    /**
+     * Returns the value for the given name. Names containing dot notation will be resolved recursively.
+     *
+     * @param name
+     *            value name
+     * @return value
+     */
     public Object get(String name) {
 
         // null guard
@@ -58,6 +69,12 @@ public class GenericItem {
         }
     }
 
+    /**
+     * Returns a recursive view for all values. Values of nested items are combined with a dot in their names. Any changes won't be reflected to the item
+     * itself.
+     *
+     * @return recursive values
+     */
     public Map<String, Object> get() {
         Map<String, Object> flattened = new HashMap<>();
         values.entrySet().forEach(e -> {
@@ -79,6 +96,15 @@ public class GenericItem {
         return flattened;
     }
 
+    /**
+     * Sets the given value for the given name. Names containing dot notation will be resolved recursively.
+     *
+     * @param name
+     *            value name
+     * @param value
+     *            value
+     * @return the old value
+     */
     public Object set(String name, Object value) {
 
         // null guard
@@ -109,6 +135,37 @@ public class GenericItem {
         }
     }
 
+    /**
+     * Removes the value for the given name. Names containing dot notation will be resolved recursively
+     *
+     * @param name
+     *            value name
+     * @return the removed value
+     */
+    public Object remove(String name) {
+
+        // null guard
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        // check for nested value
+        int dotIndex = name.indexOf('.');
+        if (dotIndex > 0) {
+
+            // get nested
+            GenericItem object = getNested(name.substring(0, dotIndex));
+            if (object == null) {
+                return null;
+            }
+
+            // delegate
+            return object.remove(name.substring(dotIndex + 1));
+        } else {
+            return values.remove(name);
+        }
+    }
+
     private GenericItem getNested(String key) {
 
         // null guard
@@ -131,17 +188,6 @@ public class GenericItem {
         return (GenericItem) object;
     }
 
-    public Object remove(String name) {
-
-        // null guard
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        // remove
-        return values.remove(name);
-    }
-
     public Long getId() {
         return id;
     }
@@ -150,12 +196,12 @@ public class GenericItem {
         this.id = id;
     }
 
-    public Long getGenericTypeId() {
-        return genericTypeId;
+    public Long getTypeId() {
+        return typeId;
     }
 
-    public void setGenericTypeId(Long genericTypeId) {
-        this.genericTypeId = genericTypeId;
+    public void setTypeId(Long typeId) {
+        this.typeId = typeId;
     }
 
     public Map<String, Object> getValues() {
@@ -166,11 +212,27 @@ public class GenericItem {
         this.values = values;
     }
 
+    public Long getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Long owner) {
+        this.owner = owner;
+    }
+
+    public Visibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (genericTypeId == null ? 0 : genericTypeId.hashCode());
+        result = prime * result + (typeId == null ? 0 : typeId.hashCode());
         result = prime * result + (id == null ? 0 : id.hashCode());
         return result;
     }
@@ -187,11 +249,11 @@ public class GenericItem {
             return false;
         }
         GenericItem other = (GenericItem) obj;
-        if (genericTypeId == null) {
-            if (other.genericTypeId != null) {
+        if (typeId == null) {
+            if (other.typeId != null) {
                 return false;
             }
-        } else if (!genericTypeId.equals(other.genericTypeId)) {
+        } else if (!typeId.equals(other.typeId)) {
             return false;
         }
         if (id == null) {
@@ -206,6 +268,6 @@ public class GenericItem {
 
     @Override
     public String toString() {
-        return "GenericItem [id=" + id + ", genericTypeId=" + genericTypeId + ", values=" + values + "]";
+        return "GenericItem [id=" + id + ", typeId=" + typeId + ", values=" + values + ", owner=" + owner + ", visibility=" + visibility + "]";
     }
 }

@@ -3,15 +3,54 @@ package de.chrgroth.generictypesystem.model;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO JSON handling for isList, isStructure, structure, defaultValue, valueProposalDependencies, isUnitBased, units
-// TODO use builder pattern
+/**
+ * A simple POJO class holding all information about attribute definitions.
+ * <dl>
+ * <dt>id</dt>
+ * <dd>The id value used for persistence purposes.</dd>
+ * <dt>order</dt>
+ * <dd>Numeric value defining an order over attributes.</dd>
+ * <dt>name</dt>
+ * <dd>The attribute name. Used for {@link GenericAttribute#equals(Object)} and {@link GenericAttribute#hashCode()}.</dd>
+ * <dt>type</dt>
+ * <dd>The attribute type.</dd>
+ * <dt>valueType</dt>
+ * <dd>The attribute value type. Primarily used for list type attributes.</dd>
+ * <dt>unique</dt>
+ * <dd>Flag to indicate if this attribute is part of the items unique key.</dd>
+ * <dt>indexed</dt>
+ * <dd>Flag to indicate if this attribute is indexed. May be used for persistence or UI purposes.</dd>
+ * <dt>mandatory</dt>
+ * <dd>Flag to indicate if this attribute has a mandatory value.</dd>
+ * <dt>structure</dt>
+ * <dd>The structure connected to this attribute. Used for attributes with structured type or a list type holding a structured value type.</dd>
+ * <dt>min</dt>
+ * <dd>An optional minimum for attribute values. Numeric or value length for string based attribute types.</dd>
+ * <dt>max</dt>
+ * <dd>An optional maximum for attribute values. Numeric or value length for string based attribute types.</dd>
+ * <dt>step</dt>
+ * <dd>A step value for numeric typed attributes. Primarily used for UI purposes, not used for validaton at all.</dd>
+ * <dt>pattern</dt>
+ * <dd>An optional pattern for string based attribute types.</dd>
+ * <dt>defaultValue</dt>
+ * <dd>An optional string representation of the default value.</dd>
+ * <dt>defaultValueCallback</dt>
+ * <dd>An optional default value callback script to be executed.</dd>
+ * <dt>valueProposalDependencies</dt>
+ * <dd>An optional list of value proposal dependencies, referencing other attribute ids. Primarily used for UI purposes.</dd>
+ * <dt>units</dt>
+ * <dd>An optional list of attribute value units.</dd>
+ * </dl>
+ *
+ * @author Christian Groth
+ */
 public class GenericAttribute {
 
     private Long id;
-    private int order;
+    private long order;
     private String name;
-    private GenericAttributeType type;
-    private GenericAttributeType valueType;
+    private DefaultGenericAttributeType type;
+    private DefaultGenericAttributeType valueType;
     private boolean unique;
     private boolean indexed;
     private boolean mandatory;
@@ -22,6 +61,7 @@ public class GenericAttribute {
     private Double step;
     private String pattern;
 
+    // TODO change to object??
     private String defaultValue;
     private String defaultValueCallback;
 
@@ -30,31 +70,12 @@ public class GenericAttribute {
     private List<GenericAttributeUnit> units;
 
     public GenericAttribute() {
-        this(null, 0, null, null);
+        this(null, 0, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type) {
-        this(id, order, name, type, null, false, false, true, null);
-    }
-
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure) {
-        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, null, null, null, null);
-    }
-
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern) {
-        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, null, null);
-    }
-
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback) {
-        this(id, order, name, type, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback, null, null);
-    }
-
-    public GenericAttribute(Long id, int order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies,
-            List<GenericAttributeUnit> units) {
+    public GenericAttribute(Long id, long order, String name, DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean unique, boolean indexed,
+            boolean mandatory, GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback,
+            List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
         this.id = id;
         this.order = order;
         this.name = name;
@@ -79,25 +100,25 @@ public class GenericAttribute {
     }
 
     /**
-     * Returns true if the attributes type equals to {@link GenericAttributeType#LIST}.
+     * Returns true if the attributes type equals to {@link DefaultGenericAttributeType#LIST}.
      *
      * @return true if list, false otherwise
      */
     public boolean isList() {
-        return GenericAttributeType.LIST.equals(type);
+        return DefaultGenericAttributeType.LIST.equals(type);
     }
 
     /**
-     * Returns true if {@link #isList()} returns true and the attributes value type equals to {@link GenericAttributeType#STRUCTURE} or if {@link #isList()}
-     * returns false and the attributes type equals to {@link GenericAttributeType#STRUCTURE}.
+     * Returns true if {@link #isList()} returns true and the attributes value type equals to {@link DefaultGenericAttributeType#STRUCTURE} or if
+     * {@link #isList()} returns false and the attributes type equals to {@link DefaultGenericAttributeType#STRUCTURE}.
      *
      * @return true if list, false otherwise
      */
     public boolean isStructure() {
         if (isList()) {
-            return GenericAttributeType.STRUCTURE.equals(valueType);
+            return DefaultGenericAttributeType.STRUCTURE.equals(valueType);
         } else {
-            return GenericAttributeType.STRUCTURE.equals(type);
+            return DefaultGenericAttributeType.STRUCTURE.equals(type);
         }
     }
 
@@ -109,11 +130,11 @@ public class GenericAttribute {
         this.id = id;
     }
 
-    public int getOrder() {
+    public long getOrder() {
         return order;
     }
 
-    public void setOrder(int order) {
+    public void setOrder(long order) {
         this.order = order;
     }
 
@@ -125,19 +146,19 @@ public class GenericAttribute {
         this.name = name;
     }
 
-    public GenericAttributeType getType() {
+    public DefaultGenericAttributeType getType() {
         return type;
     }
 
-    public void setType(GenericAttributeType type) {
+    public void setType(DefaultGenericAttributeType type) {
         this.type = type;
     }
 
-    public GenericAttributeType getValueType() {
+    public DefaultGenericAttributeType getValueType() {
         return valueType;
     }
 
-    public void setValueType(GenericAttributeType valueType) {
+    public void setValueType(DefaultGenericAttributeType valueType) {
         this.valueType = valueType;
     }
 
@@ -273,7 +294,7 @@ public class GenericAttribute {
 
     @Override
     public String toString() {
-        return "GenericAttribute [order=" + order + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed
+        return "GenericAttribute [id=" + id + ", order=" + order + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed
                 + ", mandatory=" + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue="
                 + defaultValue + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
     }

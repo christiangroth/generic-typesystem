@@ -24,7 +24,7 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertTrue(service.typeGroups().isEmpty());
 
         // add type
-        GenericType type = new GenericType(0l, 0, "name", "group", null, 10);
+        GenericType type = new GenericType(0l, 0, "name", "group", null, null, null, null, null, 10l);
         service.type(type);
 
         // assert type data
@@ -49,9 +49,9 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertEquals(1, service.typeGroups().size());
 
         // add items for type
-        service.item(type, new GenericItem(0l, type.getId(), null));
-        service.item(type, new GenericItem(1l, type.getId(), null));
-        service.item(type, new GenericItem(2l, type.getId(), null));
+        service.item(type, new GenericItem(0l, type.getId(), null, null, null));
+        service.item(type, new GenericItem(1l, type.getId(), null, null, null));
+        service.item(type, new GenericItem(2l, type.getId(), null, null, null));
 
         // assert item data
         Assert.assertEquals(3, service.items(type.getId()).size());
@@ -66,8 +66,8 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertNotNull(service.item(type.getId(), 2l));
 
         // add item for non existing type
-        GenericType newType = new GenericType(1l, 0, "new-name", "group", null, 10);
-        service.item(newType, new GenericItem(0l, newType.getId(), null));
+        GenericType newType = new GenericType(1l, 0, "new-name", "group", null, null, null, null, null, 10l);
+        service.item(newType, new GenericItem(0l, newType.getId(), null, null, null));
 
         // assert type and item data
         Assert.assertEquals(2, service.types().size());

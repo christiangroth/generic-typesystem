@@ -1,6 +1,10 @@
 package de.chrgroth.generictypesystem.model;
 
-// TODO JSON handling?
+/**
+ * A simple POJO representing a unit based value.
+ *
+ * @author Christian Groth
+ */
 public final class UnitValue {
     private String unit;
     private Object value;

@@ -14,7 +14,6 @@ import com.google.common.collect.ImmutableMap;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
-import de.chrgroth.generictypesystem.persistence.query.impl.CascadingAttributeComparator;
 
 // TODO test with different value types
 // TODO test with mismatching value types per attribute (inconsistent data)
@@ -31,9 +30,9 @@ public class CascadingAttributeComparatorTest {
 
     @Before
     public void setup() {
-        itemOne = new GenericItem(0l, 0l, itemValues("a", "one"));
-        itemTwo = new GenericItem(1l, 0l, itemValues("b", "two"));
-        itemThree = new GenericItem(2l, 0l, itemValues("a", "two"));
+        itemOne = new GenericItem(0l, 0l, itemValues("a", "one"), null, null);
+        itemTwo = new GenericItem(1l, 0l, itemValues("b", "two"), null, null);
+        itemThree = new GenericItem(2l, 0l, itemValues("a", "two"), null, null);
     }
 
     private Map<String, Object> itemValues(String valueOne, String valueTwo) {

@@ -8,7 +8,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-// TODO JSON handling for attributes
+/**
+ * Represents a generic structure holding a number of generic attributes.
+ *
+ * @author Christian Groth
+ */
 public class GenericStructure {
 
     private Set<GenericAttribute> attributes;
@@ -24,10 +28,22 @@ public class GenericStructure {
         }
     }
 
+    /**
+     * Checks if the attributes contain unique key attributes.
+     *
+     * @return true if unique key attributes are contained, false otherwise
+     */
     public boolean hasUniqueKey() {
         return !uniqueAttributes().isEmpty();
     }
 
+    /**
+     * Computes the unique key for the given item.
+     *
+     * @param item
+     *            item to compute unique key for
+     * @return unique key, or null
+     */
     public Map<String, Object> computeUniqueKey(GenericItem item) {
         if (item == null || !hasUniqueKey()) {
             return null;
@@ -44,6 +60,11 @@ public class GenericStructure {
         return attributes.stream().filter(a -> a.isUnique()).collect(Collectors.toSet());
     }
 
+    /**
+     * Returns all attributes, recursing into nested structures.
+     *
+     * @return all attributes, never null
+     */
     public Set<GenericAttribute> attributes() {
         HashSet<GenericAttribute> allAttributes = new HashSet<>();
         if (attributes != null) {
@@ -54,27 +75,40 @@ public class GenericStructure {
         return allAttributes;
     }
 
-    public String attribute(Long id) {
+    /**
+     * Returns the path name of the attribute with given id, if existent.
+     *
+     * @param id
+     *            attribute id
+     * @return attribute path name, or null
+     */
+    public String attributePath(Long id) {
 
         // null guard
         if (id == null) {
             return null;
         }
 
-        // find attribute
+        // find attribute directly
         GenericAttribute attribute = attributes.stream().filter(a -> id.equals(a.getId())).findFirst().orElse(null);
         if (attribute == null) {
 
-            // search recursive
-            return attributes.stream()
-                    .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
-                    .filter(a -> a.getStructure().attribute(id) != null).map(a -> a.getName() + "." + a.getStructure().attribute(id)).findFirst().orElse(null);
+            // search recursively
+            return attributes.stream().filter(a -> a.getType().isStructure() || a.getType().isList() && a.getValueType().isStructure())
+                    .filter(a -> a.getStructure().attributePath(id) != null).map(a -> a.getName() + "." + a.getStructure().attributePath(id)).findFirst().orElse(null);
         }
 
         // done
         return attribute.getName();
     }
 
+    /**
+     * Resolves the attribute for given name. Names containing dot notation will be resolved recursively.
+     *
+     * @param name
+     *            attribute name
+     * @return attribute
+     */
     public GenericAttribute attribute(String name) {
 
         // null guard

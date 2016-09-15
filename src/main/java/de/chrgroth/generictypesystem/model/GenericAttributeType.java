@@ -1,76 +1,67 @@
 package de.chrgroth.generictypesystem.model;
 
-import java.util.Arrays;
-import java.util.List;
+/**
+ * The base interface for all attribute types.
+ *
+ * @author Christian Groth
+ */
+public interface GenericAttributeType {
 
-// TODO make extensible?
-public enum GenericAttributeType {
+    /**
+     * Checks if the type is capable of min and max bounds.
+     *
+     * @return true if the attribute type is min and max capable, false otherwise
+     */
+    boolean isMinMaxCapable();
 
-    STRING(true, false, true, true, false, String.class),
-    LONG(true, true, false, false, true, Long.class, Integer.class),
-    DOUBLE(true, true, false, false, true, Double.class, Float.class, Long.class, Integer.class),
-    BOOLEAN(false, false, false, false, false, Boolean.class),
-    DATE(false, false, false, false, false, String.class),
-    TIME(false, true, false, false, false, String.class),
-    DATETIME(false, true, false, false, false, String.class),
-    STRUCTURE(false, false, false, false, false, GenericItem.class),
-    LIST(false, false, false, false, false, List.class);
+    /**
+     * Checks if the type is capable of step configuration.
+     *
+     * @return true if the attribute type is step capable, false otherwise
+     */
+    boolean isStepCapable();
 
-    private final boolean minMaxCapable;
-    private final boolean stepCapable;
-    private final boolean patternCapable;
-    private final boolean valueProposalDependenciesCapable;
-    private final boolean unitCapable;
-    private final List<Class<?>> typeClasses;
+    /**
+     * Checks if the type is capable of pattern validation.
+     *
+     * @return true if the attribute type is pattern capable, false otherwise
+     */
+    boolean isPatternCapable();
 
-    GenericAttributeType(boolean minMaxCapable, boolean stepCapable, boolean patternCapable, boolean valueProposalDependenciesCapable, boolean unitCapable,
-            Class<?>... typeClasses) {
-        this.minMaxCapable = minMaxCapable;
-        this.stepCapable = stepCapable;
-        this.patternCapable = patternCapable;
-        this.valueProposalDependenciesCapable = valueProposalDependenciesCapable;
-        this.unitCapable = unitCapable;
-        this.typeClasses = Arrays.asList(typeClasses);
-    }
+    /**
+     * Checks if the type is capable of value proposal dependencies.
+     *
+     * @return true if the attribute type is value proposal dependencies capable, false otherwise
+     */
+    boolean isValueProposalDependenciesCapable();
 
-    public boolean isMinMaxCapable() {
-        return minMaxCapable;
-    }
+    /**
+     * Checks if the type is capable of units.
+     *
+     * @return true if the attribute type is unit capable, false otherwise
+     */
+    boolean isUnitCapable();
 
-    public boolean isStepCapable() {
-        return stepCapable;
-    }
+    /**
+     * Checks if the type is a list type.
+     *
+     * @return true if the attribute type represents a list, false otherwise
+     */
+    boolean isList();
 
-    public boolean isPatternCapable() {
-        return patternCapable;
-    }
+    /**
+     * Checks if the type is a structured type.
+     *
+     * @return true if the attribute type represents a structure, false otherwise
+     */
+    boolean isStructure();
 
-    public boolean isValueProposalDependenciesCapable() {
-        return valueProposalDependenciesCapable;
-    }
-
-    public boolean isUnitCapable() {
-        return unitCapable;
-    }
-
-    public boolean isList() {
-        return this == LIST;
-    }
-
-    public boolean isStructure() {
-        return this == GenericAttributeType.STRUCTURE;
-    }
-
-    public boolean isAssignableFrom(Class<?> actualClass) {
-
-        // check all classes
-        for (Class<?> typeClass : typeClasses) {
-            if (typeClass.isAssignableFrom(actualClass)) {
-                return true;
-            }
-        }
-
-        // none found
-        return false;
-    }
+    /**
+     * Checks if the given class is assignable for the attribute type.
+     *
+     * @param actualClass
+     *            class to be checked
+     * @return true if assignable, false otherwise
+     */
+    boolean isAssignableFrom(Class<?> actualClass);
 }

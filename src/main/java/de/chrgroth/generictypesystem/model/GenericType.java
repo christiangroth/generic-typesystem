@@ -2,48 +2,61 @@ package de.chrgroth.generictypesystem.model;
 
 import java.util.Set;
 
-// TODO use builder pattern
+/**
+ * Enhances the generic structure to a generic type.
+ * <dl>
+ * <dt>id</dt>
+ * <dd>The id value used for persistence purposes.</dd>
+ * <dt>order</dt>
+ * <dd>Numeric value defining an order over types.</dd>
+ * <dt>name</dt>
+ * <dd>The type name.</dd>
+ * <dt>group</dt>
+ * <dd>An optional type group.</dd>
+ * <dt>description</dt>
+ * <dd>An optional type description.</dd>
+ * <dt>color</dt>
+ * <dd>An optional color value. Primarily used for UI purposes.</dd>
+ * <dt>owner</dt>
+ * <dd>An optional owner key.</dd>
+ * <dt>visibility</dt>
+ * <dd>An optional visibility.</dd>
+ * <dt>pageSize</dt>
+ * <dd>An optional page size to be used for querying.</dd>
+ * </dl>
+ *
+ * @author Christian Groth
+ */
 public class GenericType extends GenericStructure {
-
-    // TODO move somewhere else
-    public static final Integer VERSION = 3;
-
-    // TODO move somewhere else
-    private static final long DEFAULT_PAGE_SIZE = 10;
 
     private Long id;
     private long order;
     private String name;
     private String group;
 
-    // TODO use for 3rd party project customizing
-    // private Map<String, Object> customAttributes = new HashMap<>();
-
-    // TODO move to custom attributes map
     private String description;
-    // TODO move to custom attributes map
     private String color;
 
-    // TODO core concepts?? owner is tied to long??
-    private long owner;
-    private Visibility visibility = Visibility.PRIVATE;
+    private Long owner;
+    private Visibility visibility;
 
-    private long pageSize;
+    private Long pageSize;
 
     public GenericType() {
-        this(null, 0, null, null, null);
+        this(null, 0, null, null, null, null, null, null, null, null);
     }
 
-    public GenericType(Long id, long order, String name, String group, Set<GenericAttribute> attributes) {
-        this(id, order, name, group, attributes, DEFAULT_PAGE_SIZE);
-    }
-
-    public GenericType(Long id, long order, String name, String group, Set<GenericAttribute> attributes, long pageSize) {
+    public GenericType(Long id, long order, String name, String group, Set<GenericAttribute> attributes, String description, String color, Long owner, Visibility visibility,
+            Long pageSize) {
         super(attributes);
-        this.order = order;
         this.id = id;
+        this.order = order;
         this.name = name;
         this.group = group;
+        this.description = description;
+        this.color = color;
+        this.owner = owner;
+        this.visibility = visibility;
         this.pageSize = pageSize;
     }
 
@@ -95,11 +108,11 @@ public class GenericType extends GenericStructure {
         this.group = group;
     }
 
-    public long getOwner() {
+    public Long getOwner() {
         return owner;
     }
 
-    public void setOwner(long owner) {
+    public void setOwner(Long owner) {
         this.owner = owner;
     }
 
@@ -111,11 +124,11 @@ public class GenericType extends GenericStructure {
         this.visibility = visibility;
     }
 
-    public long getPageSize() {
+    public Long getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(long pageSize) {
+    public void setPageSize(Long pageSize) {
         this.pageSize = pageSize;
     }
 
@@ -151,7 +164,7 @@ public class GenericType extends GenericStructure {
 
     @Override
     public String toString() {
-        return "GenericType [id=" + id + ", order=" + order + ", name=" + name + ", description=" + description + ", color=" + color + ", group=" + group + ", owner=" + owner
+        return "GenericType [id=" + id + ", order=" + order + ", name=" + name + ", group=" + group + ", description=" + description + ", color=" + color + ", owner=" + owner
                 + ", visibility=" + visibility + ", pageSize=" + pageSize + ", structure=" + super.toString() + "]";
     }
 }

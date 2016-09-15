@@ -6,8 +6,8 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 
@@ -16,8 +16,8 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        attribute = new GenericAttribute(0l, 0, "foo", GenericAttributeType.STRING, null, false, false, false, null);
-        type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)));
+        attribute = new GenericAttribute(0l, 0, "foo", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)), null, null, null, null, null);
     }
 
     @Test
@@ -51,14 +51,20 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     }
 
     @Test
+    public void pageSizeNull() {
+        type.setPageSize(null);
+        validateType();
+    }
+
+    @Test
     public void pageSizeZero() {
-        type.setPageSize(0);
+        type.setPageSize(0l);
         validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
     }
 
     @Test
     public void pageSizeNegative() {
-        type.setPageSize(-1);
+        type.setPageSize(-1l);
         validateType(DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
     }
 
@@ -76,7 +82,8 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
 
     @Test
     public void attributeAmbigiousId() {
-        type.getAttributes().add(new GenericAttribute(0l, 1, "some other", GenericAttributeType.LONG));
+        type.getAttributes()
+                .add(new GenericAttribute(0l, 1, "some other", DefaultGenericAttributeType.LONG, null, false, false, false, null, null, null, null, null, null, null, null, null));
         validateType(DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID);
     }
 

@@ -12,8 +12,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -33,13 +33,17 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceTest
 
         // type
         Set<GenericAttribute> typeAttributes = new HashSet<>();
-        typeAttributes.add(new GenericAttribute(0l, 0, "simple", GenericAttributeType.STRING, null, false, false, false, null));
-        typeAttributes.add(new GenericAttribute(1l, 0, "list", GenericAttributeType.LIST, GenericAttributeType.LONG, false, false, false, null));
+        typeAttributes
+                .add(new GenericAttribute(0l, 0, "simple", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null));
+        typeAttributes.add(new GenericAttribute(1l, 0, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, false, null, null, null, null,
+                null, null, null, null, null));
         Set<GenericAttribute> subStructureAttributes = new HashSet<>();
-        subStructureAttributes.add(new GenericAttribute(3l, 0, "sub-simple", GenericAttributeType.DOUBLE, null, false, false, false, null));
+        subStructureAttributes.add(
+                new GenericAttribute(3l, 0, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
         GenericStructure subStructure = new GenericStructure(subStructureAttributes);
-        typeAttributes.add(new GenericAttribute(2l, 0, "struct", GenericAttributeType.STRUCTURE, null, false, false, false, subStructure));
-        type = new GenericType(0l, 0, "testType", "testGroup", typeAttributes);
+        typeAttributes.add(new GenericAttribute(2l, 0, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, false, subStructure, null, null, null, null, null, null,
+                null, null));
+        type = new GenericType(0l, 0, "testType", "testGroup", typeAttributes, null, null, null, null, null);
 
         // item
         Map<String, Object> values = new HashMap<>();
@@ -47,9 +51,9 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceTest
         values.put("list", Arrays.asList(2l, 3l, 7l));
         Map<String, Object> subValues = new HashMap<>();
         subValues.put("sub-simple", 12.34d);
-        GenericItem subItem = new GenericItem(null, null, subValues);
+        GenericItem subItem = new GenericItem(null, null, subValues, null, null);
         values.put("struct", subItem);
-        item = new GenericItem(0l, type.getId(), values);
+        item = new GenericItem(0l, type.getId(), values, null, null);
     }
 
     @Test

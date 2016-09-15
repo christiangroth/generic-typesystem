@@ -29,16 +29,16 @@ public class InMemoryItemsQueryServicePagingTest {
 
         // prepare items
         items = new HashSet<>();
-        items.add(new GenericItem(0l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 0.0d).build()));
-        items.add(new GenericItem(1l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 1.0d).build()));
-        items.add(new GenericItem(2l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 2.0d).build()));
-        items.add(new GenericItem(3l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 3.0d).build()));
-        items.add(new GenericItem(4l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 4.0d).build()));
-        items.add(new GenericItem(5l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 5.0d).build()));
-        items.add(new GenericItem(6l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 6.0d).build()));
-        items.add(new GenericItem(7l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 7.0d).build()));
-        items.add(new GenericItem(8l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 8.0d).build()));
-        items.add(new GenericItem(9l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 9.0d).build()));
+        items.add(new GenericItem(0l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(1l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 1.0d).build(), null, null));
+        items.add(new GenericItem(2l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 2.0d).build(), null, null));
+        items.add(new GenericItem(3l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 3.0d).build(), null, null));
+        items.add(new GenericItem(4l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 4.0d).build(), null, null));
+        items.add(new GenericItem(5l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 5.0d).build(), null, null));
+        items.add(new GenericItem(6l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 6.0d).build(), null, null));
+        items.add(new GenericItem(7l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 7.0d).build(), null, null));
+        items.add(new GenericItem(8l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 8.0d).build(), null, null));
+        items.add(new GenericItem(9l, 0l, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 9.0d).build(), null, null));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -104,12 +104,12 @@ public class InMemoryItemsQueryServicePagingTest {
         paging(6, 2, 0, false);
     }
 
-    private void paging(int page, int size, int results, boolean moreAvailable) {
+    private void paging(long page, long size, int results, boolean moreAvailable) {
 
         // create paging data
         ItemPagingData paging = new ItemPagingData();
         paging.setPage(page);
-        paging.setSize(size);
+        paging.setPageSize(size);
 
         // delegate
         paging(paging, results, moreAvailable);

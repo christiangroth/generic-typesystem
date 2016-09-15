@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
@@ -56,7 +56,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // paging valid
-        if (type.getPageSize() < 1) {
+        if (type.getPageSize() != null && type.getPageSize() < 1) {
             result.error("pageSize", DefaultValidationServiceMessageKey.TYPE_PAGE_SIZE_INVALID);
         }
 
@@ -211,9 +211,9 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // list structure
-        if (a.getValueType() == GenericAttributeType.STRUCTURE && a.getStructure() == null) {
+        if (a.getValueType() == DefaultGenericAttributeType.STRUCTURE && a.getStructure() == null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_MANDATORY);
-        } else if (a.getValueType() != null && a.getValueType() != GenericAttributeType.STRUCTURE && a.getStructure() != null) {
+        } else if (a.getValueType() != null && a.getValueType() != DefaultGenericAttributeType.STRUCTURE && a.getStructure() != null) {
             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_STRUCTURE_NOT_ALLOWED, a.getValueType().toString());
         }
 
@@ -274,11 +274,11 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // validate type matches
-        if (item.getGenericTypeId() == null) {
+        if (item.getTypeId() == null) {
             result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_MANDATORY);
             return result;
         }
-        if (!item.getGenericTypeId().equals(type.getId())) {
+        if (!item.getTypeId().equals(type.getId())) {
             result.error("", DefaultValidationServiceMessageKey.ITEM_TYPE_DOES_NOT_MATCH);
             return result;
         }
@@ -329,7 +329,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // check mandatory value
-        boolean nullOrEmptyValue = checkValue == null || a.getType() == GenericAttributeType.STRING && StringUtils.isBlank(checkValue.toString());
+        boolean nullOrEmptyValue = checkValue == null || a.getType() == DefaultGenericAttributeType.STRING && StringUtils.isBlank(checkValue.toString());
         if (a.isMandatory() && nullOrEmptyValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }

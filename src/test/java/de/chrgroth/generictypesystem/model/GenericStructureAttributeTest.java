@@ -26,7 +26,7 @@ public class GenericStructureAttributeTest {
     @Test
     public void pathByIdNested() {
         GenericAttribute attribute = attribute(structure, 1l, "foo");
-        attribute.setType(GenericAttributeType.STRUCTURE);
+        attribute.setType(DefaultGenericAttributeType.STRUCTURE);
         GenericStructure nested = new GenericStructure();
         attribute.setStructure(nested);
         attribute(nested, 2l, "bar");
@@ -85,7 +85,8 @@ public class GenericStructureAttributeTest {
     }
 
     private GenericAttribute attribute(GenericStructure structure, Long id, String name) {
-        GenericAttribute attribute = new GenericAttribute(id, 0, name, GenericAttributeType.STRING);
+        GenericAttribute attribute = new GenericAttribute(id, 0, name, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null,
+                null, null);
         structure.getAttributes().add(attribute);
         return attribute;
     }
@@ -100,6 +101,6 @@ public class GenericStructureAttributeTest {
     }
 
     private void assertAttributePath(Long id, String path) {
-        Assert.assertEquals(path, structure.attribute(id));
+        Assert.assertEquals(path, structure.attributePath(id));
     }
 }

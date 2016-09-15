@@ -10,8 +10,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -26,25 +26,25 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null);
+        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
     }
 
     @Parameters(name = "attribute type {0} value type {1}")
-    public static Iterable<GenericAttributeType[]> data() {
-        List<GenericAttributeType[]> data = new ArrayList<>();
-        for (GenericAttributeType type : GenericAttributeType.values()) {
-            for (GenericAttributeType valueType : GenericAttributeType.values()) {
-                data.add(new GenericAttributeType[] { type, valueType });
+    public static Iterable<DefaultGenericAttributeType[]> data() {
+        List<DefaultGenericAttributeType[]> data = new ArrayList<>();
+        for (DefaultGenericAttributeType type : DefaultGenericAttributeType.values()) {
+            for (DefaultGenericAttributeType valueType : DefaultGenericAttributeType.values()) {
+                data.add(new DefaultGenericAttributeType[] { type, valueType });
             }
         }
         return data;
     }
 
     @Parameter(value = 0)
-    public GenericAttributeType testType;
+    public DefaultGenericAttributeType testType;
 
     @Parameter(value = 1)
-    public GenericAttributeType testValueType;
+    public DefaultGenericAttributeType testValueType;
 
     @Test
     public void attributeTypeTest() {
@@ -126,8 +126,8 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         validateType(errorKeys.toArray(new ValidationMessageKey[errorKeys.size()]));
     }
 
-    public void createAttribute(GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
-            String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
+    public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
+            Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
         attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);

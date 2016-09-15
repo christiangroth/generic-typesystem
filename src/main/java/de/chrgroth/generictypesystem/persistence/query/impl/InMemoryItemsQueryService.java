@@ -23,9 +23,9 @@ public class InMemoryItemsQueryService {
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryItemsQueryService.class);
 
-    private final int defaultPageSize;
+    private final long defaultPageSize;
 
-    public InMemoryItemsQueryService(int defaultPageSize) {
+    public InMemoryItemsQueryService(long defaultPageSize) {
         if (defaultPageSize < 1) {
             throw new IllegalArgumentException("default page size must be greater zero!!");
         }
@@ -70,25 +70,25 @@ public class InMemoryItemsQueryService {
         if (paging != null) {
 
             // validate paging parameters
-            int page = paging.getPage();
+            long page = paging.getPage();
             if (page < 0) {
                 LOG.error("illegal page number: " + page + "!! Setting page to 0.");
                 page = 0;
             }
-            int pageSize = paging.getSize();
-            if (pageSize < 1) {
+            Long pageSize = paging.getPageSize();
+            if (pageSize == null || pageSize.longValue() < 1) {
                 LOG.error("illegal page size: " + pageSize + "!! Falling back to configured default: " + defaultPageSize + ".");
                 pageSize = defaultPageSize;
             }
 
             // compute beginning
-            int firstIdx = 0;
+            long firstIdx = 0;
             if (page > 0) {
-                firstIdx = pageSize * (page - 1);
+                firstIdx = pageSize.longValue() * (page - 1);
             }
 
             // compute end
-            int lastIdx = firstIdx + pageSize;
+            long lastIdx = firstIdx + pageSize.longValue();
 
             // slice
             if (items.size() >= firstIdx + 1) {
@@ -97,7 +97,7 @@ public class InMemoryItemsQueryService {
                 moreAvailable = items.size() > lastIdx;
 
                 // slive to actual page
-                items = items.subList(firstIdx, items.size() > lastIdx ? lastIdx : items.size());
+                items = items.subList((int) firstIdx, items.size() > lastIdx ? (int) lastIdx : items.size());
             } else {
 
                 // return empty result

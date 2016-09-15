@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
+import de.chrgroth.generictypesystem.persistence.query.ItemPagingData;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
@@ -70,7 +71,24 @@ public class InMemoryPersistenceService implements PersistenceService {
 
     @Override
     public ItemQueryResult query(Long typeId, ItemsQueryData data) {
-        return query.query(items(typeId), data.getFilter(), data.getSorts(), data.getPaging());
+
+        // check for paging data
+        if (data != null && data.getPaging() != null) {
+
+            // check for missing or invalid page size
+            ItemPagingData paging = data.getPaging();
+            if (paging.getPageSize() == null || paging.getPageSize().intValue() < 1) {
+
+                // use types configured and valid page size
+                GenericType type = type(typeId);
+                if (type != null && type.getPageSize() != null && type.getPageSize().longValue() > 0) {
+                    paging.setPageSize(type.getPageSize());
+                }
+            }
+        }
+
+        // delegate
+        return query.query(items(typeId), data != null ? data.getFilter() : null, data != null ? data.getSorts() : null, data != null ? data.getPaging() : null);
     }
 
     @Override

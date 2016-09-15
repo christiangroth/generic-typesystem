@@ -9,22 +9,22 @@ import de.chrgroth.generictypesystem.model.GenericItem;
  */
 public class ItemPagingData {
 
-    private int page;
-    private int size;
+    private long page;
+    private Long pageSize;
 
-    public int getPage() {
+    public long getPage() {
         return page;
     }
 
-    public void setPage(int page) {
+    public void setPage(long page) {
         this.page = page;
     }
 
-    public int getSize() {
-        return size;
+    public Long getPageSize() {
+        return pageSize;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setPageSize(Long pageSize) {
+        this.pageSize = pageSize;
     }
 }

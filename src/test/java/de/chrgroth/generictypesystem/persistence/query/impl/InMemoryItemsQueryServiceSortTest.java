@@ -35,18 +35,18 @@ public class InMemoryItemsQueryServiceSortTest {
 
         // add items
         items = new HashSet<>();
-        items.add(new GenericItem(0l, 0l, ImmutableMap.<String, Object> builder().put(S, "foo").put(D, 0.0d).put(B, true).put(L, 0).build()));
-        items.add(new GenericItem(1l, 0l, ImmutableMap.<String, Object> builder().put(S, "bar").put(D, 1.0d).put(B, false).put(L, 1).build()));
-        items.add(new GenericItem(2l, 0l, ImmutableMap.<String, Object> builder().put(S, "bar").put(D, 2.0d).put(B, true).put(L, 2).build()));
-        items.add(new GenericItem(3l, 0l, ImmutableMap.<String, Object> builder().put(S, " bar").put(D, 3.0d).put(B, false).put(L, 3).build()));
-        items.add(new GenericItem(4l, 0l, ImmutableMap.<String, Object> builder().put(S, " bar ").put(D, 4.0d).put(B, true).put(L, 4).build()));
-        items.add(new GenericItem(5l, 0l, ImmutableMap.<String, Object> builder().put(S, "Bar").put(D, 5.0d).put(B, false).put(L, 5).build()));
-        items.add(new GenericItem(6l, 0l, ImmutableMap.<String, Object> builder().put(S, "Foo").put(D, 6.0d).put(B, true).put(L, 6).build()));
+        items.add(new GenericItem(0l, 0l, ImmutableMap.<String, Object> builder().put(S, "foo").put(D, 0.0d).put(B, true).put(L, 0).build(), null, null));
+        items.add(new GenericItem(1l, 0l, ImmutableMap.<String, Object> builder().put(S, "bar").put(D, 1.0d).put(B, false).put(L, 1).build(), null, null));
+        items.add(new GenericItem(2l, 0l, ImmutableMap.<String, Object> builder().put(S, "bar").put(D, 2.0d).put(B, true).put(L, 2).build(), null, null));
+        items.add(new GenericItem(3l, 0l, ImmutableMap.<String, Object> builder().put(S, " bar").put(D, 3.0d).put(B, false).put(L, 3).build(), null, null));
+        items.add(new GenericItem(4l, 0l, ImmutableMap.<String, Object> builder().put(S, " bar ").put(D, 4.0d).put(B, true).put(L, 4).build(), null, null));
+        items.add(new GenericItem(5l, 0l, ImmutableMap.<String, Object> builder().put(S, "Bar").put(D, 5.0d).put(B, false).put(L, 5).build(), null, null));
+        items.add(new GenericItem(6l, 0l, ImmutableMap.<String, Object> builder().put(S, "Foo").put(D, 6.0d).put(B, true).put(L, 6).build(), null, null));
         HashMap<String, Object> valuesWithNull = Maps.newHashMap(ImmutableMap.<String, Object> builder().put(D, 7.0d).put(B, false).put(L, 7).build());
         valuesWithNull.put(S, null);
-        items.add(new GenericItem(7l, 0l, valuesWithNull));
-        items.add(new GenericItem(8l, 0l, ImmutableMap.<String, Object> builder().put(S, "").put(D, 8.0d).put(B, true).put(L, 8).build()));
-        items.add(new GenericItem(9l, 0l, ImmutableMap.<String, Object> builder().put(S, " ").put(D, 9.0d).put(B, false).put(L, 9).build()));
+        items.add(new GenericItem(7l, 0l, valuesWithNull, null, null));
+        items.add(new GenericItem(8l, 0l, ImmutableMap.<String, Object> builder().put(S, "").put(D, 8.0d).put(B, true).put(L, 8).build(), null, null));
+        items.add(new GenericItem(9l, 0l, ImmutableMap.<String, Object> builder().put(S, " ").put(D, 9.0d).put(B, false).put(L, 9).build(), null, null));
     }
 
     @Test

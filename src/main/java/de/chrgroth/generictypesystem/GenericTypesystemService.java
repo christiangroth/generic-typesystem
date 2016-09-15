@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -93,7 +93,7 @@ public class GenericTypesystemService {
         GenericType type = persistence.type(typeId);
 
         // ensure generic type id
-        item.setGenericTypeId(typeId);
+        item.setTypeId(typeId);
 
         // validate
         ValidationResult<GenericItem> validationResult = validation.validate(type, item);
@@ -136,12 +136,11 @@ public class GenericTypesystemService {
         Collection<String> paths = new HashSet<>();
 
         // recurse into all structures
-        structure.getAttributes().stream()
-                .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
+        structure.getAttributes().stream().filter(a -> a.getType().isStructure() || a.getType().isList() && a.getValueType().isStructure())
                 .forEach(a -> paths.addAll(collectValuePaths(a.getStructure(), buildAttributePath(pathPrefix, a))));
 
         // add all string attributes
-        structure.getAttributes().stream().filter(a -> a.getType() == GenericAttributeType.STRING).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
+        structure.getAttributes().stream().filter(a -> a.getType() == DefaultGenericAttributeType.STRING).forEach(a -> paths.add(buildAttributePath(pathPrefix, a)));
 
         // done
         return paths;
@@ -172,7 +171,7 @@ public class GenericTypesystemService {
         }
 
         // validate type
-        if (attribute.getType() != GenericAttributeType.STRING) {
+        if (attribute.getType() != DefaultGenericAttributeType.STRING) {
             return new ArrayList<>();
         }
 
@@ -185,7 +184,7 @@ public class GenericTypesystemService {
             // filter items by dependent attributes and their template values
             Stream<GenericItem> itemsStream = allItems.stream();
             for (Long dependencyId : attribute.getValueProposalDependencies()) {
-                String dependecyAttributePath = type.attribute(dependencyId);
+                String dependecyAttributePath = type.attributePath(dependencyId);
                 if (StringUtils.isNotBlank(dependecyAttributePath)) {
                     Object templateValue = template.get(dependecyAttributePath);
                     if (templateValue != null && StringUtils.isNotBlank(templateValue.toString())) {

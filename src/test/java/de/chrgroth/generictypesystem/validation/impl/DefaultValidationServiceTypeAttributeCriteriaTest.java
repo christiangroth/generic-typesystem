@@ -11,8 +11,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -29,16 +29,16 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null);
+        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
     }
 
     @Parameters(name = "attribute type {0}")
-    public static Iterable<GenericAttributeType> data() {
-        return Arrays.asList(GenericAttributeType.values());
+    public static Iterable<DefaultGenericAttributeType> data() {
+        return Arrays.asList(DefaultGenericAttributeType.values());
     }
 
     @Parameter
-    public GenericAttributeType testType;
+    public DefaultGenericAttributeType testType;
 
     private List<ValidationMessageKey> errorKeys = new ArrayList<>();
 
@@ -145,7 +145,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // create attribute to depend upon
         createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, null);
-        attribute.setType(GenericAttributeType.STRING);
+        attribute.setType(DefaultGenericAttributeType.STRING);
         attribute.setId(100l);
         attribute.setName("dependOnMe");
         GenericAttribute attributeToDependUpon = attribute;
@@ -282,8 +282,8 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         return new GenericAttributeUnit("nonBaseUnit", GenericAttributeUnit.FACTOR_BASE + 1);
     }
 
-    public void createAttribute(GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
-            String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
+    public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
+            Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
         attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);
