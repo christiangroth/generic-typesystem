@@ -10,7 +10,6 @@ import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
 public enum DefaultValidationServiceMessageKey implements ValidationMessageKey {
 
     GENERAL_TYPE_NOT_PROVIDED,
-    GENERAL_STRUCTURE_NOT_PROVIDED,
     GENERAL_ITEM_NOT_PROVIDED,
 
     TYPE_NAME_MANDATORY,

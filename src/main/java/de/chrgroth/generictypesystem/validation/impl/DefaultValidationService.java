@@ -72,12 +72,6 @@ public class DefaultValidationService implements ValidationService {
 
     private void validateStructure(ValidationResult<GenericType> result, GenericStructure structure, String path) {
 
-        // null guard
-        if (structure == null) {
-            result.error(path, DefaultValidationServiceMessageKey.GENERAL_STRUCTURE_NOT_PROVIDED);
-            return;
-        }
-
         // validate structure attributes
         Set<GenericAttribute> allAttributes = structure.attributes();
         structure.getAttributes().forEach(a -> validateTypeAttribute(result, allAttributes, a, path));
