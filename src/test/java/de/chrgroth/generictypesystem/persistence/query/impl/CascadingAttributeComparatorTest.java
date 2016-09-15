@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.util;
+package de.chrgroth.generictypesystem.persistence.query.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +10,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.chrgroth.generictypesystem.TestUtils;
+import com.google.common.collect.ImmutableMap;
+
 import de.chrgroth.generictypesystem.model.GenericItem;
-import de.chrgroth.generictypesystem.query.ItemSortData;
+import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
+import de.chrgroth.generictypesystem.persistence.query.impl.CascadingAttributeComparator;
 
 // TODO test with different value types
 // TODO test with mismatching value types per attribute (inconsistent data)
@@ -35,7 +37,7 @@ public class CascadingAttributeComparatorTest {
     }
 
     private Map<String, Object> itemValues(String valueOne, String valueTwo) {
-        return TestUtils.buildStringKeyMap(ATTRIBUTE_ONE, valueOne, ATTRIBUTE_TWO, valueTwo);
+        return ImmutableMap.<String, Object> builder().put(ATTRIBUTE_ONE, valueOne).put(ATTRIBUTE_TWO, valueTwo).build();
     }
 
     @Test

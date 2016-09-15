@@ -2,7 +2,6 @@ package de.chrgroth.generictypesystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeType;
@@ -23,30 +20,27 @@ import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.persistence.impl.InMemoryPersistenceService;
-import de.chrgroth.generictypesystem.query.ItemFilterData;
-import de.chrgroth.generictypesystem.query.ItemPagingData;
-import de.chrgroth.generictypesystem.query.ItemQueryResult;
-import de.chrgroth.generictypesystem.query.ItemSortData;
-import de.chrgroth.generictypesystem.query.ItemsQueryData;
-import de.chrgroth.generictypesystem.util.CascadingAttributeComparator;
+import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
+import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmptyHooks;
 
-// TODO add security / visibility service
-// TODO extract query service or move to data service??
+// TODO add security / visibility service and some kind of context
 // TODO unit test coverage
 public class GenericTypesystemService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
+    // TODO private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final ValidationService validation;
     private final PersistenceService persistence;
 
     public GenericTypesystemService(ValidationService validation, PersistenceService persistence) {
         this.validation = validation != null ? validation : new DefaultValidationService(new DefaultValidationServiceEmptyHooks());
-        this.persistence = persistence != null ? persistence : new InMemoryPersistenceService();
+        this.persistence = persistence != null ? persistence : new InMemoryPersistenceService(DEFAULT_PAGE_SIZE);
     }
 
     public Set<String> typeGroups() {
@@ -54,7 +48,6 @@ public class GenericTypesystemService {
     }
 
     public Set<GenericType> types() {
-        // TODO context / visibility handling
         return persistence.types();
     }
 
@@ -62,7 +55,7 @@ public class GenericTypesystemService {
 
         // ensure all type attributes have an id
         if (type != null && type.getAttributes() != null) {
-            List<GenericAttribute> allAttributes = collectAllTypeAttributes(type);
+            Set<GenericAttribute> allAttributes = type.attributes();
             for (GenericAttribute attribute : allAttributes) {
                 if (attribute.getId() == null || attribute.getId().longValue() < 1) {
                     attribute.setId(nextTypeAttributeId(allAttributes));
@@ -82,84 +75,12 @@ public class GenericTypesystemService {
         return validationResult;
     }
 
-    private List<GenericAttribute> collectAllTypeAttributes(GenericStructure structure) {
-        List<GenericAttribute> allAttributes = new ArrayList<>();
-
-        // add all attributes
-        allAttributes.addAll(structure.getAttributes());
-
-        // recurse into all structures
-        structure.getAttributes().stream()
-                .filter(a -> a.getType() == GenericAttributeType.STRUCTURE || a.getType() == GenericAttributeType.LIST && a.getValueType() == GenericAttributeType.STRUCTURE)
-                .forEach(a -> allAttributes.addAll(collectAllTypeAttributes(a.getStructure())));
-
-        return allAttributes;
-    }
-
-    private long nextTypeAttributeId(List<GenericAttribute> allAttributes) {
+    private long nextTypeAttributeId(Set<GenericAttribute> allAttributes) {
         return allAttributes.stream().filter(a -> a.getId() != null).mapToLong(a -> a.getId()).max().orElse(0) + 1;
     }
 
-    public ItemQueryResult items(Long typeId, ItemsQueryData data) {
-
-        // query
-        // TODO unit test query, change return object
-        return items(typeId, data.getFilter(), data.getSorts(), data.getPaging());
-    }
-
-    // TODO allow to be served by persistence service??
-    // TODO error handling
-    private ItemQueryResult items(long typeId, ItemFilterData filter, List<ItemSortData> sorts, ItemPagingData paging) {
-        List<GenericItem> items = new ArrayList<>();
-
-        // get item store
-        Set<GenericItem> data = persistence.items(typeId);
-        if (data == null) {
-            return new ItemQueryResult(items, false);
-        }
-
-        // add all
-        boolean moreAvailable = false;
-        items.addAll(data);
-
-        // TODO filter and test
-        // filter
-        if (filter != null) {
-            LOG.warn("filtering not implemented yet!!");
-        }
-
-        // sorting
-        // TODO case insensitive string compare + test
-        Collections.sort(items, new CascadingAttributeComparator(sorts));
-
-        // paging
-        // TODO error tests
-        if (paging != null) {
-            // TODO validate paging parameters
-            int pageSize = paging.getSize();
-            int page = paging.getPage();
-
-            // compute beginning
-            int firstIdx = 0;
-            if (page > 0) {
-                firstIdx = pageSize * (page - 1);
-            }
-
-            // compute end
-            int lastIdx = firstIdx + pageSize;
-
-            // slice
-            if (items.size() >= firstIdx + 1) {
-                moreAvailable = items.size() > lastIdx;
-                items = items.subList(firstIdx, items.size() > lastIdx ? lastIdx : items.size());
-            } else {
-                // TODO error handling
-                items.clear();
-            }
-        }
-
-        // done
-        return new ItemQueryResult(items, moreAvailable);
+    public ItemQueryResult query(Long typeId, ItemsQueryData data) {
+        return persistence.query(typeId, data);
     }
 
     public GenericItem item(Long typeId, long id) {
@@ -290,17 +211,6 @@ public class GenericTypesystemService {
     }
 
     public boolean deleteType(long typeId) {
-
-        // drop storage
-        // TODO move to default impl boolean success = persistence.dropItemStore(typeId);
-        boolean success = true;
-        if (success) {
-
-            // remove type definition from types storage
-            success = persistence.removeType(typeId);
-        }
-
-        // done
-        return success;
+        return persistence.removeType(typeId);
     }
 }

@@ -1,10 +1,15 @@
-package de.chrgroth.generictypesystem.query;
+package de.chrgroth.generictypesystem.persistence.query;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 
+/**
+ * Simple POJO holding the results for querying {@link GenericItem} instances.
+ *
+ * @author Christian Groth
+ */
 public class ItemQueryResult {
     private final List<GenericItem> items = new ArrayList<>();
     private final boolean moreAvailable;
@@ -16,9 +21,6 @@ public class ItemQueryResult {
         this.moreAvailable = moreAvailable;
     }
 
-    // TODO json handling
-    // @JSON
-    // @JsonProperty
     public List<GenericItem> getItems() {
         return items;
     }

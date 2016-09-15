@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
+import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
+import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
+import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
 
 /**
  * Very simple in memory persistence service storing all types ad items in internal transient collections.
@@ -18,8 +21,19 @@ import de.chrgroth.generictypesystem.persistence.PersistenceService;
  */
 public class InMemoryPersistenceService implements PersistenceService {
 
-    private final Set<GenericType> types = new HashSet<>();
-    private final Map<Long, Set<GenericItem>> items = new HashMap<>();
+    private final Set<GenericType> types;
+    private final Map<Long, Set<GenericItem>> items;
+    private final InMemoryItemsQueryService query;
+
+    public InMemoryPersistenceService(int defaultPageSize) {
+
+        // init storage
+        types = new HashSet<>();
+        items = new HashMap<>();
+
+        // init querying
+        query = new InMemoryItemsQueryService(defaultPageSize);
+    }
 
     @Override
     public Set<String> typeGroups() {
@@ -52,6 +66,11 @@ public class InMemoryPersistenceService implements PersistenceService {
         // be null safe
         Set<GenericItem> typeItems = items.get(typeId);
         return typeItems != null ? new HashSet<>(typeItems) : Collections.emptySet();
+    }
+
+    @Override
+    public ItemQueryResult query(Long typeId, ItemsQueryData data) {
+        return query.query(items(typeId), data.getFilter(), data.getSorts(), data.getPaging());
     }
 
     @Override

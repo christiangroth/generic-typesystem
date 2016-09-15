@@ -20,6 +20,7 @@ import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationMessageKey;
 
 // TODO validate default values
+// TODO validate nested item values
 @RunWith(Parameterized.class)
 public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
 

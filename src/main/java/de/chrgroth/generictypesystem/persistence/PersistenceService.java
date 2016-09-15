@@ -4,6 +4,8 @@ import java.util.Set;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
+import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 
 /**
  * Common persistence service interface for instances of {@link GenericType} and {@link GenericItem}.
@@ -51,6 +53,17 @@ public interface PersistenceService {
      * @return known items
      */
     Set<GenericItem> items(long typeId);
+
+    /**
+     * Returns item query result for given query data.
+     *
+     * @param typeId
+     *            type id
+     * @param data
+     *            query data
+     * @return query result
+     */
+    ItemQueryResult query(Long typeId, ItemsQueryData data);
 
     /**
      * Returns the item with given type id and item id.

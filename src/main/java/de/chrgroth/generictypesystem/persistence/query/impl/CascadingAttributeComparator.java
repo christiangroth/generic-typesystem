@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem.util;
+package de.chrgroth.generictypesystem.persistence.query.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
-import de.chrgroth.generictypesystem.query.ItemSortData;
+import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
 
 public class CascadingAttributeComparator implements Serializable, Comparator<GenericItem> {
 

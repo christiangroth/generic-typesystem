@@ -13,9 +13,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.model.GenericAttributeType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 
 public class GenericTypesystemServiceValuesTest {

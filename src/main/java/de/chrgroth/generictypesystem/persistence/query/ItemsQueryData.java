@@ -1,7 +1,14 @@
-package de.chrgroth.generictypesystem.query;
+package de.chrgroth.generictypesystem.persistence.query;
 
 import java.util.List;
 
+import de.chrgroth.generictypesystem.model.GenericItem;
+
+/**
+ * Simple POJO holding all filter, sorting and paging operations for querying {@link GenericItem} instances.
+ *
+ * @author Christian Groth
+ */
 public class ItemsQueryData {
     private ItemFilterData filter;
     private List<ItemSortData> sorts;

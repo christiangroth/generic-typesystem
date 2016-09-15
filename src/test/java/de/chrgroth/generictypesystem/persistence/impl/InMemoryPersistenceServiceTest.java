@@ -13,7 +13,7 @@ public class InMemoryPersistenceServiceTest {
 
     @Before
     public void setup() {
-        service = new InMemoryPersistenceService();
+        service = new InMemoryPersistenceService(10);
     }
 
     @Test
