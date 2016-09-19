@@ -18,6 +18,16 @@ public class InMemoryPersistenceServiceTest {
         service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10), new InMemoryValueProposalService());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void missingQueryService() {
+        new InMemoryPersistenceService(null, new InMemoryValueProposalService());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void missingValuesService() {
+        new InMemoryPersistenceService(new InMemoryItemsQueryService(10l), null);
+    }
+
     @Test
     public void typeAndItemLifecycle() {
 

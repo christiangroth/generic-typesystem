@@ -1,6 +1,5 @@
 package de.chrgroth.generictypesystem.persistence.values.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -92,18 +91,8 @@ public class InMemoryValueProposalService {
 
     private List<?> values(GenericType type, Set<GenericItem> items, String attributePath, GenericItem template) {
 
-        // null guard
-        GenericAttribute attribute = type != null ? type.attribute(attributePath) : null;
-        if (attribute == null) {
-            return new ArrayList<>();
-        }
-
-        // validate type
-        if (!attribute.getType().isValueProposalDependenciesCapable()) {
-            return new ArrayList<>();
-        }
-
-        // check for value proposal dependencies
+        // check for value proposal dependencies and reduce items to the ones with matching values
+        GenericAttribute attribute = type.attribute(attributePath);
         if (template != null && attribute.getValueProposalDependencies() != null && !attribute.getValueProposalDependencies().isEmpty()) {
 
             // filter items by dependent attributes and their template values

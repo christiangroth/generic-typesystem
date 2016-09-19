@@ -15,9 +15,8 @@ import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
 import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
+// TODO test with nested structure
 public class InMemoryPersistenceServiceValuesTest {
-
-    private static final long TYPE_ID = 0l;
 
     @Mock
     private InMemoryValueProposalService values;
@@ -34,7 +33,7 @@ public class InMemoryPersistenceServiceValuesTest {
         service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10l), values);
 
         // prepare test type
-        type = new GenericType(TYPE_ID, 0, "name", "group", null, null, null, null, null, null);
+        type = new GenericType(0l, 0, "name", "group", null, null, null, null, null, null);
         service.type(type);
     }
 
