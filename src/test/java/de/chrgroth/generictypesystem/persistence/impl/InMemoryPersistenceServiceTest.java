@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
+import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
 public class InMemoryPersistenceServiceTest {
 
@@ -13,7 +15,7 @@ public class InMemoryPersistenceServiceTest {
 
     @Before
     public void setup() {
-        service = new InMemoryPersistenceService(10);
+        service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10), new InMemoryValueProposalService());
     }
 
     @Test

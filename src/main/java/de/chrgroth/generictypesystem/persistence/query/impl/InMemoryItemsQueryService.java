@@ -33,7 +33,7 @@ public class InMemoryItemsQueryService {
     }
 
     /**
-     * Executed the given filter, sorts and paging operation based on given items.
+     * Executes the given filter, sorts and paging operation based on given items.
      *
      * @param allItems
      *            items to be processed

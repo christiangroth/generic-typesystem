@@ -1,4 +1,4 @@
-package de.chrgroth.generictypesystem;
+package de.chrgroth.generictypesystem.persistence.values.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,9 +9,6 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -20,89 +17,90 @@ import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.persistence.PersistenceService;
 
-public class GenericTypesystemServiceValuesTest {
+public class InMemoryValueProposalServiceTest {
 
     private static final String STRING_ATTRIBUTE = "stringAttribute";
     private static final String DOUBLE_ATTRIBUTE = "doubleAttribute";
 
-    private GenericTypesystemService service;
+    private InMemoryValueProposalService service;
 
-    private GenericType type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+    private GenericType type;
+    private Set<GenericItem> items;
 
-    @Mock
-    private PersistenceService persistence;
-
-    public GenericTypesystemServiceValuesTest() {
-
-        // init mockito
-        MockitoAnnotations.initMocks(this);
+    public InMemoryValueProposalServiceTest() {
 
         // init service
-        service = new GenericTypesystemService(null, persistence);
+        service = new InMemoryValueProposalService();
 
         // prepare type
-        type.getAttributes().add(
-                new GenericAttribute(0l, 0, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null));
+        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+        type.getAttributes().add(new GenericAttribute(0l, 0, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null,
+                null, Arrays.asList(1l), null));
         type.getAttributes().add(
                 new GenericAttribute(1l, 1, DOUBLE_ATTRIBUTE, DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        Mockito.when(persistence.type(Mockito.eq(type.getId().longValue()))).thenReturn(type);
 
         // prepare items
-        Set<GenericItem> items = new HashSet<>();
-        items.add(new GenericItem(0l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "foo").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items = new HashSet<>();
+        items.add(new GenericItem(0l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "foo").put(DOUBLE_ATTRIBUTE, 1.0d).build(), null, null));
         items.add(new GenericItem(1l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         items.add(new GenericItem(2l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         items.add(new GenericItem(3l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         items.add(new GenericItem(4l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " bar ").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         items.add(new GenericItem(5l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "Bar").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
-        items.add(new GenericItem(6l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "Foo").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
+        items.add(new GenericItem(6l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "Foo").put(DOUBLE_ATTRIBUTE, 1.0d).build(), null, null));
         HashMap<String, Object> valuesWithNull = Maps.newHashMap(ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 0.0d).build());
         valuesWithNull.put(STRING_ATTRIBUTE, null);
         items.add(new GenericItem(7l, type.getId(), valuesWithNull, null, null));
         items.add(new GenericItem(8l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, "").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
         items.add(new GenericItem(9l, type.getId(), ImmutableMap.<String, Object> builder().put(STRING_ATTRIBUTE, " ").put(DOUBLE_ATTRIBUTE, 0.0d).build(), null, null));
-        Mockito.when(persistence.items(Mockito.eq(type.getId().longValue()))).thenReturn(items);
     }
 
     @Test
     public void unknownType() {
-        assertValues(null, null, null);
+        assertValues(null, null, null, null);
     }
 
     @Test
-    public void nullPath() {
-        assertValues(type, null, null);
+    public void nullItems() {
+        assertValues(type, null, null, null);
     }
 
     @Test
-    public void emptyPath() {
-        assertValues(type, "", null);
+    public void emptyItems() {
+        assertValues(type, null, null, null);
     }
 
     @Test
-    public void unknownPath() {
-        assertValues(type, "unknownAttribute", null);
+    public void noValueProposalCapableAttributes() {
+        type.getAttributes().removeIf(a -> a.getType().isValueProposalDependenciesCapable());
+        assertValues(type, items, null, null);
     }
 
     @Test
-    public void nonStringPath() {
-        assertValues(type, DOUBLE_ATTRIBUTE, null);
+    public void withoutTemplate() {
+        assertValues(type, items, null, ImmutableMap.<String, List<?>> builder().put(STRING_ATTRIBUTE, Arrays.asList("bar", "Bar", "foo", "Foo")).build());
     }
 
     @Test
-    public void stringPath() {
-        assertValues(type, STRING_ATTRIBUTE, Arrays.asList("bar", "Bar", "foo", "Foo"));
+    public void withTemplate() {
+        assertValues(type, items, new GenericItem(null, null, ImmutableMap.<String, Object> builder().put(DOUBLE_ATTRIBUTE, 1.0d).build(), null, null),
+                ImmutableMap.<String, List<?>> builder().put(STRING_ATTRIBUTE, Arrays.asList("foo", "Foo")).build());
     }
 
-    private void assertValues(GenericType type, String attributePath, List<?> values) {
-        Map<String, List<?>> result = service.values(type != null ? type.getId() : -1l, null);
-        if (type == null) {
-            Assert.assertNull(result);
-        } else {
-            Assert.assertNotNull(result);
-            Assert.assertEquals(values, result.get(attributePath));
+    private void assertValues(GenericType type, Set<GenericItem> items, GenericItem template, Map<String, List<?>> expectedValues) {
+
+        // invoke
+        Map<String, List<?>> result = service.values(type, items, template);
+        Assert.assertNotNull(result);
+
+        // check for invalid testcases
+        if (expectedValues == null) {
+            Assert.assertTrue(result.isEmpty());
+            return;
         }
+
+        // check expected data
+        Assert.assertEquals(expectedValues, result);
     }
 }

@@ -16,6 +16,7 @@ import de.chrgroth.generictypesystem.persistence.query.ItemPagingData;
 import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
 import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
+import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
 public class InMemoryPersistenceServiceQueryTest {
 
@@ -35,7 +36,7 @@ public class InMemoryPersistenceServiceQueryTest {
         MockitoAnnotations.initMocks(this);
 
         // create service
-        service = new InMemoryPersistenceService(query);
+        service = new InMemoryPersistenceService(query, new InMemoryValueProposalService());
 
         // prepare test type
         type = new GenericType(TYPE_ID, 0, "name", "group", null, null, null, null, null, DEFAULT_PAGE_SIZE);

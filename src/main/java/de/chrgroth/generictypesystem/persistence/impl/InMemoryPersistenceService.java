@@ -3,6 +3,7 @@ package de.chrgroth.generictypesystem.persistence.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import de.chrgroth.generictypesystem.persistence.query.ItemPagingData;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
+import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
 /**
  * Very simple in memory persistence service storing all types ad items in internal transient collections.
@@ -25,16 +27,23 @@ public class InMemoryPersistenceService implements PersistenceService {
 
     private final Set<GenericType> types;
     private final Map<Long, Set<GenericItem>> items;
+
     private final InMemoryItemsQueryService query;
+    private final InMemoryValueProposalService values;
 
-    public InMemoryPersistenceService(int defaultPageSize) {
-        this(new InMemoryItemsQueryService(defaultPageSize));
-    }
+    public InMemoryPersistenceService(InMemoryItemsQueryService query, InMemoryValueProposalService values) {
 
-    public InMemoryPersistenceService(InMemoryItemsQueryService query) {
+        // storage
         types = new HashSet<>();
         items = new HashMap<>();
+
+        // services
+        if (query == null || values == null) {
+            throw new IllegalArgumentException("query and value services must be given!!");
+        }
         this.query = query;
+        this.values = values;
+
     }
 
     @Override
@@ -71,7 +80,7 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public ItemQueryResult query(Long typeId, ItemsQueryData data) {
+    public ItemQueryResult query(long typeId, ItemsQueryData data) {
 
         // check for paging data
         if (data != null && data.getPaging() != null) {
@@ -90,6 +99,25 @@ public class InMemoryPersistenceService implements PersistenceService {
 
         // delegate
         return query.query(items(typeId), data != null ? data.getFilter() : null, data != null ? data.getSorts() : null, data != null ? data.getPaging() : null);
+    }
+
+    @Override
+    public Map<String, List<?>> values(long typeId, GenericItem template) {
+
+        // ensure type
+        GenericType type = type(typeId);
+        if (type == null) {
+            return Collections.emptyMap();
+        }
+
+        // collect all items
+        Set<GenericItem> items = items(typeId);
+        if (items == null || items.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // delegate
+        return values.values(type, items, template);
     }
 
     @Override

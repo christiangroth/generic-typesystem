@@ -10,12 +10,24 @@ import org.apache.commons.lang3.ObjectUtils;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
 
+/**
+ * Sorts {@link GenericItem} instances by a given list of {@link ItemSortData} instances. As long as the result is equal the next sort data will be used. If all
+ * sort data leads to an equality a fallback comparison based on the items ids is made.
+ *
+ * @author Christian Groth
+ */
 public class CascadingAttributeComparator implements Serializable, Comparator<GenericItem> {
 
     private static final long serialVersionUID = -1988541741809268872L;
 
     private final List<ItemSortData> sorts = new ArrayList<>();
 
+    /**
+     * Creates a new comparator instance with teh given sort data.
+     *
+     * @param sorts
+     *            sort data
+     */
     public CascadingAttributeComparator(List<ItemSortData> sorts) {
         if (sorts != null) {
             this.sorts.addAll(sorts);

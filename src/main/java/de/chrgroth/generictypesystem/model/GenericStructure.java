@@ -94,8 +94,8 @@ public class GenericStructure {
         if (attribute == null) {
 
             // search recursively
-            return attributes.stream().filter(a -> a.getType().isStructure() || a.getType().isList() && a.getValueType().isStructure())
-                    .filter(a -> a.getStructure().attributePath(id) != null).map(a -> a.getName() + "." + a.getStructure().attributePath(id)).findFirst().orElse(null);
+            return attributes.stream().filter(a -> a.isStructure() && a.getStructure() != null && a.getStructure().attributePath(id) != null)
+                    .map(a -> a.getName() + "." + a.getStructure().attributePath(id)).findFirst().orElse(null);
         }
 
         // done

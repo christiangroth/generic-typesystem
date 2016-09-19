@@ -1,7 +1,10 @@
 package de.chrgroth.generictypesystem.persistence;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
@@ -63,7 +66,19 @@ public interface PersistenceService {
      *            query data
      * @return query result
      */
-    ItemQueryResult query(Long typeId, ItemsQueryData data);
+    ItemQueryResult query(long typeId, ItemsQueryData data);
+
+    /**
+     * Returns all value proposals wrapped in a map with key representing the attribute path and value the list of value proposals. If the given template item
+     * is not null, only items matching the values for defined {@link GenericAttribute#getValueProposalDependencies()} will be processed.
+     *
+     * @param typeId
+     *            type id
+     * @param template
+     *            optional template item
+     * @return value proposals
+     */
+    Map<String, List<?>> values(long typeId, GenericItem template);
 
     /**
      * Returns the item with given type id and item id.
