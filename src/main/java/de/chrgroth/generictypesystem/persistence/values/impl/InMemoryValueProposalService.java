@@ -28,7 +28,7 @@ import de.chrgroth.generictypesystem.persistence.PersistenceService;
 public class InMemoryValueProposalService {
 
     /**
-     * Computes all value proposals for given type and items and optional template item. See {@link PersistenceService#values(Long, GenericItem)} for more
+     * Computes all value proposals for given type and items and optional template item. See {@link PersistenceService#values(long, GenericItem)} for more
      * details.
      *
      * @param type
