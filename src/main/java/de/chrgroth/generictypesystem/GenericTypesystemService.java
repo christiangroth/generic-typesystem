@@ -102,7 +102,7 @@ public class GenericTypesystemService {
         if (validationResult.isValid()) {
             persistence.type(type);
         } else if (LOG.isDebugEnabled()) {
-            LOG.debug("skip persisting invalid type " + type.getId());
+            LOG.debug("skip persisting invalid type " + (type != null ? type.getId() : null));
         }
 
         // done
@@ -155,7 +155,9 @@ public class GenericTypesystemService {
         GenericType type = persistence.type(typeId);
 
         // ensure generic type id
-        item.setTypeId(typeId);
+        if (type != null && item != null) {
+            item.setTypeId(typeId);
+        }
 
         // validate
         ValidationResult<GenericItem> validationResult = validation.validate(type, item);
