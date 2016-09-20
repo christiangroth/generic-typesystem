@@ -15,9 +15,6 @@ import com.google.common.collect.ImmutableMap;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.persistence.query.ItemSortData;
 
-// TODO test with different value types
-// TODO test with mismatching value types per attribute (inconsistent data)
-// TODO test with non comparable value types (inconsistent data)
 public class CascadingAttributeComparatorTest {
 
     private static final String ATTRIBUTE_TWO = "attributeTwo";

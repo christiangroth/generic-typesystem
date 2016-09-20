@@ -22,7 +22,6 @@ import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValuePropos
  *
  * @author Christian Groth
  */
-// TODO type/item id handling before save
 public class InMemoryPersistenceService implements PersistenceService {
 
     private final Set<GenericType> types;
@@ -64,8 +63,17 @@ public class InMemoryPersistenceService implements PersistenceService {
     @Override
     public void type(GenericType type) {
         if (type != null) {
+
+            // ensure id
+            if (type.getId() == null) {
+                type.setId(types.stream().mapToLong(t -> t.getId()).max().orElse(0) + 1);
+            }
+
+            // add
             types.add(type);
-            if (type.getId() != null && !items.containsKey(type.getId())) {
+
+            // add empty items set
+            if (!items.containsKey(type.getId())) {
                 items.put(type.getId(), new HashSet<>());
             }
         }
@@ -128,9 +136,19 @@ public class InMemoryPersistenceService implements PersistenceService {
     @Override
     public void item(GenericType type, GenericItem item) {
         if (type != null && item != null) {
+
+            // ensure type
             type(type);
             if (type.getId() != null) {
-                items.get(type.getId()).add(item);
+
+                // ensure id
+                Set<GenericItem> allItems = items.get(type.getId());
+                if (item.getId() == null) {
+                    item.setId(allItems.stream().mapToLong(i -> i.getId()).max().orElse(0) + 1);
+                }
+
+                // add item to items set
+                allItems.add(item);
             }
         }
     }
