@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
@@ -28,6 +30,8 @@ import de.chrgroth.generictypesystem.validation.ValidationService;
  */
 public class DefaultValidationService implements ValidationService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultValidationService.class);
+
     private final DefaultValidationServiceHooks hooks;
 
     public DefaultValidationService(DefaultValidationServiceHooks hooks) {
@@ -36,6 +40,9 @@ public class DefaultValidationService implements ValidationService {
 
     @Override
     public ValidationResult<GenericType> validate(GenericType type) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("validating type: " + type);
+        }
 
         // null guard
         ValidationResult<GenericType> result = new ValidationResult<>(type);
@@ -260,6 +267,9 @@ public class DefaultValidationService implements ValidationService {
 
     @Override
     public ValidationResult<GenericItem> validate(GenericType type, GenericItem item) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("validating item: " + item);
+        }
 
         // type null guard
         ValidationResult<GenericItem> result = new ValidationResult<>(item);

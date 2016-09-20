@@ -64,6 +64,9 @@ public class InMemoryItemsQueryService {
 
         // sorting
         Collections.sort(items, new CascadingAttributeComparator(sorts));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("sorted items " + items);
+        }
 
         // paging
         boolean moreAvailable;
@@ -91,6 +94,9 @@ public class InMemoryItemsQueryService {
             long lastIdx = firstIdx + pageSize.longValue();
 
             // slice
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("slicing items to [" + firstIdx + "," + lastIdx + ")");
+            }
             if (items.size() >= firstIdx + 1) {
 
                 // compute if more than the actual page is available
@@ -107,7 +113,7 @@ public class InMemoryItemsQueryService {
             }
         } else {
 
-            // all items served, nothing more available
+            // no paging - all items served, nothing more available
             moreAvailable = false;
         }
 

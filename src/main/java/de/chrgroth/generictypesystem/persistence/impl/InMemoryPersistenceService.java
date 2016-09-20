@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
@@ -23,6 +26,8 @@ import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValuePropos
  * @author Christian Groth
  */
 public class InMemoryPersistenceService implements PersistenceService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryPersistenceService.class);
 
     private final Set<GenericType> types;
     private final Map<Long, Set<GenericItem>> items;
@@ -69,8 +74,12 @@ public class InMemoryPersistenceService implements PersistenceService {
                 type.setId(types.stream().mapToLong(t -> t.getId()).max().orElse(0) + 1);
             }
 
-            // add
+            // re-add
+            boolean removed = types.remove(type);
             types.add(type);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug((removed ? "updated" : "added") + " type " + type);
+            }
 
             // add empty items set
             if (!items.containsKey(type.getId())) {
@@ -147,8 +156,12 @@ public class InMemoryPersistenceService implements PersistenceService {
                     item.setId(allItems.stream().mapToLong(i -> i.getId()).max().orElse(0) + 1);
                 }
 
-                // add item to items set
+                // re-add item
+                boolean removed = allItems.remove(item);
                 allItems.add(item);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug((removed ? "updated" : "added") + " item " + item);
+                }
             }
         }
     }
@@ -163,6 +176,9 @@ public class InMemoryPersistenceService implements PersistenceService {
         }
 
         // always success, no error handling
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removed item " + typeId + "/" + id);
+        }
         return true;
     }
 
@@ -174,6 +190,9 @@ public class InMemoryPersistenceService implements PersistenceService {
         items.remove(typeId);
 
         // always success, no error handling
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removed type " + typeId);
+        }
         return true;
     }
 }

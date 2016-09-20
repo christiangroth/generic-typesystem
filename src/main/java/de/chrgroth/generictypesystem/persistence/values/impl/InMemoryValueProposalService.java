@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
@@ -25,6 +27,8 @@ import de.chrgroth.generictypesystem.persistence.PersistenceService;
  * @author Christian Groth
  */
 public class InMemoryValueProposalService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryValueProposalService.class);
 
     /**
      * Computes all value proposals for given type and items and optional template item. See {@link PersistenceService#values(long, GenericItem)} for more
@@ -53,6 +57,9 @@ public class InMemoryValueProposalService {
         }
 
         // collect value proposals
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("computing valueproposals for " + type + " based on " + items.size() + " items and paths " + paths);
+        }
         Map<String, List<?>> valueProposals = new HashMap<>();
         paths.forEach(p -> valueProposals.put(p, values(type, items, p, template)));
 
@@ -94,6 +101,9 @@ public class InMemoryValueProposalService {
         // check for value proposal dependencies and reduce items to the ones with matching values
         GenericAttribute attribute = type.attribute(attributePath);
         if (template != null && attribute.getValueProposalDependencies() != null && !attribute.getValueProposalDependencies().isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("reducing to matching items dependeing on template item for " + attributePath);
+            }
 
             // filter items by dependent attributes and their template values
             Stream<GenericItem> itemsStream = items.stream();
@@ -109,6 +119,9 @@ public class InMemoryValueProposalService {
 
             // filter
             items = itemsStream.collect(Collectors.toSet());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("reduced to " + items.size() + " items for " + attributePath);
+            }
         }
 
         // filter all null and empty values
@@ -116,6 +129,12 @@ public class InMemoryValueProposalService {
         Stream<String> nonEmptyValuesStream = valuesStream.filter(Objects::nonNull).map(s -> s.toString().trim()).filter(s -> s.length() > 0);
 
         // create list of ordered distinct values
-        return nonEmptyValuesStream.sorted((s1, s2) -> s1.compareToIgnoreCase(s2)).distinct().collect(Collectors.toList());
+        List<String> values = nonEmptyValuesStream.sorted((s1, s2) -> s1.compareToIgnoreCase(s2)).distinct().collect(Collectors.toList());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("found " + values.size() + " values for " + attributePath);
+        }
+
+        // done
+        return values;
     }
 }
