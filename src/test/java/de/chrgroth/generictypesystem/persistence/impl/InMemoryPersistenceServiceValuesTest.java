@@ -15,7 +15,6 @@ import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
 import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
-// TODO test with nested structure
 public class InMemoryPersistenceServiceValuesTest {
 
     @Mock

@@ -27,7 +27,7 @@ import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmp
  *
  * @author Christian Groth
  */
-// TODO add createItem also considering default values
+// TODO add createItem - also considering default values
 // TODO add security / visibility service and some kind of context ... might be placed in persistence service??
 public class GenericTypesystemService {
 
