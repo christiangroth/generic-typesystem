@@ -38,7 +38,7 @@ public class InMemoryValueProposalServiceTest {
         // prepare type
         type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
         type.getAttributes().add(new GenericAttribute(0l, 0, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null,
-                null, Arrays.asList(1l), null));
+                null, new HashSet<>(Arrays.asList(1l)), null));
         type.getAttributes().add(
                 new GenericAttribute(1l, 1, DOUBLE_ATTRIBUTE, DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
         GenericStructure nestedStructure = new GenericStructure();

@@ -1,6 +1,7 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -216,7 +217,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setUnits(Arrays.asList(new GenericAttributeUnit("default", GenericAttributeUnit.FACTOR_BASE)));
+        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet(Arrays.asList(new GenericAttributeUnit("default", GenericAttributeUnit.FACTOR_BASE))));
         type.attribute(ATTRIBUTE_NAME).setDefaultValue("{foo:bar}");
 
         // validate type

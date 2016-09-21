@@ -2,6 +2,7 @@ package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -127,7 +128,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     }
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
-            Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
+            Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
         attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);

@@ -1,7 +1,7 @@
 package de.chrgroth.generictypesystem.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A simple POJO class holding all information about attribute definitions.
@@ -65,19 +65,17 @@ public class GenericAttribute {
     private String defaultValue;
     private String defaultValueCallback;
 
-    // TODO change to Set, this is not ordered at all
-    private List<Long> valueProposalDependencies;
+    private Set<Long> valueProposalDependencies;
 
-    // TODO change to Set, this is not ordered at all
-    private List<GenericAttributeUnit> units;
+    private Set<GenericAttributeUnit> units;
 
     public GenericAttribute() {
         this(null, 0, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
     }
 
     public GenericAttribute(Long id, long order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies,
-            List<GenericAttributeUnit> units) {
+            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
+            Set<GenericAttributeUnit> units) {
         this.id = id;
         this.order = order;
         this.name = name;
@@ -94,10 +92,10 @@ public class GenericAttribute {
         this.defaultValue = defaultValue;
         this.defaultValueCallback = defaultValueCallback;
         if (valueProposalDependencies != null) {
-            this.valueProposalDependencies = new ArrayList<>(valueProposalDependencies);
+            this.valueProposalDependencies = new HashSet<>(valueProposalDependencies);
         }
         if (units != null) {
-            this.units = new ArrayList<>(units);
+            this.units = new HashSet<>(units);
         }
     }
 
@@ -248,19 +246,19 @@ public class GenericAttribute {
         this.defaultValueCallback = defaultValueCallback;
     }
 
-    public List<Long> getValueProposalDependencies() {
+    public Set<Long> getValueProposalDependencies() {
         return valueProposalDependencies;
     }
 
-    public void setValueProposalDependencies(List<Long> valueProposalDependencies) {
+    public void setValueProposalDependencies(Set<Long> valueProposalDependencies) {
         this.valueProposalDependencies = valueProposalDependencies;
     }
 
-    public List<GenericAttributeUnit> getUnits() {
+    public Set<GenericAttributeUnit> getUnits() {
         return units;
     }
 
-    public void setUnits(List<GenericAttributeUnit> units) {
+    public void setUnits(Set<GenericAttributeUnit> units) {
         this.units = units;
     }
 

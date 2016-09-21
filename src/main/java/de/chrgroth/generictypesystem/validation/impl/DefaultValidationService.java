@@ -185,11 +185,6 @@ public class DefaultValidationService implements ValidationService {
                 if (a.getUnits().size() != a.getUnits().stream().map(u -> u.getName()).distinct().count()) {
                     result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME);
                 }
-
-                // be sure all unit factors are distinct
-                if (a.getUnits().size() != a.getUnits().stream().map(u -> u.getFactor()).distinct().count()) {
-                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR);
-                }
             }
         }
 

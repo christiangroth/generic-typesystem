@@ -2,7 +2,9 @@ package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +21,6 @@ import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-// TODO validate nested item
 @RunWith(Parameterized.class)
 public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
 
@@ -146,7 +147,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         GenericAttribute attributeToDependUpon = attribute;
 
         // create attribute with value proposal dependency
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(attributeToDependUpon.getId()), null);
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, new HashSet(Arrays.asList(attributeToDependUpon.getId())), null);
 
         // define expected error message keys
         if (!testType.isValueProposalDependenciesCapable()) {
@@ -163,7 +164,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // value proposal dependency on non existing attribute
         clearAttributes();
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(123l), null);
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, new HashSet(Arrays.asList(123l)), null);
 
         // define expected error message keys
         errorKeys.clear();
@@ -174,7 +175,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // value proposal dependency on myself
         clearAttributes();
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, Arrays.asList(0l), null);
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, new HashSet(Arrays.asList(0l)), null);
 
         // define expected error message keys
         errorKeys.clear();
@@ -188,7 +189,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     public void unitsTest() {
 
         // create attribute with base unit only
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, Arrays.asList(baseUnit()));
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, new HashSet(Arrays.asList(baseUnit())));
 
         // define expected error message keys
         if (!testType.isUnitCapable()) {
@@ -205,7 +206,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
         // create attribute with base unit only
         clearAttributes();
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, Arrays.asList(nonBaseUnit()));
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, new HashSet(Arrays.asList(nonBaseUnit())));
 
         // define expected error message keys
         errorKeys.clear();
@@ -218,7 +219,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         clearAttributes();
         GenericAttributeUnit nonBaseUnitWithoutName = nonBaseUnit();
         nonBaseUnitWithoutName.setName(null);
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, Arrays.asList(baseUnit(), nonBaseUnitWithoutName));
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, new HashSet(Arrays.asList(baseUnit(), nonBaseUnitWithoutName)));
 
         // define expected error message keys
         errorKeys.clear();
@@ -231,7 +232,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         clearAttributes();
         GenericAttributeUnit nonBaseUnitAmbigiousName = nonBaseUnit();
         nonBaseUnitAmbigiousName.setName(baseUnit().getName());
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, Arrays.asList(baseUnit(), nonBaseUnitAmbigiousName));
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, new HashSet(Arrays.asList(baseUnit(), nonBaseUnitAmbigiousName)));
 
         // define expected error message keys
         errorKeys.clear();
@@ -240,27 +241,9 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         // validate type
         validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
 
-        // create attribute with both units - ambigious factor
-        clearAttributes();
-        double ambigiousFactor = 0.5d;
-        GenericAttributeUnit nonBaseUnitAmbigiousFactorOne = nonBaseUnit();
-        nonBaseUnitAmbigiousFactorOne.setFactor(ambigiousFactor);
-        GenericAttributeUnit nonBaseUnitAmbigiousFactorTwo = nonBaseUnit();
-        nonBaseUnitAmbigiousFactorTwo.setName(nonBaseUnitAmbigiousFactorOne.getName() + "-2");
-        nonBaseUnitAmbigiousFactorTwo.setFactor(ambigiousFactor);
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null,
-                Arrays.asList(baseUnit(), nonBaseUnitAmbigiousFactorOne, nonBaseUnitAmbigiousFactorTwo));
-
-        // define expected error message keys
-        errorKeys.clear();
-        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_FACTOR));
-
-        // validate type
-        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
-
         // create attribute with both units
         clearAttributes();
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, Arrays.asList(baseUnit(), nonBaseUnit()));
+        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, new HashSet(Arrays.asList(baseUnit(), nonBaseUnit())));
 
         // define expected error message keys
         errorKeys.clear();
@@ -278,7 +261,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     }
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
-            Double step, String pattern, String defaultValue, String defaultValueCallback, List<Long> valueProposalDependencies, List<GenericAttributeUnit> units) {
+            Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
         attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);

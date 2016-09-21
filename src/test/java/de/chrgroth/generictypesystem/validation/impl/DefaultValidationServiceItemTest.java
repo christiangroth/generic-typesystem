@@ -78,7 +78,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Test
     public void nonUnitValueForUnitBasedAttribute() {
         GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
-        attribute.setUnits(new ArrayList<>());
+        attribute.setUnits(new HashSet<>());
         GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
         minutesUnit.setName("minutes");
         minutesUnit.setFactor(60);
@@ -94,7 +94,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Test
     public void validUnitBasedValue() {
         GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
-        attribute.setUnits(new ArrayList<>());
+        attribute.setUnits(new HashSet<>());
         GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
         minutesUnit.setName("minutes");
         minutesUnit.setFactor(60);
