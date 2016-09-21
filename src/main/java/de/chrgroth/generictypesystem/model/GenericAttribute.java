@@ -122,6 +122,10 @@ public class GenericAttribute {
         }
     }
 
+    public boolean isUnitBased() {
+        return units != null && !units.isEmpty();
+    }
+
     public Long getId() {
         return id;
     }
@@ -248,10 +252,6 @@ public class GenericAttribute {
 
     public void setValueProposalDependencies(List<Long> valueProposalDependencies) {
         this.valueProposalDependencies = valueProposalDependencies;
-    }
-
-    public boolean isUnitBased() {
-        return units != null && !units.isEmpty();
     }
 
     public List<GenericAttributeUnit> getUnits() {

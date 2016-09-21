@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
@@ -92,7 +93,6 @@ public class DefaultValidationService implements ValidationService {
         hooks.structureValidation(result, structure, path);
     }
 
-    // TODO validate default values
     private void validateTypeAttribute(ValidationResult<GenericType> result, Set<GenericAttribute> allAttributes, GenericAttribute a, String path) {
 
         // validate id
@@ -167,7 +167,7 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // validate units
-        if (a.getUnits() != null && !a.getUnits().isEmpty()) {
+        if (a.isUnitBased()) {
             if (!a.getType().isUnitCapable()) {
                 result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, a.getType().toString());
             } else {
@@ -194,6 +194,39 @@ public class DefaultValidationService implements ValidationService {
             }
         }
 
+        // validate default values
+        if (StringUtils.isNotBlank(a.getDefaultValue())) {
+
+            // not allowed for unit based attributes
+            if (a.isUnitBased()) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_BASED_DEFAULT_VALUE_NOT_ALLOWED);
+            } else if (a.getType() instanceof DefaultGenericAttributeType) {
+
+                // validate default attribute types
+                switch ((DefaultGenericAttributeType) a.getType()) {
+                    case BOOLEAN:
+                        // fine, nothing to validate for Booleans based on java.lang.Boolean#parseBoolean(String)
+                        break;
+                    case STRING:
+                        validateTypeAttributeStringDefaultValue(result, a);
+                        break;
+                    case LONG:
+                        validateTypeAttributeLongDefaultValue(result, a);
+                        break;
+                    case DOUBLE:
+                        validateTypeAttributeDoubleDefaultValue(result, a);
+                        break;
+                    case DATE:
+                    case DATETIME:
+                    case TIME:
+                    case LIST:
+                    case STRUCTURE:
+                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
+                        break;
+                }
+            }
+        }
+
         // call type attribute hook
         hooks.typeAttributeValidation(result, a, path);
 
@@ -204,6 +237,73 @@ public class DefaultValidationService implements ValidationService {
             validateTypeStructureAttribute(result, a, path);
         } else {
             validateTypeSingleAttribute(result, a, path);
+        }
+    }
+
+    private void validateTypeAttributeStringDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
+
+        // validate min
+        int length = a.getDefaultValue().length();
+        if (a.getMin() != null && a.getMin() > length) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MIN_UNDERCUT, a.getMin());
+        }
+
+        // validate max
+        if (a.getMax() != null && a.getMax() < length) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MAX_EXCEEDED, a.getMax());
+        }
+
+        // validate pattern
+        if (StringUtils.isNotBlank(a.getPattern())) {
+            Pattern pattern = Pattern.compile(a.getPattern());
+            Matcher matcher = pattern.matcher(a.getDefaultValue());
+            if (!matcher.matches()) {
+                result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_PATTERN_VIOLATED, a.getPattern());
+            }
+        }
+    }
+
+    private void validateTypeAttributeLongDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
+
+        // parse default value
+        Long value = null;
+        try {
+            value = Long.parseLong(a.getDefaultValue());
+        } catch (NumberFormatException e) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_INVALID);
+            return;
+        }
+
+        // validate min
+        if (a.getMin() != null && a.getMin() > value) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MIN_UNDERCUT, a.getMin());
+        }
+
+        // validate max
+        if (a.getMax() != null && a.getMax() < value) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MAX_EXCEEDED, a.getMax());
+        }
+    }
+
+    private void validateTypeAttributeDoubleDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
+
+        // parse default value
+        Double value = null;
+        try {
+            value = Double.parseDouble(a.getDefaultValue());
+        } catch (NumberFormatException e) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_INVALID);
+            return;
+        }
+
+        // validate min
+        if (a.getMin() != null && a.getMin() > value) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MIN_UNDERCUT, a.getMin());
+        }
+
+        // validate max
+        if (a.getMax() != null && a.getMax() < value) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MAX_EXCEEDED, a.getMax());
         }
     }
 
@@ -350,8 +450,8 @@ public class DefaultValidationService implements ValidationService {
             UnitValue unitValue = (UnitValue) value;
 
             // check unit is registered for attribute
-            GenericAttributeUnit attributeUnit = a.getUnits() != null
-                    ? a.getUnits().stream().filter(u -> StringUtils.equals(u.getName(), unitValue.getUnit())).findFirst().orElse(null) : null;
+            GenericAttributeUnit attributeUnit = !a.isUnitBased() ? null
+                    : a.getUnits().stream().filter(u -> StringUtils.equals(u.getName(), unitValue.getUnit())).findFirst().orElse(null);
             if (attributeUnit == null) {
                 result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
             }
