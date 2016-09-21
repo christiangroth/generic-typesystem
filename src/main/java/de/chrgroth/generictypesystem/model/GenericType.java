@@ -27,6 +27,7 @@ import java.util.Set;
  *
  * @author Christian Groth
  */
+// TODO introduce map for custom properties and cleanup data model
 public class GenericType extends GenericStructure {
 
     private Long id;

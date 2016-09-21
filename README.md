@@ -5,12 +5,14 @@ Development: [![Build Status](https://secure.travis-ci.org/christiangroth/generi
 Stable: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/${articatId}/badge.svg)](http://search.maven.org/#artifactdetails|de.chrgroth.generic-typesystem|generic-typesystem)
 
 generic-typesystem
-=====================
+==================
 TODO ...
 
 Requirements
 ------------
 
 - [Java SDK 1.8+][1]
+- [slf4j][2]
 
 [1]: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+[2]: http://www.slf4j.org/
