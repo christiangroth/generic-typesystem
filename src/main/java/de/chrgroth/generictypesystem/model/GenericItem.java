@@ -28,7 +28,7 @@ public class GenericItem {
         this.typeId = typeId;
         this.values = new HashMap<>();
         if (values != null) {
-            this.values.putAll(values);
+            values.forEach((k, v) -> set(k, v));
         }
         this.owner = owner;
         this.visibility = visibility;
