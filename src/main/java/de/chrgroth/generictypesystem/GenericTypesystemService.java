@@ -167,7 +167,7 @@ public class GenericTypesystemService {
         if (validationResult.isValid()) {
             persistence.item(type, item);
         } else if (LOG.isDebugEnabled()) {
-            LOG.debug("skip persisting invalid item " + typeId + "/" + item.getId());
+            LOG.debug("skip persisting invalid item " + typeId + "/" + (item != null ? item.getId() : null));
         }
 
         // done
