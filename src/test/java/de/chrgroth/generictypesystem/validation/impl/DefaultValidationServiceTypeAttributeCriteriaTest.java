@@ -19,7 +19,7 @@ import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-// TODO validate nested item values
+// TODO validate nested item
 @RunWith(Parameterized.class)
 public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
 
