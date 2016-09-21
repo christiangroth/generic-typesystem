@@ -1,10 +1,13 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
@@ -206,5 +209,17 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
+    }
+
+    @Test
+    public void defaultValueUnitBases() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
+        type.attribute(ATTRIBUTE_NAME).setUnits(Arrays.asList(new GenericAttributeUnit("default", GenericAttributeUnit.FACTOR_BASE)));
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue("{foo:bar}");
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_BASED_DEFAULT_VALUE_NOT_ALLOWED) });
     }
 }

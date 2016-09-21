@@ -65,8 +65,10 @@ public class GenericAttribute {
     private String defaultValue;
     private String defaultValueCallback;
 
+    // TODO change to Set, this is not ordered at all
     private List<Long> valueProposalDependencies;
 
+    // TODO change to Set, this is not ordered at all
     private List<GenericAttributeUnit> units;
 
     public GenericAttribute() {
