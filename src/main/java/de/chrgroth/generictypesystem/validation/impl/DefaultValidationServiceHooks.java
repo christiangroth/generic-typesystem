@@ -90,66 +90,83 @@ public interface DefaultValidationServiceHooks {
     void typeSimpleAttributeValidation(ValidationResult<GenericType> result, GenericAttribute attribute, String path);
 
     /**
-     * Called to validate the given item.
+     * Called to validate the given item. During item validation this method is called once for root item.
      *
      * @param result
      *            the result to be updated
+     * @param type
+     *            type belonging to item
      * @param item
      *            item to be validated
      */
-    void itemValidation(ValidationResult<GenericItem> result, GenericItem item);
+    void itemValidation(ValidationResult<GenericItem> result, GenericType type, GenericItem item);
+
+    /**
+     * Called to validate the current level of this item, belonging to given structure. During item validation this method is called for root item and every
+     * nested item.
+     *
+     * @param result
+     *            the result to be updated
+     * @param structure
+     *            structure belonging to item
+     * @param item
+     *            item to be validated
+     * @param path
+     *            the path the given item is located at
+     */
+    void itemLevelValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericItem item, String path);
 
     /**
      * Called to validate the given attribute definition against given item. There are specific callbacks for attribute values you may also use.
      *
      * @param result
      *            the result to be updated
-     * @param item
-     *            item to be validated
+     * @param structure
+     *            structure belonging to item
      * @param attribute
      *            attribute to be validated
+     * @param item
+     *            item to be validated
+     * @param path
+     *            the path the given item is located at
      */
-    void itemAttributeValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute);
+    void itemAttributeValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item, String path);
 
     /**
      * Called to validate the given list value for given attribute and item.
      *
      * @param result
      *            the result to be updated
-     * @param item
-     *            item the value belongs to
+     * @param structure
+     *            structure belonging to item
      * @param attribute
      *            attribute definition the value is based on
+     * @param item
+     *            item the value belongs to
      * @param value
      *            value to be validated
+     * @param path
+     *            the path the given item is located at
      */
-    void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Collection<?> value);
-
-    /**
-     * Called to validate the given nested item for given attribute and item.
-     *
-     * @param result
-     *            the result to be updated
-     * @param item
-     *            item the nested item belongs to
-     * @param attribute
-     *            attribute definition the nested item is based on
-     * @param nestedItem
-     *            nested item to be validated
-     */
-    void itemNestedItemAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, GenericItem nestedItem);
+    void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item, Collection<?> value,
+            String path);
 
     /**
      * Called to validate the given value for given attribute and item.
      *
      * @param result
      *            the result to be updated
-     * @param item
-     *            item the value belongs to
+     * @param structure
+     *            structure belonging to item
      * @param attribute
      *            attribute definition the value is based on
+     * @param item
+     *            item the value belongs to
      * @param value
      *            value to be validated
+     * @param path
+     *            the path the given item is located at
      */
-    void itemSimpleAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Object value);
+    void itemSimpleAttributeValueValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item, Object value,
+            String path);
 }

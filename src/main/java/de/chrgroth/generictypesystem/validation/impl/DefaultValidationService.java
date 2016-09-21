@@ -2,7 +2,6 @@ package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -223,6 +222,9 @@ public class DefaultValidationService implements ValidationService {
                     case STRUCTURE:
                         result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
                         break;
+                    default:
+                        // nothing to do here
+                        break;
                 }
             }
         }
@@ -401,20 +403,33 @@ public class DefaultValidationService implements ValidationService {
             return result;
         }
 
-        // check all attributes
-        type.getAttributes().forEach(a -> validateItemAttribute(result, a, item));
+        // validate item level
+        validateItemLevel(result, type, item, "");
 
         // check all values
-        item.get().entrySet().forEach(e -> validateItemValue(result, e, type));
+        item.get().entrySet().forEach(e -> {
+            if (type.attribute(e.getKey()) == null) {
+                result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED);
+            }
+        });
 
         // call item hook
-        hooks.itemValidation(result, item);
+        hooks.itemValidation(result, type, item);
 
         // done
         return result;
     }
 
-    private void validateItemAttribute(ValidationResult<GenericItem> result, GenericAttribute a, GenericItem item) {
+    private void validateItemLevel(ValidationResult<GenericItem> result, GenericStructure structure, GenericItem item, String path) {
+
+        // check all attributes on this level
+        structure.getAttributes().forEach(a -> validateItemAttribute(result, structure, a, item, path));
+
+        // call item level hook
+        hooks.itemLevelValidation(result, structure, item, path);
+    }
+
+    private void validateItemAttribute(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute a, GenericItem item, String path) {
 
         // check mandatory value
         Object value = item.get(a.getName());
@@ -428,9 +443,9 @@ public class DefaultValidationService implements ValidationService {
 
             // validate unit based value
             if (a.isUnitBased() && !isUnitValue) {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_NOT_UNIT_BASED);
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_NOT_UNIT_BASED);
             } else if (!a.isUnitBased() && isUnitValue) {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED);
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED);
             }
 
             // unbox unit based value
@@ -442,7 +457,7 @@ public class DefaultValidationService implements ValidationService {
         // check mandatory value
         boolean nullOrEmptyValue = checkValue == null || a.getType().isText() && StringUtils.isBlank(checkValue.toString());
         if (a.isMandatory() && nullOrEmptyValue) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
 
         // unit based checks
@@ -453,7 +468,7 @@ public class DefaultValidationService implements ValidationService {
             GenericAttributeUnit attributeUnit = !a.isUnitBased() ? null
                     : a.getUnits().stream().filter(u -> StringUtils.equals(u.getName(), unitValue.getUnit())).findFirst().orElse(null);
             if (attributeUnit == null) {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
             }
         }
 
@@ -466,29 +481,35 @@ public class DefaultValidationService implements ValidationService {
         Class<?> checkClass = checkValue.getClass();
         boolean valueAssignableToType = a.getType().isAssignableFrom(checkClass);
         if (!valueAssignableToType) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_TYPE_INVALID, a.getType().toString(), checkClass.getName());
             return;
         }
 
         // call item attribute hook
-        hooks.itemAttributeValidation(result, item, a);
+        hooks.itemAttributeValidation(result, structure, a, item, path);
 
-        // check list type - the type check above guarantees that checkValue is of correct type
-        if (a.isList()) {
-            validateItemAttributeListValue(result, item, a, (List<?>) checkValue);
-        } else if (a.isStructure()) {
+        // recurse for nested structures
+        if (a.isStructure()) {
+            validateItemLevel(result, a.getStructure(), (GenericItem) checkValue, path + a.getName() + ".");
+        } else {
 
-            validateNestedItemAttributeValue(result, item, a, (GenericItem) checkValue);
-        } else if (valueAssignableToType) {
-            validateItemAttributeValue(result, item, a, checkValue);
+            // handle list attributes
+            if (a.isList()) {
+                validateItemAttributeListValue(result, structure, a, item, (List<?>) checkValue, path);
+            } else if (valueAssignableToType) {
+
+                // handle simple attributes
+                validateItemAttributeValue(result, structure, a, item, checkValue, path);
+            }
         }
     }
 
-    private <T> void validateItemAttributeListValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, List<T> value) {
+    private <T> void validateItemAttributeListValue(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute a, GenericItem item, List<T> value,
+            String path) {
 
         // check mandatory value
         if (value.isEmpty() && a.isMandatory()) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MANDATORY);
         }
         if (value.isEmpty()) {
             return;
@@ -497,26 +518,18 @@ public class DefaultValidationService implements ValidationService {
         // check containing items
         Set<T> mismatchingItems = value.stream().filter(i -> !a.getValueType().isAssignableFrom(i.getClass())).collect(Collectors.toSet());
         if (!mismatchingItems.isEmpty()) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_LIST_VALUE_TYPE_INVALID, a.getValueType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_LIST_VALUE_TYPE_INVALID, a.getValueType().toString());
         }
 
         // call item list attribute value hook
-        hooks.itemListAttributeValueValidation(result, item, a, value);
+        hooks.itemListAttributeValueValidation(result, structure, a, item, value, path);
     }
 
-    private void validateNestedItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, GenericItem nestedItem) {
-
-        // TODO implement nested checks
-
-        // call nested item attribute value hook
-        hooks.itemNestedItemAttributeValueValidation(result, item, a, nestedItem);
-    }
-
-    private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute a, Object value) {
+    private void validateItemAttributeValue(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute a, GenericItem item, Object value, String path) {
 
         // string validation
         if (a.getType().isText()) {
-            validateItemAttributeStringValue(result, a, value.toString());
+            validateItemAttributeStringValue(result, a, value.toString(), path);
         }
 
         // numeric validation
@@ -531,24 +544,24 @@ public class DefaultValidationService implements ValidationService {
             } else if (value instanceof Double) {
                 dValue = (Double) value;
             }
-            validateItemAttributeDoubleValue(result, a, dValue);
+            validateItemAttributeDoubleValue(result, a, dValue, path);
         }
 
         // call item simple attribute value hook
-        hooks.itemSimpleAttributeValueValidation(result, item, a, value);
+        hooks.itemSimpleAttributeValueValidation(result, structure, a, item, value, path);
     }
 
-    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericAttribute a, String value) {
+    private void validateItemAttributeStringValue(ValidationResult<GenericItem> result, GenericAttribute a, String value, String path) {
 
         // validate min
         int length = value.length();
         if (a.getMin() != null && a.getMin() > length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
         }
 
         // validate pattern
@@ -556,29 +569,21 @@ public class DefaultValidationService implements ValidationService {
             Pattern pattern = Pattern.compile(a.getPattern());
             Matcher matcher = pattern.matcher(value);
             if (!matcher.matches()) {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_PATTERN_VIOLATED, a.getPattern());
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_PATTERN_VIOLATED, a.getPattern());
             }
         }
     }
 
-    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericAttribute a, Double value) {
+    private void validateItemAttributeDoubleValue(ValidationResult<GenericItem> result, GenericAttribute a, Double value, String path) {
 
         // validate min
         if (a.getMin() != null && a.getMin() > value) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < value) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
-        }
-    }
-
-    private void validateItemValue(ValidationResult<GenericItem> result, Entry<String, Object> e, GenericType type) {
-
-        // check for unknown attribute to value
-        if (type.attribute(e.getKey()) == null) {
-            result.error(e.getKey(), DefaultValidationServiceMessageKey.ITEM_ATTRIBUTE_UNDEFINED);
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_MAX_EXCEEDED, a.getMax());
         }
     }
 }

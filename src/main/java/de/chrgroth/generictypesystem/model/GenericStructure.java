@@ -105,31 +105,31 @@ public class GenericStructure {
     /**
      * Resolves the attribute for given name. Names containing dot notation will be resolved recursively.
      *
-     * @param name
+     * @param path
      *            attribute name
      * @return attribute
      */
-    public GenericAttribute attribute(String name) {
+    public GenericAttribute attribute(String path) {
 
         // null guard
-        if (StringUtils.isBlank(name)) {
+        if (StringUtils.isBlank(path)) {
             return null;
         }
 
         // check for nested structure
-        int dotIndex = name.indexOf('.');
+        int dotIndex = path.indexOf('.');
         if (dotIndex > 0) {
 
             // get nested
-            GenericAttribute attribute = attributeInternal(name.substring(0, dotIndex));
+            GenericAttribute attribute = attributeInternal(path.substring(0, dotIndex));
             if (attribute == null || attribute.getStructure() == null) {
                 return null;
             }
 
             // delegate
-            return attribute.getStructure().attribute(name.substring(dotIndex + 1));
+            return attribute.getStructure().attribute(path.substring(dotIndex + 1));
         } else {
-            return attributeInternal(name);
+            return attributeInternal(path);
         }
     }
 

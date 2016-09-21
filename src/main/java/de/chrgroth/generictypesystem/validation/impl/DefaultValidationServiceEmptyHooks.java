@@ -52,30 +52,33 @@ public class DefaultValidationServiceEmptyHooks implements DefaultValidationServ
     }
 
     @Override
-    public void itemValidation(ValidationResult<GenericItem> result, GenericItem item) {
+    public void itemValidation(ValidationResult<GenericItem> result, GenericType type, GenericItem item) {
 
         // empty implementation
     }
 
     @Override
-    public void itemAttributeValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute) {
+    public void itemLevelValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericItem item, String path) {
 
         // empty implementation
     }
 
     @Override
-    public void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Collection<?> value) {
-
-    }
-
-    @Override
-    public void itemNestedItemAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, GenericItem nestedItem) {
+    public void itemAttributeValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item, String path) {
 
         // empty implementation
     }
 
     @Override
-    public void itemSimpleAttributeValueValidation(ValidationResult<GenericItem> result, GenericItem item, GenericAttribute attribute, Object value) {
+    public void itemListAttributeValueValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item,
+            Collection<?> value, String path) {
+
+        // empty implementation
+    }
+
+    @Override
+    public void itemSimpleAttributeValueValidation(ValidationResult<GenericItem> result, GenericStructure structure, GenericAttribute attribute, GenericItem item, Object value,
+            String path) {
 
         // empty implementation
     }
