@@ -27,7 +27,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+        type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
     }
 
     @Parameters(name = "attribute type {0} value type {1}")
@@ -129,7 +129,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
             Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
-        attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);
     }

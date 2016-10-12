@@ -39,7 +39,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+        type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
             errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
@@ -262,7 +262,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
             Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
-        attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
                 defaultValueCallback, valueProposalDependencies, units);
         type.getAttributes().add(attribute);
     }

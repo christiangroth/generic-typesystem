@@ -57,6 +57,13 @@ public interface GenericAttributeType {
     boolean isUnitCapable();
 
     /**
+     * Checks if the type is capable of default values.
+     *
+     * @return true if the attribute type is default valuecapable, false otherwise
+     */
+    boolean isDefaultValueCapable();
+
+    /**
      * Checks if the type is a list type.
      *
      * @return true if the attribute type represents a list, false otherwise
@@ -78,4 +85,15 @@ public interface GenericAttributeType {
      * @return true if assignable, false otherwise
      */
     boolean isAssignableFrom(Class<?> actualClass);
+
+    /**
+     * Converts the given value from any class returning true for {@link #isAssignableFrom(Class)} to the java main type. Unfortunately the main type can't b
+     * expressed as generic on enumerations because of java language specification boundaries, so we need to return object. Sorry for that!! If
+     * {@link #isDefaultValueCapable()} returns fale this method will always return null!
+     *
+     * @param value
+     *            value to be converted
+     * @return converted value of null is {@link #isAssignableFrom(Class)} returns false
+     */
+    Object convert(Object value);
 }

@@ -1,72 +1,56 @@
 package de.chrgroth.generictypesystem.model;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Enhances the generic structure to a generic type.
  * <dl>
  * <dt>id</dt>
  * <dd>The id value used for persistence purposes.</dd>
- * <dt>order</dt>
- * <dd>Numeric value defining an order over types.</dd>
  * <dt>name</dt>
  * <dd>The type name.</dd>
  * <dt>group</dt>
  * <dd>An optional type group.</dd>
- * <dt>description</dt>
- * <dd>An optional type description.</dd>
- * <dt>color</dt>
- * <dd>An optional color value. Primarily used for UI purposes.</dd>
  * <dt>owner</dt>
  * <dd>An optional owner key.</dd>
  * <dt>visibility</dt>
  * <dd>An optional visibility.</dd>
  * <dt>pageSize</dt>
  * <dd>An optional page size to be used for querying.</dd>
+ * <dt>customProperties</dt>
+ * <dd>A map holding optional custom properties to be used by concrete projects for simple type extension.</dd>
  * </dl>
  *
  * @author Christian Groth
  */
-// TODO introduce map for custom properties and cleanup data model
 public class GenericType extends GenericStructure {
 
     private Long id;
-    private long order;
     private String name;
     private String group;
-
-    private String description;
-    private String color;
 
     private Long owner;
     private Visibility visibility;
 
     private Long pageSize;
 
+    private Map<String, Object> customProperties;
+
     public GenericType() {
-        this(null, 0, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null, null, null);
     }
 
-    public GenericType(Long id, long order, String name, String group, Set<GenericAttribute> attributes, String description, String color, Long owner, Visibility visibility,
-            Long pageSize) {
+    public GenericType(Long id, String name, String group, List<GenericAttribute> attributes, Long owner, Visibility visibility, Long pageSize) {
         super(attributes);
         this.id = id;
-        this.order = order;
         this.name = name;
         this.group = group;
-        this.description = description;
-        this.color = color;
         this.owner = owner;
         this.visibility = visibility;
         this.pageSize = pageSize;
-    }
-
-    public long getOrder() {
-        return order;
-    }
-
-    public void setOrder(long order) {
-        this.order = order;
+        customProperties = new HashMap<>();
     }
 
     public Long getId() {
@@ -83,22 +67,6 @@ public class GenericType extends GenericStructure {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
     }
 
     public String getGroup() {
@@ -133,6 +101,14 @@ public class GenericType extends GenericStructure {
         this.pageSize = pageSize;
     }
 
+    public Map<String, Object> getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Map<String, Object> customProperties) {
+        this.customProperties = customProperties;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -165,7 +141,7 @@ public class GenericType extends GenericStructure {
 
     @Override
     public String toString() {
-        return "GenericType [id=" + id + ", order=" + order + ", name=" + name + ", group=" + group + ", description=" + description + ", color=" + color + ", owner=" + owner
-                + ", visibility=" + visibility + ", pageSize=" + pageSize + ", structure=" + super.toString() + "]";
+        return "GenericType [id=" + id + ", name=" + name + ", group=" + group + ", owner=" + owner + ", visibility=" + visibility + ", pageSize=" + pageSize
+                + ", customProperties=" + customProperties + ", structure=" + super.toString() + "]";
     }
 }

@@ -1,28 +1,28 @@
 package de.chrgroth.generictypesystem.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Represents a generic structure holding a number of generic attributes.
+ * Represents a generic structure holding an ordered list of generic attributes.
  *
  * @author Christian Groth
  */
 public class GenericStructure {
 
-    private Set<GenericAttribute> attributes;
+    private List<GenericAttribute> attributes;
 
     public GenericStructure() {
         this(null);
     }
 
-    public GenericStructure(Set<GenericAttribute> attributes) {
-        this.attributes = new HashSet<>();
+    public GenericStructure(List<GenericAttribute> attributes) {
+        this.attributes = new ArrayList<>();
         if (attributes != null) {
             this.attributes.addAll(attributes);
         }
@@ -56,8 +56,8 @@ public class GenericStructure {
         return uniqueKey;
     }
 
-    private Set<GenericAttribute> uniqueAttributes() {
-        return attributes.stream().filter(a -> a.isUnique()).collect(Collectors.toSet());
+    private List<GenericAttribute> uniqueAttributes() {
+        return attributes.stream().filter(a -> a.isUnique()).collect(Collectors.toList());
     }
 
     /**
@@ -65,12 +65,12 @@ public class GenericStructure {
      *
      * @return all attributes, never null
      */
-    public Set<GenericAttribute> attributes() {
-        HashSet<GenericAttribute> allAttributes = new HashSet<>();
+    public List<GenericAttribute> attributes() {
+        List<GenericAttribute> allAttributes = new ArrayList<>();
         if (attributes != null) {
             allAttributes.addAll(attributes);
             allAttributes.addAll(
-                    attributes.stream().filter(a -> a.isStructure() && a.getStructure() != null).flatMap(a -> a.getStructure().attributes().stream()).collect(Collectors.toSet()));
+                    attributes.stream().filter(a -> a.isStructure() && a.getStructure() != null).flatMap(a -> a.getStructure().attributes().stream()).collect(Collectors.toList()));
         }
         return allAttributes;
     }
@@ -137,11 +137,11 @@ public class GenericStructure {
         return getAttributes().stream().filter(a -> a.getName().equals(name)).findFirst().orElse(null);
     }
 
-    public Set<GenericAttribute> getAttributes() {
+    public List<GenericAttribute> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Set<GenericAttribute> attributes) {
+    public void setAttributes(List<GenericAttribute> attributes) {
         this.attributes = attributes;
     }
 

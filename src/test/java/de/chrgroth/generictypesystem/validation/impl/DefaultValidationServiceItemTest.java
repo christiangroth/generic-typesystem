@@ -24,7 +24,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
+        type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         item = new GenericItem(0l, type.getId(), null, null, null);
     }
 
@@ -280,7 +280,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     }
 
     private <T, K, V> GenericAttribute attribute(DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
-        GenericAttribute a = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, type, valueType, false, false, mandatory, structure, null, null, null, null, null, null, null, null);
+        GenericAttribute a = new GenericAttribute(0l, ATTRIBUTE_NAME, type, valueType, false, false, mandatory, structure, null, null, null, null, null, null, null, null);
         this.type.getAttributes().add(a);
         return a;
     }

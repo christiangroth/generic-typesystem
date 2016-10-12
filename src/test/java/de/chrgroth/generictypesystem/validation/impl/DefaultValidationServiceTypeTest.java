@@ -1,7 +1,6 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +18,8 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null,
-                null);
-        type = new GenericType(0l, 0, "testType", "testGroup", new HashSet<>(Arrays.asList(attribute)), null, null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        type = new GenericType(0l, "testType", "testGroup", Arrays.asList(attribute), null, null, null);
     }
 
     @Test
@@ -87,7 +85,7 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Test
     public void attributeAmbigiousId() {
         type.getAttributes()
-                .add(new GenericAttribute(0l, 1, "some other", DefaultGenericAttributeType.LONG, null, false, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(0l, "some other", DefaultGenericAttributeType.LONG, null, false, false, false, null, null, null, null, null, null, null, null, null));
         validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, attribute.getId().longValue()));
     }
 

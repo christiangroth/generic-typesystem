@@ -3,13 +3,13 @@ package de.chrgroth.generictypesystem.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * A simple POJO class holding all information about attribute definitions.
  * <dl>
  * <dt>id</dt>
  * <dd>The id value used for persistence purposes.</dd>
- * <dt>order</dt>
- * <dd>Numeric value defining an order over attributes.</dd>
  * <dt>name</dt>
  * <dd>The attribute name. Used for {@link GenericAttribute#equals(Object)} and {@link GenericAttribute#hashCode()}.</dd>
  * <dt>type</dt>
@@ -33,7 +33,7 @@ import java.util.Set;
  * <dt>pattern</dt>
  * <dd>An optional pattern for string based attribute types.</dd>
  * <dt>defaultValue</dt>
- * <dd>An optional string representation of the default value.</dd>
+ * <dd>An optional default value.</dd>
  * <dt>defaultValueCallback</dt>
  * <dd>An optional default value callback script to be executed.</dd>
  * <dt>valueProposalDependencies</dt>
@@ -47,7 +47,6 @@ import java.util.Set;
 public class GenericAttribute {
 
     private Long id;
-    private long order;
     private String name;
     private GenericAttributeType type;
     private GenericAttributeType valueType;
@@ -61,8 +60,7 @@ public class GenericAttribute {
     private Double step;
     private String pattern;
 
-    // TODO change to object??
-    private String defaultValue;
+    private Object defaultValue;
     private String defaultValueCallback;
 
     private Set<Long> valueProposalDependencies;
@@ -70,14 +68,13 @@ public class GenericAttribute {
     private Set<GenericAttributeUnit> units;
 
     public GenericAttribute() {
-        this(null, 0, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, long order, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
+    public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
             GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
             Set<GenericAttributeUnit> units) {
         this.id = id;
-        this.order = order;
         this.name = name;
         this.type = type;
         this.valueType = valueType;
@@ -122,8 +119,24 @@ public class GenericAttribute {
         }
     }
 
+    /**
+     * Returns true if the attribute definition contains at least one unit definition.
+     *
+     * @return true if unit base, false otherwise
+     */
     public boolean isUnitBased() {
         return units != null && !units.isEmpty();
+    }
+
+    /**
+     * Returns the attribute unit definition with the given name or null if the attribute is not unit based or if no unit with given name is defined.
+     *
+     * @param name
+     *            unit name to match
+     * @return unit definition or null
+     */
+    public GenericAttributeUnit getUnit(String name) {
+        return isUnitBased() ? units.stream().filter(u -> StringUtils.equals(u.getName(), name)).findFirst().orElse(null) : null;
     }
 
     public Long getId() {
@@ -132,14 +145,6 @@ public class GenericAttribute {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public long getOrder() {
-        return order;
-    }
-
-    public void setOrder(long order) {
-        this.order = order;
     }
 
     public String getName() {
@@ -230,11 +235,11 @@ public class GenericAttribute {
         this.pattern = pattern;
     }
 
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -294,8 +299,8 @@ public class GenericAttribute {
 
     @Override
     public String toString() {
-        return "GenericAttribute [id=" + id + ", order=" + order + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed
-                + ", mandatory=" + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue="
-                + defaultValue + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
+        return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed + ", mandatory="
+                + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue
+                + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
     }
 }

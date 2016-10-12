@@ -79,7 +79,7 @@ public class DefaultValidationService implements ValidationService {
     private void validateStructure(ValidationResult<GenericType> result, GenericStructure structure, String path) {
 
         // validate structure attributes
-        Set<GenericAttribute> allAttributes = structure.attributes();
+        List<GenericAttribute> allAttributes = structure.attributes();
         structure.getAttributes().forEach(a -> validateTypeAttribute(result, allAttributes, a, path));
 
         // validate attribute ids are unique
@@ -92,7 +92,7 @@ public class DefaultValidationService implements ValidationService {
         hooks.structureValidation(result, structure, path);
     }
 
-    private void validateTypeAttribute(ValidationResult<GenericType> result, Set<GenericAttribute> allAttributes, GenericAttribute a, String path) {
+    private void validateTypeAttribute(ValidationResult<GenericType> result, List<GenericAttribute> allAttributes, GenericAttribute a, String path) {
 
         // validate id
         if (a.getId() == null) {
@@ -145,6 +145,31 @@ public class DefaultValidationService implements ValidationService {
         }
 
         // validate valueProposalDependencies
+        validateTypeAttributeValueProposalDependencyDefinitions(result, allAttributes, a, path);
+
+        // validate units
+        validateTypeAttributeUnitDefinitions(result, a, path);
+
+        // validate default value
+        validateTypeAttributeDefaultValueDefinition(result, a, path);
+
+        // call type attribute hook
+        hooks.typeAttributeValidation(result, a, path);
+
+        // check collection attribute
+        if (a.isList()) {
+            validateTypeListAttribute(result, a, path);
+        } else if (a.isStructure()) {
+            validateTypeStructureAttribute(result, a, path);
+        } else {
+            validateTypeSingleAttribute(result, a, path);
+        }
+    }
+
+    public void validateTypeAttributeValueProposalDependencyDefinitions(ValidationResult<GenericType> result, List<GenericAttribute> allAttributes, GenericAttribute a,
+            String path) {
+
+        // validate valueProposalDependencies
         if (a.getValueProposalDependencies() != null && !a.getValueProposalDependencies().isEmpty()) {
             if (!a.getType().isValueProposalDependenciesCapable()) {
                 result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_VALUE_PROPOSAL_CAPABLE, a.getType().toString());
@@ -164,6 +189,9 @@ public class DefaultValidationService implements ValidationService {
                 }
             }
         }
+    }
+
+    public void validateTypeAttributeUnitDefinitions(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
         // validate units
         if (a.isUnitBased()) {
@@ -187,60 +215,89 @@ public class DefaultValidationService implements ValidationService {
                 }
             }
         }
+    }
 
-        // validate default values
-        if (StringUtils.isNotBlank(a.getDefaultValue())) {
+    public void validateTypeAttributeDefaultValueDefinition(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
-            // not allowed for unit based attributes
-            if (a.isUnitBased()) {
-                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_BASED_DEFAULT_VALUE_NOT_ALLOWED);
+        // validate default value
+        Object defaultValue = a.getDefaultValue();
+        if (defaultValue != null) {
+
+            // check if type is default value capable
+            if (!a.getType().isDefaultValueCapable()) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
             } else if (a.getType() instanceof DefaultGenericAttributeType) {
 
-                // validate default attribute types
-                switch ((DefaultGenericAttributeType) a.getType()) {
-                    case BOOLEAN:
-                        // fine, nothing to validate for Booleans based on java.lang.Boolean#parseBoolean(String)
-                        break;
-                    case STRING:
-                        validateTypeAttributeStringDefaultValue(result, a);
-                        break;
-                    case LONG:
-                        validateTypeAttributeLongDefaultValue(result, a);
-                        break;
-                    case DOUBLE:
-                        validateTypeAttributeDoubleDefaultValue(result, a);
-                        break;
-                    case DATE:
-                    case DATETIME:
-                    case TIME:
-                    case LIST:
-                    case STRUCTURE:
-                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
-                        break;
-                    default:
-                        // nothing to do here
-                        break;
+                // check for unit based attribute
+                Object defaultValueToBeChecked = defaultValue;
+                boolean skipDefaultValueCheck = false;
+                if (a.isUnitBased()) {
+
+                    // check for unit value
+                    if (!(defaultValue instanceof UnitValue)) {
+                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED);
+                        skipDefaultValueCheck = true;
+                    }
+
+                    // ensure unit reference is valid
+                    GenericAttributeUnit referencedAttributeUnit = a.getUnit(((UnitValue) defaultValue).getUnit());
+                    if (!skipDefaultValueCheck && referencedAttributeUnit == null) {
+                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
+                        skipDefaultValueCheck = true;
+                    }
+
+                    // replace default value to be checked
+                    if (!skipDefaultValueCheck) {
+                        defaultValueToBeChecked = ((UnitValue) defaultValue).getValue();
+                    }
+                }
+
+                if (!skipDefaultValueCheck) {
+
+                    // validate default value is of correct type
+                    boolean defaultValueTypeValid = validateDefaultValueType(result, a, (DefaultGenericAttributeType) a.getType(), defaultValueToBeChecked);
+
+                    // validate default attribute types
+                    if (defaultValueTypeValid) {
+                        switch ((DefaultGenericAttributeType) a.getType()) {
+                            case BOOLEAN:
+                                // fine, nothing to validate for Booleans
+                                break;
+                            case STRING:
+                                validateTypeAttributeDefaultValue(result, a, (String) a.getType().convert(defaultValueToBeChecked));
+                                break;
+                            case LONG:
+                                validateTypeAttributeDefaultValue(result, a, (Long) a.getType().convert(defaultValueToBeChecked));
+                                break;
+                            case DOUBLE:
+                                validateTypeAttributeDefaultValue(result, a, (Double) a.getType().convert(defaultValueToBeChecked));
+                                break;
+                            default:
+                                // all other types do not need to be validated because they are not capable of default values. So nothing to do here.
+                                break;
+                        }
+                    }
                 }
             }
         }
-
-        // call type attribute hook
-        hooks.typeAttributeValidation(result, a, path);
-
-        // check collection attribute
-        if (a.isList()) {
-            validateTypeListAttribute(result, a, path);
-        } else if (a.isStructure()) {
-            validateTypeStructureAttribute(result, a, path);
-        } else {
-            validateTypeSingleAttribute(result, a, path);
-        }
     }
 
-    private void validateTypeAttributeStringDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
+    private boolean validateDefaultValueType(ValidationResult<GenericType> result, GenericAttribute a, DefaultGenericAttributeType type, Object defaultValue) {
+
+        // check type is applicable to defined ones
+        if (!type.isAssignableFrom(defaultValue.getClass())) {
+            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_TYPE_INVALID, defaultValue.getClass());
+            return false;
+        }
+
+        // ok
+        return true;
+    }
+
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String defaultValue) {
 
         // validate min
-        int length = a.getDefaultValue().length();
+        int length = defaultValue.length();
         if (a.getMin() != null && a.getMin() > length) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MIN_UNDERCUT, a.getMin());
         }
@@ -253,53 +310,35 @@ public class DefaultValidationService implements ValidationService {
         // validate pattern
         if (StringUtils.isNotBlank(a.getPattern())) {
             Pattern pattern = Pattern.compile(a.getPattern());
-            Matcher matcher = pattern.matcher(a.getDefaultValue());
+            Matcher matcher = pattern.matcher(defaultValue);
             if (!matcher.matches()) {
                 result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_PATTERN_VIOLATED, a.getPattern());
             }
         }
     }
 
-    private void validateTypeAttributeLongDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
-
-        // parse default value
-        Long value = null;
-        try {
-            value = Long.parseLong(a.getDefaultValue());
-        } catch (NumberFormatException e) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_INVALID);
-            return;
-        }
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, Long defaultValue) {
 
         // validate min
-        if (a.getMin() != null && a.getMin() > value) {
+        if (a.getMin() != null && a.getMin() > defaultValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
-        if (a.getMax() != null && a.getMax() < value) {
+        if (a.getMax() != null && a.getMax() < defaultValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MAX_EXCEEDED, a.getMax());
         }
     }
 
-    private void validateTypeAttributeDoubleDefaultValue(ValidationResult<GenericType> result, GenericAttribute a) {
-
-        // parse default value
-        Double value = null;
-        try {
-            value = Double.parseDouble(a.getDefaultValue());
-        } catch (NumberFormatException e) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_INVALID);
-            return;
-        }
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, Double defaultValue) {
 
         // validate min
-        if (a.getMin() != null && a.getMin() > value) {
+        if (a.getMin() != null && a.getMin() > defaultValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
-        if (a.getMax() != null && a.getMax() < value) {
+        if (a.getMax() != null && a.getMax() < defaultValue) {
             result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MAX_EXCEEDED, a.getMax());
         }
     }
@@ -460,8 +499,7 @@ public class DefaultValidationService implements ValidationService {
             UnitValue unitValue = (UnitValue) value;
 
             // check unit is registered for attribute
-            GenericAttributeUnit attributeUnit = !a.isUnitBased() ? null
-                    : a.getUnits().stream().filter(u -> StringUtils.equals(u.getName(), unitValue.getUnit())).findFirst().orElse(null);
+            GenericAttributeUnit attributeUnit = !a.isUnitBased() ? null : a.getUnit(unitValue.getUnit());
             if (attributeUnit == null) {
                 result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
             }

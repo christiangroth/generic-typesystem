@@ -18,7 +18,7 @@ public class NoValidationServiceTest {
     @Before
     public void setup() {
         service = new NoValidationService();
-        type = new GenericType(null, 0, null, null, null, null, null, null, null, null);
+        type = new GenericType(null, null, null, null, null, null, null);
         item = new GenericItem();
     }
 

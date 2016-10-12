@@ -1,10 +1,10 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,18 +32,17 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceTest
         service = new DefaultValidationService(hooks);
 
         // type
-        Set<GenericAttribute> typeAttributes = new HashSet<>();
-        typeAttributes
-                .add(new GenericAttribute(0l, 0, "simple", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        typeAttributes.add(new GenericAttribute(1l, 0, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, false, null, null, null, null,
-                null, null, null, null, null));
-        Set<GenericAttribute> subStructureAttributes = new HashSet<>();
-        subStructureAttributes.add(
-                new GenericAttribute(3l, 0, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
+        List<GenericAttribute> typeAttributes = new ArrayList<>();
+        typeAttributes.add(new GenericAttribute(0l, "simple", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null));
+        typeAttributes.add(new GenericAttribute(1l, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, false, null, null, null, null, null,
+                null, null, null, null));
+        List<GenericAttribute> subStructureAttributes = new ArrayList<>();
+        subStructureAttributes
+                .add(new GenericAttribute(3l, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
         GenericStructure subStructure = new GenericStructure(subStructureAttributes);
-        typeAttributes.add(new GenericAttribute(2l, 0, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, false, subStructure, null, null, null, null, null, null,
-                null, null));
-        type = new GenericType(0l, 0, "testType", "testGroup", typeAttributes, null, null, null, null, null);
+        typeAttributes.add(
+                new GenericAttribute(2l, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, false, subStructure, null, null, null, null, null, null, null, null));
+        type = new GenericType(0l, "testType", "testGroup", typeAttributes, null, null, null);
 
         // item
         Map<String, Object> values = new HashMap<>();

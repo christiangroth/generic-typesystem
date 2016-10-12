@@ -39,7 +39,7 @@ public class InMemoryPersistenceServiceQueryTest {
         service = new InMemoryPersistenceService(query, new InMemoryValueProposalService());
 
         // prepare test type
-        type = new GenericType(TYPE_ID, 0, "name", "group", null, null, null, null, null, DEFAULT_PAGE_SIZE);
+        type = new GenericType(TYPE_ID, "name", "group", null, null, null, DEFAULT_PAGE_SIZE);
         service.type(type);
     }
 

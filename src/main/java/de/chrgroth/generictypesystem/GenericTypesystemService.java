@@ -80,7 +80,7 @@ public class GenericTypesystemService {
 
         // ensure all type attributes have an id
         if (type != null && type.getAttributes() != null) {
-            Set<GenericAttribute> allAttributes = type.attributes();
+            List<GenericAttribute> allAttributes = type.attributes();
             for (GenericAttribute attribute : allAttributes) {
                 if (attribute.getId() == null || attribute.getId().longValue() < 1) {
 
@@ -110,7 +110,7 @@ public class GenericTypesystemService {
         return validationResult;
     }
 
-    private long nextTypeAttributeId(Set<GenericAttribute> allAttributes) {
+    private long nextTypeAttributeId(List<GenericAttribute> allAttributes) {
         return allAttributes.stream().filter(a -> a.getId() != null).mapToLong(a -> a.getId()).max().orElse(0) + 1;
     }
 

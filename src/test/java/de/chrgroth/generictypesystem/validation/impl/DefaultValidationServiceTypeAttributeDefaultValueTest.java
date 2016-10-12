@@ -1,19 +1,16 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
+// TODO recap all unit tests regarding default values to increase test coverage
 public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseValidationServiceTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
@@ -21,8 +18,8 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        type = new GenericType(0l, 0, "testType", "testGroup", null, null, null, null, null, null);
-        attribute = new GenericAttribute(0l, 0, ATTRIBUTE_NAME, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
         type.getAttributes().add(attribute);
     }
 
@@ -31,7 +28,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.BOOLEAN);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("true");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(Boolean.TRUE);
 
         // validate type
         validateType(new ValidationError[] {});
@@ -86,22 +83,11 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
     }
 
     @Test
-    public void defaultValueLongInvalid() {
-
-        // set data
-        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("4.25");
-
-        // validate type
-        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_INVALID) });
-    }
-
-    @Test
     public void defaultValueLongMinUndercut() {
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("-4");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(-4l);
         type.attribute(ATTRIBUTE_NAME).setMin(5.0d);
 
         // validate type
@@ -113,7 +99,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("4");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4l);
         type.attribute(ATTRIBUTE_NAME).setMax(2.0d);
 
         // validate type
@@ -121,22 +107,11 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
     }
 
     @Test
-    public void defaultValueDoubleInvalid() {
-
-        // set data
-        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DOUBLE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("foo");
-
-        // validate type
-        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_INVALID) });
-    }
-
-    @Test
     public void defaultValueDoubleMinUndercut() {
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DOUBLE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("4");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4.0d);
         type.attribute(ATTRIBUTE_NAME).setMin(5.0d);
 
         // validate type
@@ -148,7 +123,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DOUBLE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("4.0d");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4.0d);
         type.attribute(ATTRIBUTE_NAME).setMax(2.0d);
 
         // validate type
@@ -210,17 +185,5 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
-    }
-
-    @Test
-    public void defaultValueUnitBases() {
-
-        // set data
-        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet(Arrays.asList(new GenericAttributeUnit("default", GenericAttributeUnit.FACTOR_BASE))));
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("{foo:bar}");
-
-        // validate type
-        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_BASED_DEFAULT_VALUE_NOT_ALLOWED) });
     }
 }

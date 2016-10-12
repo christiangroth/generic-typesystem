@@ -74,7 +74,7 @@ public class GenericStructureUniqueKeyTest {
 
     private void addAttribute(String name, boolean unique, String value) {
         structure.getAttributes()
-                .add(new GenericAttribute(0l, 0, name, DefaultGenericAttributeType.STRING, null, unique, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(0l, name, DefaultGenericAttributeType.STRING, null, unique, false, false, null, null, null, null, null, null, null, null, null));
         item.set(name, value);
     }
 

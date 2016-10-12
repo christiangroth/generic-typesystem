@@ -36,7 +36,7 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertTrue(service.typeGroups().isEmpty());
 
         // add type
-        GenericType type = new GenericType(null, 0, "name", "group", null, null, null, null, null, null);
+        GenericType type = new GenericType(null, "name", "group", null, null, null, null);
         service.type(type);
 
         // ensure id was set
@@ -85,7 +85,7 @@ public class InMemoryPersistenceServiceTest {
         Assert.assertNotNull(service.item(type.getId(), 3l));
 
         // add item for non existing type
-        GenericType newType = new GenericType(2l, 0, "new-name", "group", null, null, null, null, null, null);
+        GenericType newType = new GenericType(2l, "new-name", "group", null, null, null, null);
         service.item(newType, new GenericItem(1l, newType.getId(), null, null, null));
 
         // assert type and item data

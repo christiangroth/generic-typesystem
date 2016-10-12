@@ -32,7 +32,7 @@ public class InMemoryPersistenceServiceValuesTest {
         service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10l), values);
 
         // prepare test type
-        type = new GenericType(0l, 0, "name", "group", null, null, null, null, null, null);
+        type = new GenericType(0l, "name", "group", null, null, null, null);
         service.type(type);
     }
 
