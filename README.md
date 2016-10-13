@@ -7,78 +7,66 @@ This project allowes to programatically define, use and validate a generic types
 
 Although this project was extracted from a single personal project the datamodel and services are designed to be extended. But to be honest datamodel customization is not really used by myself at the moment.
 
-<a id="toc"></a>
 ## Table of Contents
-- [Datamodel](#model)
-  - [Types](#model-type)
-  - [Attributes](#model-type-attributes)
-   - [Items](#model-item)
-- [Services](#service)
-  - [Validation](#service-validation)
-  - [Persistence](#service-persistence)
+- [Datamodel](#datamodel)
+  - [Types](#types)
+  - [Attributes](#attributes)
+   - [Items](#item)
+- [Services](#services)
+  - [Validation](#validation)
+  - [Persistence](#persistence)
 - [Requirements](#requirements)
 
-<a id="model"></a>
 ## Datamodel
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="model-type"></a>
 ### Types
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="model-type-attributes"></a>
 #### Attributes
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="model-item"></a>
 ### Items
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service"></a>
 ## Services
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service-validation"></a>
 ### Validation
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service-validation-type"></a>
 #### Type Validation
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service-validation-item"></a>
 #### Item Validation
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service-persistence"></a>
 ### Persistence
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="service-persistence-querying"></a>
 #### Querying
 TODO ...
 
-back to [top](#toc).
+back to [top](#table-of-contents).
 
-<a id="requirements"></a>
 ## Requirements
 - [slf4j][1]
 - [Java SDK 1.8+][2]
@@ -86,4 +74,4 @@ back to [top](#toc).
 [1]: http://www.slf4j.org/
 [2]: http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-back to [top](#toc).
+back to [top](#table-of-contents).
