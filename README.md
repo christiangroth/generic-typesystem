@@ -8,22 +8,33 @@ This project allowes to programatically define, use and validate a generic types
 Although this project was extracted from a single personal project the datamodel and services are designed to be extended. But to be honest datamodel customization is not really used by myself at the moment.
 
 ## Table of Contents
+- [Usage](#usage)
 - [Datamodel](#datamodel)
   - [Types](#types)
   - [Attributes](#attributes)
-   - [Items](#item)
+   - [Items](#items)
 - [Services](#services)
   - [Validation](#validation)
   - [Persistence](#persistence)
+- [Ownership & Visibility](#ownership)
 - [Requirements](#requirements)
 
+## Usage
+Just include the maven dependency provided via maven central:
+
+	<dependency>
+		<groupId>de.chrgroth.generic-typesystem</groupId>
+		<artifactId>generic-typesystem</artifactId>
+		<version>${latest version see maven central badge above}</version>
+	</dependency>
+
 ## Datamodel
-TODO ...
+The datamodel is defined using a handful of POJOs and enums contained in *de.chrgroth.generictypesystem.model*. A type can define attributes of concrete type and with specific restrictions / configuration. Each item belongs to a type and contains the concrete values for defined attributes. Due to very loose coupling an item may also contain values for undefined attributes, but in case of item validation this situation will be detected. 
 
 back to [top](#table-of-contents).
 
 ### Types
-TODO ...
+A type is defined using *de.chrgroth.generictypesystem.model.GenericType* and extends *de.chrgroth.generictypesystem.model.GenericStructure*. This allows recursive re-usage of structured attributes as kind of nested *types*. 
 
 back to [top](#table-of-contents).
 
