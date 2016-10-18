@@ -1,6 +1,8 @@
 Development: [![Build Status](https://secure.travis-ci.org/christiangroth/generic-typesystem.svg)](http://travis-ci.org/christiangroth/generic-typesystem) [![Coverage Status](https://coveralls.io/repos/github/christiangroth/generic-typesystem/badge.svg?branch=develop)](https://coveralls.io/github/christiangroth/generic-typesystem?branch=develop) [![Dependency Status](https://www.versioneye.com/user/projects/57d99a5d4307470032353ca5/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57d99a5d4307470032353ca5)
 
-Stable: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/${articatId}/badge.svg)](http://search.maven.org/#artifactdetails|de.chrgroth.generic-typesystem|generic-typesystem)
+Stable: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/generic-typesystem/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/generic-typesystem)
+
+https://maven-badges.herokuapp.com/maven-central/de.chrgroth.smartcron/smartcron
 
 # Generic typesystem
 This project allowes to programatically define, use and validate a generic typesystem consisting of types, attributes and items. Furthermore there a some services which may be customized to your own project needs. The main service to deal with is *de.chrgroth.generictypesystem.GenericTypesystemService*. This acts as the entry point for all operations and connects the various features like validation and persistence. 
