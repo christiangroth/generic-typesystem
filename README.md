@@ -14,11 +14,12 @@ Although this project was extracted from a single personal project the datamodel
 - [Datamodel](#datamodel)
   - [Types](#types)
   - [Attributes](#attributes)
-   - [Items](#items)
+  - [Units](#attribute-units)
+  - [Items](#items)
 - [Services](#services)
   - [Validation](#validation)
   - [Persistence](#persistence)
-- [Ownership & Visibility](#ownership)
+  - [Ownership & Visibility](#ownership-visibility)
 - [Requirements](#requirements)
 
 ## Usage
@@ -38,15 +39,44 @@ back to [top](#table-of-contents).
 ### Types
 A type is defined using *de.chrgroth.generictypesystem.model.GenericType* and extends *de.chrgroth.generictypesystem.model.GenericStructure*. This allows recursive re-usage of structured attributes as kind of nested *types*. 
 
+Beside attributes a type is defined using the following properties:
+- id: a unique numeric identifier
+- name, group: human readable type name and optional group for organizational purposes
+- owner, visibility: see [Ownership & Visibility](#ownership-visibility)
+- pageSize: optional default page size, see [Persistence](#persistence)
+- customProperties: optional *java.util.Map* of custom properties to be used for project based customization  
+
 back to [top](#table-of-contents).
 
-#### Attributes
-TODO ...
+### Attributes
+A type attribute is defined by the following properties:
+- id: a unique numeric identifier (per type)
+- name: human readable attribute name
+- type, valueType, structure: the attribute type. In case of a list type valueType defines the list values type. In case of a structure type, structure defines the nested structure (thatÄs basically a list of attributes) to be used.
+- unique: whether the type value belongs to the unique key
+- mandatory: whether the type value is mandatory
+- min, max, step: defines the min, max and step values for numerical types. Textual types may use min and max in case of value length validation.
+- pattern: an optional pattern to be validated against
+- defaultValue, defaultValueCallback: optional default values and default value callback which may be invoked somwhere outside this framework on client side.
+- valueProposalDependencies: a list of attribute ids considered for value proposal. See [Persistence](#persistence)
+- units: defines if the attribute is unit based if any unit definitions are provided. See [below](#attribute-units)
+
+Further more each attribute has a unique path in context of a type. The path is formed using the attribute name and a dot for nested structures. The path is relevant when working with [items](#items).
+
+back to [top](#table-of-contents).
+
+### Attribute Units
+Attribute values may be unit based and the definition of units is fairly simple at the moment:
+- name: a unique name (per attribute)
+- factor: the units factor to allow conversion between units 
 
 back to [top](#table-of-contents).
 
 ### Items
-TODO ...
+An item is defined using *de.chrgroth.generictypesystem.model.GenericItem* and is uite simple:
+- id, typeId: unique item id and id of the defining type
+- owner, visibility: see [Ownership & Visibility](#ownership-visibility)
+- values: all values are stored in a *java.util.Map* using the attributes path as key. This allows all clients to work with the more manageable attribute path instead of attributes id.
 
 back to [top](#table-of-contents).
 
@@ -75,7 +105,17 @@ TODO ...
 
 back to [top](#table-of-contents).
 
+#### Value Proposals
+TODO ...
+
+back to [top](#table-of-contents).
+
 #### Querying
+TODO ...
+
+back to [top](#table-of-contents).
+
+### Ownership & Visibility
 TODO ...
 
 back to [top](#table-of-contents).
