@@ -280,7 +280,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     }
 
     private <T, K, V> GenericAttribute attribute(DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
-        GenericAttribute a = new GenericAttribute(0l, ATTRIBUTE_NAME, type, valueType, false, false, mandatory, structure, null, null, null, null, null, null, null, null);
+        GenericAttribute a = new GenericAttribute(0l, ATTRIBUTE_NAME, type, valueType, false, mandatory, structure, null, null, null, null, null, null, null, null);
         this.type.getAttributes().add(a);
         return a;
     }

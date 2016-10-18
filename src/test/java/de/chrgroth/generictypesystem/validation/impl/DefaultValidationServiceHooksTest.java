@@ -33,15 +33,15 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceTest
 
         // type
         List<GenericAttribute> typeAttributes = new ArrayList<>();
-        typeAttributes.add(new GenericAttribute(0l, "simple", DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        typeAttributes.add(new GenericAttribute(1l, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, false, null, null, null, null, null,
-                null, null, null, null));
+        typeAttributes.add(new GenericAttribute(0l, "simple", DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null));
+        typeAttributes.add(new GenericAttribute(1l, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, null, null, null, null, null, null,
+                null, null, null));
         List<GenericAttribute> subStructureAttributes = new ArrayList<>();
         subStructureAttributes
-                .add(new GenericAttribute(3l, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(3l, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, null));
         GenericStructure subStructure = new GenericStructure(subStructureAttributes);
-        typeAttributes.add(
-                new GenericAttribute(2l, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, false, subStructure, null, null, null, null, null, null, null, null));
+        typeAttributes
+                .add(new GenericAttribute(2l, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, subStructure, null, null, null, null, null, null, null, null));
         type = new GenericType(0l, "testType", "testGroup", typeAttributes, null, null, null);
 
         // item

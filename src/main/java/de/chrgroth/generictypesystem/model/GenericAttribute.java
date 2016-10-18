@@ -18,8 +18,6 @@ import org.apache.commons.lang3.StringUtils;
  * <dd>The attribute value type. Primarily used for list type attributes.</dd>
  * <dt>unique</dt>
  * <dd>Flag to indicate if this attribute is part of the items unique key.</dd>
- * <dt>indexed</dt>
- * <dd>Flag to indicate if this attribute is indexed. May be used for persistence or UI purposes.</dd>
  * <dt>mandatory</dt>
  * <dd>Flag to indicate if this attribute has a mandatory value.</dd>
  * <dt>structure</dt>
@@ -51,7 +49,6 @@ public class GenericAttribute {
     private GenericAttributeType type;
     private GenericAttributeType valueType;
     private boolean unique;
-    private boolean indexed;
     private boolean mandatory;
     private GenericStructure structure;
 
@@ -68,18 +65,17 @@ public class GenericAttribute {
     private Set<GenericAttributeUnit> units;
 
     public GenericAttribute() {
-        this(null, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null);
     }
 
-    public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory,
-            GenericStructure structure, Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
+    public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure,
+            Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
             Set<GenericAttributeUnit> units) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.valueType = valueType;
         this.unique = unique;
-        this.indexed = indexed;
         this.mandatory = mandatory;
         this.structure = structure;
         this.min = min;
@@ -177,14 +173,6 @@ public class GenericAttribute {
 
     public void setUnique(boolean unique) {
         this.unique = unique;
-    }
-
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    public void setIndexed(boolean indexed) {
-        this.indexed = indexed;
     }
 
     public boolean isMandatory() {
@@ -299,8 +287,8 @@ public class GenericAttribute {
 
     @Override
     public String toString() {
-        return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", indexed=" + indexed + ", mandatory="
-                + mandatory + ", structure=" + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue
-                + ", defaultValueCallback=" + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
+        return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", mandatory=" + mandatory + ", structure="
+                + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultValueCallback="
+                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
     }
 }

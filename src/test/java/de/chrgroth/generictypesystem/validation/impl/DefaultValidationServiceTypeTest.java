@@ -18,7 +18,7 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Before
     public void setup() {
         service = new DefaultValidationService(null);
-        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null);
         type = new GenericType(0l, "testType", "testGroup", Arrays.asList(attribute), null, null, null);
     }
 
@@ -85,7 +85,7 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest 
     @Test
     public void attributeAmbigiousId() {
         type.getAttributes()
-                .add(new GenericAttribute(0l, "some other", DefaultGenericAttributeType.LONG, null, false, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(0l, "some other", DefaultGenericAttributeType.LONG, null, false, false, null, null, null, null, null, null, null, null, null));
         validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, attribute.getId().longValue()));
     }
 

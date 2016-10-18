@@ -63,11 +63,11 @@ public class GenericTypesystemServiceTest {
 
         // create type
         GenericType type = new GenericType();
-        type.getAttributes().add(new GenericAttribute(0l, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        type.getAttributes().add(new GenericAttribute(1l, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        type.getAttributes().add(new GenericAttribute(null, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        type.getAttributes().add(new GenericAttribute(3l, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null));
-        type.getAttributes().add(new GenericAttribute(null, null, null, null, false, false, false, null, null, null, null, null, null, null, null, null));
+        type.getAttributes().add(new GenericAttribute(0l, null, null, null, false, false, null, null, null, null, null, null, null, null, null));
+        type.getAttributes().add(new GenericAttribute(1l, null, null, null, false, false, null, null, null, null, null, null, null, null, null));
+        type.getAttributes().add(new GenericAttribute(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null));
+        type.getAttributes().add(new GenericAttribute(3l, null, null, null, false, false, null, null, null, null, null, null, null, null, null));
+        type.getAttributes().add(new GenericAttribute(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null));
 
         // type is valid
         ValidationResult<GenericType> validationResult = Mockito.mock(ValidationResult.class);

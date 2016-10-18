@@ -91,8 +91,7 @@ public class GenericStructureAttributeTest {
     }
 
     private GenericAttribute attribute(GenericStructure structure, Long id, String name) {
-        GenericAttribute attribute = new GenericAttribute(id, name, DefaultGenericAttributeType.STRING, null, false, false, false, null, null, null, null, null, null, null, null,
-                null);
+        GenericAttribute attribute = new GenericAttribute(id, name, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null);
         structure.getAttributes().add(attribute);
         return attribute;
     }

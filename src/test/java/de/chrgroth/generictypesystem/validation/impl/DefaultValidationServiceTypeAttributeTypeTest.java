@@ -51,7 +51,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     public void attributeTypeTest() {
 
         // create attribute with type only
-        createAttribute(null, false, false, false, null, null, null, null, null, null, null, null, null);
+        createAttribute(null, false, false, null, null, null, null, null, null, null, null, null);
 
         // define expected error message keys
         List<ValidationError> errorKeys = new ArrayList<>();
@@ -66,7 +66,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // create attribute with value type
         clearAttributes();
-        createAttribute(testValueType, false, false, false, null, null, null, null, null, null, null, null, null);
+        createAttribute(testValueType, false, false, null, null, null, null, null, null, null, null, null);
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
@@ -90,7 +90,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // create attribute with structure
         clearAttributes();
-        createAttribute(null, false, false, false, new GenericStructure(), null, null, null, null, null, null, null, null);
+        createAttribute(null, false, false, new GenericStructure(), null, null, null, null, null, null, null, null);
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
@@ -105,7 +105,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // create attribute with value type and structure
         clearAttributes();
-        createAttribute(testValueType, false, false, false, new GenericStructure(), null, null, null, null, null, null, null, null);
+        createAttribute(testValueType, false, false, new GenericStructure(), null, null, null, null, null, null, null, null);
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
@@ -127,10 +127,10 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
         validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
-    public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean indexed, boolean mandatory, GenericStructure structure, Double min, Double max,
-            Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
-        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, indexed, mandatory, structure, min, max, step, pattern, defaultValue,
-                defaultValueCallback, valueProposalDependencies, units);
+    public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
+            String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback,
+                valueProposalDependencies, units);
         type.getAttributes().add(attribute);
     }
 

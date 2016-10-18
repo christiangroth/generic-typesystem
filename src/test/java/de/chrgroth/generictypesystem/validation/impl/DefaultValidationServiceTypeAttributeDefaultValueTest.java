@@ -19,7 +19,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
     public void setup() {
         service = new DefaultValidationService(null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
-        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, false, null, null, null, null, null, null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, null, null, null, null, null, null, null, null, null);
         type.getAttributes().add(attribute);
     }
 
