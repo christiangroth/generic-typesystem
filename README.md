@@ -17,7 +17,7 @@ Although this project was extracted from a single personal project the datamodel
 - [Services](#services)
   - [Validation](#validation)
   - [Persistence](#persistence)
-  - [Ownership & Visibility](#ownership--visibility)
+  - [Ownership and visibility](#ownership-and-visibility)
 - [Requirements](#requirements)
 
 ## Usage
@@ -42,7 +42,7 @@ A type is defined using *de.chrgroth.generictypesystem.model.GenericType* and ex
 Beside attributes a type is defined using the following properties:
 - id: a unique numeric identifier
 - name, group: human readable type name and optional group for organizational purposes
-- owner, visibility: see [Ownership & Visibility](#ownership--visibility)
+- owner, visibility: see [Ownership & Visibility](#ownership-and-visibility)
 - pageSize: optional default page size, see [Persistence](#persistence)
 - customProperties: optional *java.util.Map* of custom properties to be used for project based customization  
 
@@ -58,7 +58,7 @@ A type attribute is defined by the following properties:
 - min, max, step: defines the min, max and step values for numerical types. Textual types may use min and max in case of value length validation.
 - pattern: an optional pattern to be validated against
 - defaultValue, defaultValueCallback: optional default values and default value callback which may be invoked somwhere outside this framework on client side.
-- valueProposalDependencies: a list of attribute ids considered for value proposal. See [Persistence](#persistence)
+- valueProposalDependencies: a list of attribute ids considered for value proposal. See [value proposals section](#value-proposals) under [persistence](#persistence)
 - units: defines if the attribute is unit based if any unit definitions are provided. See [below](#attribute-units)
 
 Further more each attribute has a unique path in context of a type. The path is formed using the attribute name and a dot for nested structures. The path is relevant when working with [items](#items).
@@ -75,48 +75,62 @@ back to [top](#table-of-contents).
 ### Items
 An item is defined using *de.chrgroth.generictypesystem.model.GenericItem* and is uite simple:
 - id, typeId: unique item id and id of the defining type
-- owner, visibility: see [Ownership & Visibility](#ownership--visibility)
+- owner, visibility: see [Ownership & Visibility](#ownership-and-visibility)
 - values: all values are stored in a *java.util.Map* using the attributes path as key. This allows all clients to work with the more manageable attribute path instead of attributes id.
+
+The values map needs to contain a suitable java type instance for the specified attribute type. In case of nested structures a nested instance of *de.chrgroth.generictypesystem.model.GenericItem* is contained in the map.
+
+Values belonging to unit based attributes are modeled using *de.chrgroth.generictypesystem.model.UnitValue* instances, containing the value itself and a reference to the unique units name.
 
 back to [top](#table-of-contents).
 
 ## Services
-TODO ...
+The main service to handle generic typesystem is *de.chrgroth.generictypesystem.GenericTypesystemService*. This service acts as main entry point and is composed using further sub-service instances for special purposes, i.e. persistence and validation. Later ones may easily be overwritten / exchanged, see also [Persistence](#persistence) and [Validation](#validation). Further sub-services may be introduces in future releases.
+
+Thus *de.chrgroth.generictypesystem.GenericTypesystemService* itself contains only a minimum amount of business logic and mainly prepares and composes or just delegates calls to defined sub-services.
 
 back to [top](#table-of-contents).
 
 ### Validation
-TODO ...
+Validation aspects are handled using a sub-service defined by *de.chrgroth.generictypesystem.validation.ValidationService.java*. Each validation results in a *de.chrgroth.generictypesystem.validation.ValidationResult* containing all validation error including the path the error occurred at and a message key which can be mapped to suite your own needs.
 
-back to [top](#table-of-contents).
+By default the *de.chrgroth.generictypesystem.validation.impl.DefaultValidationService* is used. This service can be extended providing an implementation for *de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceHooks*.
 
-#### Type Validation
-TODO ...
-
-back to [top](#table-of-contents).
-
-#### Item Validation
-TODO ...
+To completely disable validation *de.chrgroth.generictypesystem.validation.impl* can be used.
 
 back to [top](#table-of-contents).
 
 ### Persistence
-TODO ...
+Persistence is also separated to an own sub-service defined by *de.chrgroth.generictypesystem.persistence.PersistenceService*. By default the *de.chrgroth.generictypesystem.persistence.impl.InMemoryPersistenceService* is used, meaning all data is hold in memory only and not persisted during JVM shutdowns ot even new service instantiations. This is a good starting point for prototyping but needs to be replaced for any of your projects going beyond this phase.
+
+Apart from default CRUD operations for types and items there are some more concepts located in persistence service:
+
+- [generating value proposals](#value-proposals)
+- [a simple item query API](#querying)
+
+Both of the above topics are implemented as further sub-services and passed to the constructor of defaults in memory persistence service instance. The default implementations may also be reused by your own implementation of persistence service, if they meet your needs.
 
 back to [top](#table-of-contents).
 
 #### Value Proposals
-TODO ...
+The concept of value proposals calculates all currently existing values for all value proposal capable attributes for a given type. To take it further an optional template item of given type may be provided to reduce the possible values using only items with matching attribute values regarding all defined value proposal dependencies.
+
+The default implementation works in memory only, so all items have to be loaded for this operation. if this is somehow acceptable for you, just reuse the implementation *de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService*.
 
 back to [top](#table-of-contents).
 
 #### Querying
-TODO ...
+*de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService* is the default implementation for querying purposes and also works in memory only. So again all items have to be loaded to use it. Querying contains the following features executed in declared order:
+- filtering
+- sorting
+- paging
+
+Unfortunately filtering is not implemented yet but will be provided (also in an in-memory only fashion) in a future release.
 
 back to [top](#table-of-contents).
 
-### Ownership & Visibility
-TODO ...
+### Ownership and visibility
+Ownership and visibility is currently unimplemented in service layer level. Datamodel provides the basic fields and thus this feature must be implemented by yourself until it is included in a future release. Sorry ;)
 
 back to [top](#table-of-contents).
 

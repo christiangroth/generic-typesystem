@@ -166,7 +166,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    public void validateTypeAttributeValueProposalDependencyDefinitions(ValidationResult<GenericType> result, List<GenericAttribute> allAttributes, GenericAttribute a,
+    private void validateTypeAttributeValueProposalDependencyDefinitions(ValidationResult<GenericType> result, List<GenericAttribute> allAttributes, GenericAttribute a,
             String path) {
 
         // validate valueProposalDependencies
@@ -191,7 +191,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    public void validateTypeAttributeUnitDefinitions(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+    private void validateTypeAttributeUnitDefinitions(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
         // validate units
         if (a.isUnitBased()) {
@@ -217,7 +217,7 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    public void validateTypeAttributeDefaultValueDefinition(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+    private void validateTypeAttributeDefaultValueDefinition(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
         // validate default value
         Object defaultValue = a.getDefaultValue();
