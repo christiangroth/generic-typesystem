@@ -32,12 +32,12 @@ Just include the maven dependency provided via maven central:
 back to [top](#table-of-contents).
 
 ## Datamodel
-The datamodel is defined using a handful of POJOs and enums contained in [model](src/main/java/de/chrgroth/generictypesystem/model]. A type can define attributes of concrete type and with specific restrictions / configuration. Each item belongs to a type and contains the concrete values for defined attributes. Due to very loose coupling an item may also contain values for undefined attributes, but in case of item validation this situation will be detected. 
+The datamodel is defined using a handful of POJOs and enums contained in [model](src/main/java/de/chrgroth/generictypesystem/model). A type can define attributes of concrete type and with specific restrictions / configuration. Each item belongs to a type and contains the concrete values for defined attributes. Due to very loose coupling an item may also contain values for undefined attributes, but in case of item validation this situation will be detected. 
 
 back to [top](#table-of-contents).
 
 ### Types
-A type is defined using [GenericType]](src/main/java/de/chrgroth/generictypesystem/model/GenericType.java) and extends [GenericStructure](src/main/java/de/chrgroth/generictypesystem/model/GenericStructure.java). This allows recursive re-usage of structured attributes as kind of nested *types*. 
+A type is defined using [GenericType](src/main/java/de/chrgroth/generictypesystem/model/GenericType.java) and extends [GenericStructure](src/main/java/de/chrgroth/generictypesystem/model/GenericStructure.java). This allows recursive re-usage of structured attributes as kind of nested *types*. 
 
 Beside attributes a type is defined using the following properties:
 - id: a unique numeric identifier
@@ -92,7 +92,7 @@ Thus [GenericTypesystemService](src/main/java/de/chrgroth/generictypesystem/Gene
 back to [top](#table-of-contents).
 
 ### Validation
-Validation aspects are handled using a sub-service defined by [ValidationService](src/main/java/de/chrgroth/generictypesystem/validation/ValidationService.java). Each validation results in a [ValidationResult](src/main/java/de/chrgroth/generictypesystem/validation/ValidationResult.java] containing all validation error including the path the error occurred at and a message key which can be mapped to suite your own needs.
+Validation aspects are handled using a sub-service defined by [ValidationService](src/main/java/de/chrgroth/generictypesystem/validation/ValidationService.java). Each validation results in a [ValidationResult](src/main/java/de/chrgroth/generictypesystem/validation/ValidationResult.java) containing all validation error including the path the error occurred at and a message key which can be mapped to suite your own needs.
 
 By default the [DefaultValidationService](src/main/java/de/chrgroth/generictypesystem/validation/impl/DefaultValidationService.java) is used. This service can be extended providing an implementation for [DefaultValidationServiceHooks](src/main/java/de/chrgroth/generictypesystem/validation/impl/DefaultValidationServiceHooks.java).
 
