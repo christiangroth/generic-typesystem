@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+# 0.2.0-SNAPSHOT (in progress)
+- ...
+
 # 0.1.0-SNAPSHOT
 - extracted from personal project
 - completed datamodel for type, attribute and item
