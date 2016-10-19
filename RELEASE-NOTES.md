@@ -1,8 +1,7 @@
 Release Notes
 =============
 
-0.1.0-SNAPSHOT (in progress)
-----------------------------
+# 0.1.0-SNAPSHOT
 - extracted from personal project
 - completed datamodel for type, attribute and item
 - implemented central typesystem service
@@ -15,4 +14,3 @@ Release Notes
 - prepared ownership and visibility in datamodel
 - prepared unit based attributes in datamodel
 - added much more unit tests
-- ...
