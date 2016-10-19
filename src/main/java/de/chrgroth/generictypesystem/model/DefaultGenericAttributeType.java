@@ -102,7 +102,7 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
 
     @Override
     public boolean isDefaultValueCapable() {
-        return this == DefaultGenericAttributeType.STRING || this == LONG || this == DOUBLE || this == BOOLEAN;
+        return this == STRING || this == LONG || this == DOUBLE || this == BOOLEAN;
     }
 
     @Override
@@ -133,7 +133,7 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
     public Object convert(java.lang.Object value) {
 
         // check value is assignable
-        if (!isDefaultValueCapable() || value == null || !isAssignableFrom(value.getClass())) {
+        if (value == null || !isAssignableFrom(value.getClass())) {
             return null;
         }
 

@@ -73,13 +73,35 @@ public class GenericItemTest {
 
     @Test
     public void nestedValue() {
+
+        // set some nested values
         Assert.assertNull(item.set("foo.bar.baz", "boom"));
+
+        // check nested items and value are created
         Assert.assertEquals(new GenericItem(), item.get("foo"));
         Assert.assertEquals(new GenericItem(), item.get("foo.bar"));
         Assert.assertEquals("boom", item.get("foo.bar.baz"));
+
+        // check direct access via nested items
         Assert.assertEquals("boom", ((GenericItem) item.get("foo")).get("bar.baz"));
         Assert.assertEquals("boom", ((GenericItem) ((GenericItem) item.get("foo")).get("bar")).get("baz"));
-        Assert.assertEquals("boom", item.remove("foo.bar.baz"));
-        Assert.assertNull(item.get("foo.bar.baz"));
+        Assert.assertEquals("boom", item.get("foo.bar.baz"));
+
+        // check value maps directly
+        Map<String, Object> valuesMap = item.getValues();
+        Assert.assertEquals(1, valuesMap.size());
+        Map<String, Object> nestedValuesMap = ((GenericItem) valuesMap.values().iterator().next()).getValues();
+        Assert.assertEquals(1, nestedValuesMap.size());
+        Map<String, Object> nestedNestedValuesMap = ((GenericItem) nestedValuesMap.values().iterator().next()).getValues();
+        Assert.assertEquals(1, nestedNestedValuesMap.size());
+    }
+
+    @Test
+    public void illegalPath() {
+        String invalidPath = "foo.bar.";
+        Assert.assertNull(item.set(invalidPath, "boom"));
+        Assert.assertNull(item.get(invalidPath));
+        Assert.assertNull(item.set(invalidPath, "boom2"));
+        Assert.assertNull(item.remove(invalidPath));
     }
 }
