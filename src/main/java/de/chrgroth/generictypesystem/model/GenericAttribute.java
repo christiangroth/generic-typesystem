@@ -1,6 +1,8 @@
 package de.chrgroth.generictypesystem.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +66,8 @@ public class GenericAttribute {
 
     private Set<GenericAttributeUnit> units;
 
+    private Map<String, Object> customProperties;
+
     public GenericAttribute() {
         this(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null);
     }
@@ -90,6 +94,7 @@ public class GenericAttribute {
         if (units != null) {
             this.units = new HashSet<>(units);
         }
+        customProperties = new HashMap<>();
     }
 
     /**
@@ -255,6 +260,14 @@ public class GenericAttribute {
         this.units = units;
     }
 
+    public Map<String, Object> getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Map<String, Object> customProperties) {
+        this.customProperties = customProperties;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -289,6 +302,6 @@ public class GenericAttribute {
     public String toString() {
         return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", mandatory=" + mandatory + ", structure="
                 + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultValueCallback="
-                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + "]";
+                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + ", customProperties=" + customProperties + "]";
     }
 }
