@@ -7,7 +7,7 @@ package de.chrgroth.generictypesystem.model;
  */
 public final class UnitValue {
     private String unit;
-    private Object value;
+    private GenericValue<?> value;
 
     public String getUnit() {
         return unit;
@@ -17,11 +17,11 @@ public final class UnitValue {
         this.unit = unit;
     }
 
-    public Object getValue() {
+    public GenericValue<?> getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(GenericValue<?> value) {
         this.value = value;
     }
 

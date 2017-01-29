@@ -7,6 +7,7 @@ import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
@@ -28,7 +29,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.BOOLEAN);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(Boolean.TRUE);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Boolean.class, Boolean.TRUE));
 
         // validate type
         validateType(new ValidationError[] {});
@@ -39,7 +40,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRING);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("foo");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
 
         // validate type
         validateType(new ValidationError[] {});
@@ -50,7 +51,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRING);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("foo");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
         type.attribute(ATTRIBUTE_NAME).setMin(5.0d);
 
         // validate type
@@ -62,7 +63,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRING);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("foo");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
         type.attribute(ATTRIBUTE_NAME).setMax(2.0d);
 
         // validate type
@@ -74,7 +75,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRING);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("foo");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
         type.attribute(ATTRIBUTE_NAME).setPattern("\\d+");
 
         // validate type
@@ -87,7 +88,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(-4l);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Long.class, -4l));
         type.attribute(ATTRIBUTE_NAME).setMin(5.0d);
 
         // validate type
@@ -99,7 +100,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4l);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Long.class, 4l));
         type.attribute(ATTRIBUTE_NAME).setMax(2.0d);
 
         // validate type
@@ -111,7 +112,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DOUBLE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4.0d);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Double.class, 4.0d));
         type.attribute(ATTRIBUTE_NAME).setMin(5.0d);
 
         // validate type
@@ -123,7 +124,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DOUBLE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(4.0d);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Double.class, 4.0d));
         type.attribute(ATTRIBUTE_NAME).setMax(2.0d);
 
         // validate type
@@ -135,7 +136,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DATE);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("01.01.2016");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "01.01.2016"));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
@@ -146,7 +147,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.DATETIME);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("01.01.2016 12:00:00.000");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "01.01.2016 12:00:00.000"));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
@@ -157,7 +158,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.TIME);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("12:00:00.000");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "12:00:00.000"));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
@@ -169,7 +170,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LIST);
         type.attribute(ATTRIBUTE_NAME).setValueType(DefaultGenericAttributeType.STRING);
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("[foo]");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "[foo]"));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
@@ -181,7 +182,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRUCTURE);
         type.attribute(ATTRIBUTE_NAME).setStructure(new GenericStructure());
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue("{foo:bar}");
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "{foo:bar}"));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });

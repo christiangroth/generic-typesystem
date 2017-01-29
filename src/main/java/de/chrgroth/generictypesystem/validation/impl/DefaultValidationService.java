@@ -18,6 +18,7 @@ import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
@@ -220,7 +221,7 @@ public class DefaultValidationService implements ValidationService {
     private void validateTypeAttributeDefaultValueDefinition(ValidationResult<GenericType> result, GenericAttribute a, String path) {
 
         // validate default value
-        Object defaultValue = a.getDefaultValue();
+        GenericValue<?> defaultValue = a.getDefaultValue();
         if (defaultValue != null) {
 
             // check if type is default value capable
@@ -229,26 +230,28 @@ public class DefaultValidationService implements ValidationService {
             } else if (a.getType() instanceof DefaultGenericAttributeType) {
 
                 // check for unit based attribute
-                Object defaultValueToBeChecked = defaultValue;
+                Object defaultValueToBeChecked = defaultValue.getValue();
                 boolean skipDefaultValueCheck = false;
                 if (a.isUnitBased()) {
 
                     // check for unit value
-                    if (!(defaultValue instanceof UnitValue)) {
+                    if (!(defaultValueToBeChecked instanceof UnitValue)) {
                         result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED);
                         skipDefaultValueCheck = true;
-                    }
+                    } else {
 
-                    // ensure unit reference is valid
-                    GenericAttributeUnit referencedAttributeUnit = a.getUnit(((UnitValue) defaultValue).getUnit());
-                    if (!skipDefaultValueCheck && referencedAttributeUnit == null) {
-                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
-                        skipDefaultValueCheck = true;
+                        // ensure unit reference is valid
+                        final String unitName = ((UnitValue) defaultValueToBeChecked).getUnit();
+                        GenericAttributeUnit referencedAttributeUnit = a.getUnit(unitName);
+                        if (!skipDefaultValueCheck && referencedAttributeUnit == null) {
+                            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
+                            skipDefaultValueCheck = true;
+                        }
                     }
 
                     // replace default value to be checked
                     if (!skipDefaultValueCheck) {
-                        defaultValueToBeChecked = ((UnitValue) defaultValue).getValue();
+                        defaultValueToBeChecked = ((UnitValue) defaultValueToBeChecked).getValue();
                     }
                 }
 
@@ -484,7 +487,8 @@ public class DefaultValidationService implements ValidationService {
 
             // unbox unit based value
             if (isUnitValue) {
-                checkValue = ((UnitValue) value).getValue();
+                final UnitValue unitValue = (UnitValue) value;
+                checkValue = unitValue.getValue() != null ? unitValue.getValue().getValue() : null;
             }
         }
 

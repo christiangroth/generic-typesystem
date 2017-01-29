@@ -60,6 +60,7 @@ A type attribute is defined by the following properties:
 - defaultValue, defaultValueCallback: optional default values and default value callback which may be invoked somwhere outside this framework on client side.
 - valueProposalDependencies: a list of attribute ids considered for value proposal. See [value proposals section](#value-proposals) under [persistence](#persistence)
 - units: defines if the attribute is unit based if any unit definitions are provided. See [below](#attribute-units)
+- customProperties: optional *java.util.Map* of custom properties to be used for project based customization  
 
 Further more each attribute has a unique path in context of a type. The path is formed using the attribute name and a dot for nested structures. The path is relevant when working with [items](#items).
 

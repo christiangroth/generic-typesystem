@@ -13,6 +13,7 @@ import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
@@ -69,7 +70,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
         attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         UnitValue value = new UnitValue();
         value.setUnit("minutes");
-        value.setValue(1);
+        value.setValue(new GenericValue<>(Double.class, 1.0d));
         value(value);
         validateItem(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED),
                 new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID));
@@ -105,7 +106,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
         attribute.getUnits().add(secondsUnit);
         UnitValue value = new UnitValue();
         value.setUnit("minutes");
-        value.setValue(1);
+        value.setValue(new GenericValue<>(Double.class, 1.0d));
         value(value);
         validateItem();
     }

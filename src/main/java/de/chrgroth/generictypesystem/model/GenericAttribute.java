@@ -40,6 +40,8 @@ import org.apache.commons.lang3.StringUtils;
  * <dd>An optional list of value proposal dependencies, referencing other attribute ids. Primarily used for UI purposes.</dd>
  * <dt>units</dt>
  * <dd>An optional list of attribute value units.</dd>
+ * <dt>customProperties</dt>
+ * <dd>A map holding optional custom properties to be used by concrete projects for simple type attribute extension.</dd>
  * </dl>
  *
  * @author Christian Groth
@@ -59,21 +61,21 @@ public class GenericAttribute {
     private Double step;
     private String pattern;
 
-    private Object defaultValue;
+    private GenericValue<?> defaultValue;
     private String defaultValueCallback;
 
     private Set<Long> valueProposalDependencies;
 
     private Set<GenericAttributeUnit> units;
 
-    private Map<String, Object> customProperties;
+    private Map<String, GenericValue<?>> customProperties;
 
     public GenericAttribute() {
         this(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null);
     }
 
     public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure,
-            Double min, Double max, Double step, String pattern, String defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
+            Double min, Double max, Double step, String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
             Set<GenericAttributeUnit> units) {
         this.id = id;
         this.name = name;
@@ -228,11 +230,11 @@ public class GenericAttribute {
         this.pattern = pattern;
     }
 
-    public Object getDefaultValue() {
+    public GenericValue<?> getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(Object defaultValue) {
+    public void setDefaultValue(GenericValue<?> defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -260,11 +262,11 @@ public class GenericAttribute {
         this.units = units;
     }
 
-    public Map<String, Object> getCustomProperties() {
+    public Map<String, GenericValue<?>> getCustomProperties() {
         return customProperties;
     }
 
-    public void setCustomProperties(Map<String, Object> customProperties) {
+    public void setCustomProperties(Map<String, GenericValue<?>> customProperties) {
         this.customProperties = customProperties;
     }
 

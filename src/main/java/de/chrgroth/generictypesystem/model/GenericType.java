@@ -36,7 +36,7 @@ public class GenericType extends GenericStructure {
 
     private Long pageSize;
 
-    private Map<String, Object> customProperties;
+    private Map<String, GenericValue<?>> customProperties;
 
     public GenericType() {
         this(null, null, null, null, null, null, null);
@@ -101,11 +101,11 @@ public class GenericType extends GenericStructure {
         this.pageSize = pageSize;
     }
 
-    public Map<String, Object> getCustomProperties() {
+    public Map<String, GenericValue<?>> getCustomProperties() {
         return customProperties;
     }
 
-    public void setCustomProperties(Map<String, Object> customProperties) {
+    public void setCustomProperties(Map<String, GenericValue<?>> customProperties) {
         this.customProperties = customProperties;
     }
 
