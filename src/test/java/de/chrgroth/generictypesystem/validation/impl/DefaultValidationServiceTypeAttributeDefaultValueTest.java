@@ -1,17 +1,20 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
+import java.util.HashSet;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
+import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.model.GenericValue;
+import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-// TODO recap all unit tests regarding default values to increase test coverage
 public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseValidationServiceTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
@@ -186,5 +189,58 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED) });
+    }
+
+    @Test
+    public void valueTypeMismatch() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.STRING);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Long.class, 12l));
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_TYPE_INVALID, Long.class) });
+    }
+
+    @Test
+    public void unitBasedValue() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
+        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue("base", new GenericValue<>(Long.class, 12l))));
+
+        // validate type
+        validateType(new ValidationError[] {});
+    }
+
+    @Test
+    public void unitBasedValueUnknownUnit() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
+        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue("unknown", new GenericValue<>(Long.class, 12l))));
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT) });
+    }
+
+    @Test
+    public void unitBasedValueNoUnitValue() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
+        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
+        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Long.class, 12l));
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED) });
     }
 }

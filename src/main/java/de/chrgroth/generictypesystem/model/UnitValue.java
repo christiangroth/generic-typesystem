@@ -9,6 +9,15 @@ public final class UnitValue {
     private String unit;
     private GenericValue<?> value;
 
+    public UnitValue() {
+        this(null, null);
+    }
+
+    public UnitValue(String unit, GenericValue<?> value) {
+        this.unit = unit;
+        this.value = value;
+    }
+
     public String getUnit() {
         return unit;
     }

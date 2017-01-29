@@ -251,7 +251,7 @@ public class DefaultValidationService implements ValidationService {
 
                     // replace default value to be checked
                     if (!skipDefaultValueCheck) {
-                        defaultValueToBeChecked = ((UnitValue) defaultValueToBeChecked).getValue();
+                        defaultValueToBeChecked = ((UnitValue) defaultValueToBeChecked).getValue().getValue();
                     }
                 }
 
