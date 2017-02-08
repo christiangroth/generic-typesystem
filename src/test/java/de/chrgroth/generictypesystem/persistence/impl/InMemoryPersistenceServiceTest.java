@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
@@ -11,10 +13,14 @@ import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValuePropos
 
 public class InMemoryPersistenceServiceTest {
 
+    private GenericTypesystemContext context;
     private InMemoryPersistenceService service;
 
     @Before
     public void setup() {
+
+        // create context & service
+        context = new NullGenericTypesystemContext();
         service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10), new InMemoryValueProposalService());
     }
 
@@ -32,79 +38,79 @@ public class InMemoryPersistenceServiceTest {
     public void typeAndItemLifecycle() {
 
         // assert empty
-        Assert.assertTrue(service.types().isEmpty());
-        Assert.assertTrue(service.typeGroups().isEmpty());
+        Assert.assertTrue(service.types(context).isEmpty());
+        Assert.assertTrue(service.typeGroups(context).isEmpty());
 
         // add type
         GenericType type = new GenericType(null, "name", "group", null, null, null, null);
-        service.type(type);
+        service.type(context, type);
 
         // ensure id was set
         Assert.assertEquals(1l, type.getId().longValue());
 
         // assert type data
-        Assert.assertFalse(service.types().isEmpty());
-        Assert.assertEquals(1, service.types().size());
-        Assert.assertEquals(type, service.types().iterator().next());
-        Assert.assertNotNull(service.type(type.getId()));
-        Assert.assertFalse(service.typeGroups().isEmpty());
-        Assert.assertEquals(1, service.typeGroups().size());
-        Assert.assertEquals(type.getGroup(), service.typeGroups().iterator().next());
+        Assert.assertFalse(service.types(context).isEmpty());
+        Assert.assertEquals(1, service.types(context).size());
+        Assert.assertEquals(type, service.types(context).iterator().next());
+        Assert.assertNotNull(service.type(context, type.getId()));
+        Assert.assertFalse(service.typeGroups(context).isEmpty());
+        Assert.assertEquals(1, service.typeGroups(context).size());
+        Assert.assertEquals(type.getGroup(), service.typeGroups(context).iterator().next());
 
         // add type again
-        service.type(type);
+        service.type(context, type);
 
         // assert type data not duplicate
-        Assert.assertEquals(1, service.types().size());
-        Assert.assertEquals(1, service.typeGroups().size());
+        Assert.assertEquals(1, service.types(context).size());
+        Assert.assertEquals(1, service.typeGroups(context).size());
 
         // remove non existing type
-        Assert.assertTrue(service.removeType(Long.MAX_VALUE));
-        Assert.assertEquals(1, service.types().size());
-        Assert.assertEquals(1, service.typeGroups().size());
+        Assert.assertTrue(service.removeType(context, Long.MAX_VALUE));
+        Assert.assertEquals(1, service.types(context).size());
+        Assert.assertEquals(1, service.typeGroups(context).size());
 
         // add items for type
         GenericItem item = new GenericItem(null, type.getId(), null, null, null);
-        service.item(type, item);
-        service.item(type, new GenericItem(2l, type.getId(), null, null, null));
-        service.item(type, new GenericItem(3l, type.getId(), null, null, null));
+        service.item(context, type, item);
+        service.item(context, type, new GenericItem(2l, type.getId(), null, null, null));
+        service.item(context, type, new GenericItem(3l, type.getId(), null, null, null));
 
         // ensure id was set
         Assert.assertEquals(1l, item.getId().longValue());
 
         // assert item data
-        Assert.assertEquals(3, service.items(type.getId()).size());
-        Assert.assertNotNull(service.item(type.getId(), 1l));
-        Assert.assertNotNull(service.item(type.getId(), 2l));
-        Assert.assertNotNull(service.item(type.getId(), 3l));
+        Assert.assertEquals(3, service.items(context, type.getId()).size());
+        Assert.assertNotNull(service.item(context, type.getId(), 1l));
+        Assert.assertNotNull(service.item(context, type.getId(), 2l));
+        Assert.assertNotNull(service.item(context, type.getId(), 3l));
 
         // remove item
-        Assert.assertTrue(service.removeItem(type.getId(), 1l));
-        Assert.assertEquals(2, service.items(type.getId()).size());
-        Assert.assertNotNull(service.item(type.getId(), 2l));
-        Assert.assertNotNull(service.item(type.getId(), 3l));
+        Assert.assertTrue(service.removeItem(context, type.getId(), 1l));
+        Assert.assertEquals(2, service.items(context, type.getId()).size());
+        Assert.assertNotNull(service.item(context, type.getId(), 2l));
+        Assert.assertNotNull(service.item(context, type.getId(), 3l));
 
         // add item for non existing type
         GenericType newType = new GenericType(2l, "new-name", "group", null, null, null, null);
-        service.item(newType, new GenericItem(1l, newType.getId(), null, null, null));
+        service.item(context, newType, new GenericItem(1l, newType.getId(), null, null, null));
 
         // assert type and item data
-        Assert.assertEquals(2, service.types().size());
-        Assert.assertEquals(1, service.typeGroups().size());
-        Assert.assertEquals(2, service.items(type.getId()).size());
-        Assert.assertEquals(1, service.items(newType.getId()).size());
+        Assert.assertEquals(2, service.types(context).size());
+        Assert.assertEquals(1, service.typeGroups(context).size());
+        Assert.assertEquals(2, service.items(context, type.getId()).size());
+        Assert.assertEquals(1, service.items(context, newType.getId()).size());
 
         // remove new type and assert items are also removed
-        Assert.assertTrue(service.removeType(newType.getId()));
-        Assert.assertEquals(1, service.types().size());
-        Assert.assertEquals(1, service.typeGroups().size());
-        Assert.assertEquals(2, service.items(type.getId()).size());
-        Assert.assertEquals(0, service.items(newType.getId()).size());
+        Assert.assertTrue(service.removeType(context, newType.getId()));
+        Assert.assertEquals(1, service.types(context).size());
+        Assert.assertEquals(1, service.typeGroups(context).size());
+        Assert.assertEquals(2, service.items(context, type.getId()).size());
+        Assert.assertEquals(0, service.items(context, newType.getId()).size());
 
         // remove type
-        service.removeType(type.getId().longValue());
-        Assert.assertTrue(service.types().isEmpty());
-        Assert.assertNull(service.type(type.getId()));
-        Assert.assertTrue(service.typeGroups().isEmpty());
+        service.removeType(context, type.getId().longValue());
+        Assert.assertTrue(service.types(context).isEmpty());
+        Assert.assertNull(service.type(context, type.getId()));
+        Assert.assertTrue(service.typeGroups(context).isEmpty());
     }
 }

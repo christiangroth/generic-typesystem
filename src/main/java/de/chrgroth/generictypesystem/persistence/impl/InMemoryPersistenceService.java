@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
@@ -25,6 +26,7 @@ import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValuePropos
  *
  * @author Christian Groth
  */
+// TODO add unit tests with visibility checks
 public class InMemoryPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryPersistenceService.class);
@@ -51,23 +53,29 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public Set<String> typeGroups() {
-        return types.stream().map(t -> t.getGroup()).distinct().collect(Collectors.toSet());
+    public Set<String> typeGroups(GenericTypesystemContext context) {
+        return types(context).stream().map(t -> t.getGroup()).distinct().collect(Collectors.toSet());
     }
 
     @Override
-    public Set<GenericType> types() {
-        return new HashSet<>(types);
+    public Set<GenericType> types(GenericTypesystemContext context) {
+        return types.stream().filter(context::isTypeAccessible).collect(Collectors.toSet());
     }
 
     @Override
-    public GenericType type(long typeId) {
-        return types.stream().filter(t -> t.getId() != null && t.getId().longValue() == typeId).findFirst().orElse(null);
+    public GenericType type(GenericTypesystemContext context, long typeId) {
+        return types(context).stream().filter(t -> t.getId() != null && t.getId().longValue() == typeId).findFirst().orElse(null);
     }
 
     @Override
-    public void type(GenericType type) {
+    public void type(GenericTypesystemContext context, GenericType type) {
         if (type != null) {
+
+            // check if accessible
+            if (!context.isTypeAccessible(type)) {
+                LOG.error("unable to save/update inaccessible type " + type + ": " + context.currentUser());
+                return;
+            }
 
             // ensure id
             if (type.getId() == null) {
@@ -89,46 +97,61 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public Set<GenericItem> items(long typeId) {
+    public Set<GenericItem> items(GenericTypesystemContext context, long typeId) {
+
+        // check type access
+        GenericType type = type(context, typeId);
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to retrieve items for inaccessible type " + type + ": " + context.currentUser());
+            return Collections.emptySet();
+        }
 
         // be null safe
         Set<GenericItem> typeItems = items.get(typeId);
-        return typeItems != null ? new HashSet<>(typeItems) : Collections.emptySet();
+        if (typeItems == null) {
+            return Collections.emptySet();
+        }
+
+        // return filtered types
+        return typeItems.stream().filter(i -> context.isItemAccessible(type, i)).collect(Collectors.toSet());
     }
 
     @Override
-    public ItemQueryResult query(long typeId, ItemsQueryData data) {
+    public ItemQueryResult query(GenericTypesystemContext context, long typeId, ItemsQueryData data) {
+
+        // check if accessible
+        GenericType type = type(context, typeId);
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to query items for inaccessible type " + type + ": " + context.currentUser());
+            new ItemQueryResult(Collections.emptyList(), false);
+        }
 
         // check for paging data
         if (data != null && data.getPaging() != null) {
 
-            // check for missing or invalid page size
+            // check for missing or invalid page size and use types configured and valid page size
             ItemPagingData paging = data.getPaging();
-            if (paging.getPageSize() == null || paging.getPageSize().intValue() < 1) {
-
-                // use types configured and valid page size
-                GenericType type = type(typeId);
-                if (type != null && type.getPageSize() != null && type.getPageSize().longValue() > 0) {
-                    paging.setPageSize(type.getPageSize());
-                }
+            if ((paging.getPageSize() == null || paging.getPageSize().intValue() < 1) && type != null && type.getPageSize() != null && type.getPageSize().longValue() > 0) {
+                paging.setPageSize(type.getPageSize());
             }
         }
 
         // delegate
-        return query.query(items(typeId), data != null ? data.getFilter() : null, data != null ? data.getSorts() : null, data != null ? data.getPaging() : null);
+        return query.query(items(context, typeId), data != null ? data.getFilter() : null, data != null ? data.getSorts() : null, data != null ? data.getPaging() : null);
     }
 
     @Override
-    public Map<String, List<?>> values(long typeId, GenericItem template) {
+    public Map<String, List<?>> values(GenericTypesystemContext context, long typeId, GenericItem template) {
 
         // ensure type
-        GenericType type = type(typeId);
-        if (type == null) {
+        GenericType type = type(context, typeId);
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to calculate item values for inaccessible type " + type + ": " + context.currentUser());
             return Collections.emptyMap();
         }
 
         // collect all items
-        Set<GenericItem> items = items(typeId);
+        Set<GenericItem> items = items(context, typeId);
         if (items == null || items.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -138,16 +161,28 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public GenericItem item(long typeId, long id) {
-        return items(typeId).stream().filter(i -> i.getId() != null && i.getId().longValue() == id).findFirst().orElse(null);
+    public GenericItem item(GenericTypesystemContext context, long typeId, long id) {
+        return items(context, typeId).stream().filter(i -> i.getId() != null && i.getId().longValue() == id).findFirst().orElse(null);
     }
 
     @Override
-    public void item(GenericType type, GenericItem item) {
+    public void item(GenericTypesystemContext context, GenericType type, GenericItem item) {
         if (type != null && item != null) {
 
+            // check if accessible
+            if (!context.isTypeAccessible(type)) {
+                LOG.error("unable to save/update item for inaccessible type " + type + ": " + context.currentUser());
+                return;
+            }
+
+            // check if accessible
+            if (!context.isItemAccessible(type, item)) {
+                LOG.error("unable to save/update inaccessible item " + item + ": " + context.currentUser());
+                return;
+            }
+
             // ensure type
-            type(type);
+            type(context, type);
             if (type.getId() != null) {
 
                 // ensure id
@@ -167,12 +202,26 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public boolean removeItem(long typeId, long id) {
+    public boolean removeItem(GenericTypesystemContext context, long typeId, long id) {
+
+        // check if accessible
+        GenericType type = type(context, typeId);
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to remove item for inaccessible type " + type + ": " + context.currentUser());
+            return false;
+        }
+
+        // check if accessible
+        GenericItem item = item(context, typeId, id);
+        if (!context.isItemAccessible(type, item)) {
+            LOG.error("unable to remove inaccessible item " + item + ": " + context.currentUser());
+            return false;
+        }
 
         // just remove
         Set<GenericItem> typeItems = items.get(typeId);
         if (typeItems != null) {
-            typeItems.removeIf(i -> i.getId() != null && i.getId().longValue() == id);
+            typeItems.remove(item);
         }
 
         // always success, no error handling
@@ -183,7 +232,14 @@ public class InMemoryPersistenceService implements PersistenceService {
     }
 
     @Override
-    public boolean removeType(long typeId) {
+    public boolean removeType(GenericTypesystemContext context, long typeId) {
+
+        // check if accessible
+        GenericType type = type(context, typeId);
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to remove inaccessible type " + type + ": " + context.currentUser());
+            return false;
+        }
 
         // just remove
         types.removeIf(t -> t.getId() != null && t.getId().longValue() == typeId);

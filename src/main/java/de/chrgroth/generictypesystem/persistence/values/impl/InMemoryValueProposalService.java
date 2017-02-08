@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
@@ -31,8 +32,8 @@ public class InMemoryValueProposalService {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryValueProposalService.class);
 
     /**
-     * Computes all value proposals for given type and items and optional template item. See {@link PersistenceService#values(long, GenericItem)} for more
-     * details.
+     * Computes all value proposals for given type and items and optional template item. See
+     * {@link PersistenceService#values(GenericTypesystemContext, long, GenericItem)} for more details.
      *
      * @param type
      *            type definition

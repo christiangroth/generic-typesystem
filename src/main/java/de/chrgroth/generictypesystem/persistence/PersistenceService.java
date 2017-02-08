@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -18,106 +19,128 @@ import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 public interface PersistenceService {
 
     /**
-     * Returns all known type groups.
+     * Returns groups for all known and accessible types.
      *
+     * @param context
+     *            current context
      * @return known type groups
      */
-    Set<String> typeGroups();
+    Set<String> typeGroups(GenericTypesystemContext context);
 
     /**
-     * Returns all known types.
+     * Returns all known and accessible types.
      *
+     * @param context
+     *            current context
      * @return known types
      */
-    Set<GenericType> types();
+    Set<GenericType> types(GenericTypesystemContext context);
 
     /**
-     * Returns the type with given id.
+     * Returns the type with given id. If the type is not accessible null will be returned instead.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @return known type or null
      */
-    GenericType type(long typeId);
+    GenericType type(GenericTypesystemContext context, long typeId);
 
     /**
-     * Saves the given type or updates it if a type with same id is already known.
+     * Saves the given type or updates it if a type with same id is already known. If the type is not accessible the operation will be ignored.
      *
+     * @param context
+     *            current context
      * @param type
      *            type to be saved
      */
-    void type(GenericType type);
+    void type(GenericTypesystemContext context, GenericType type);
 
     /**
-     * Returns all known items for given type id.
+     * Returns all known and accessible items for given type id.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @return known items
      */
-    Set<GenericItem> items(long typeId);
+    Set<GenericItem> items(GenericTypesystemContext context, long typeId);
 
     /**
      * Returns item query result for given query data.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param data
      *            query data
      * @return query result
      */
-    ItemQueryResult query(long typeId, ItemsQueryData data);
+    ItemQueryResult query(GenericTypesystemContext context, long typeId, ItemsQueryData data);
 
     /**
      * Returns all value proposals wrapped in a map with key representing the attribute path and value the list of value proposals. If the given template item
      * is not null, only items matching the values for defined {@link GenericAttribute#getValueProposalDependencies()} will be processed.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param template
      *            optional template item
      * @return value proposals
      */
-    Map<String, List<?>> values(long typeId, GenericItem template);
+    Map<String, List<?>> values(GenericTypesystemContext context, long typeId, GenericItem template);
 
     /**
-     * Returns the item with given type id and item id.
+     * Returns the item with given type id and item id. If type or item are not accessible null will be returned instead.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param id
      *            item id
      * @return known item or null
      */
-    GenericItem item(long typeId, long id);
+    GenericItem item(GenericTypesystemContext context, long typeId, long id);
 
     /**
-     * Saves the given item or updates it if an item with same id is already known.
+     * Saves the given item or updates it if an item with same id is already known. If the type or item is not accessible the operation will be ignored.
      *
+     * @param context
+     *            current context
      * @param type
      *            type the item belongs to
      * @param item
      *            item to be saved
      */
-    void item(GenericType type, GenericItem item);
+    void item(GenericTypesystemContext context, GenericType type, GenericItem item);
 
     /**
-     * Removes the item for given type id and item id.
+     * Removes the item for given type id and item id. If the type or item is not accessible the operation will be ignored.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param id
      *            item id
      * @return true if item is no longer known after this operation, false otherwise
      */
-    boolean removeItem(long typeId, long id);
+    boolean removeItem(GenericTypesystemContext context, long typeId, long id);
 
     /**
-     * Removes the type and all it's items for given type id.
+     * Removes the type and all it's items for given type id. If the type is not accessible the operation will be ignored.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @return true if type is no longer known after this operation, false otherwise
      */
-    boolean removeType(long typeId);
+    boolean removeType(GenericTypesystemContext context, long typeId);
 }

@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -22,6 +24,7 @@ public class GenericTypesystemServiceTest {
     @Mock
     private PersistenceService persistence;
 
+    private GenericTypesystemContext context;
     private GenericTypesystemService service;
 
     @Before
@@ -30,20 +33,21 @@ public class GenericTypesystemServiceTest {
         // init mocks
         MockitoAnnotations.initMocks(this);
 
-        // create service
+        // create context & service
+        context = new NullGenericTypesystemContext();
         service = new GenericTypesystemService(validation, persistence);
     }
 
     @Test
     public void typeGroups() {
-        service.typeGroups();
-        Mockito.verify(persistence, Mockito.times(1)).typeGroups();
+        service.typeGroups(context);
+        Mockito.verify(persistence, Mockito.times(1)).typeGroups(context);
     }
 
     @Test
     public void types() {
-        service.types();
-        Mockito.verify(persistence, Mockito.times(1)).types();
+        service.types(context);
+        Mockito.verify(persistence, Mockito.times(1)).types(context);
     }
 
     @Test
@@ -54,8 +58,8 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validation.validate(Mockito.any())).thenReturn(validationResult);
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
-        service.type(null);
-        Mockito.verify(persistence, Mockito.times(0)).type(Mockito.any());
+        service.type(context, null);
+        Mockito.verify(persistence, Mockito.times(0)).type(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -75,22 +79,22 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.TRUE);
 
         // call service
-        service.type(type);
+        service.type(context, type);
         long attributesWithoutId = type.getAttributes().stream().filter(a -> a.getId() == null).count();
         Assert.assertEquals(0, attributesWithoutId);
-        Mockito.verify(persistence, Mockito.times(1)).type(Mockito.any());
+        Mockito.verify(persistence, Mockito.times(1)).type(Mockito.any(), Mockito.any());
     }
 
     @Test
     public void query() {
-        service.query(2l, null);
-        Mockito.verify(persistence, Mockito.times(1)).query(2l, null);
+        service.query(context, 2l, null);
+        Mockito.verify(persistence, Mockito.times(1)).query(Mockito.any(), Mockito.eq(2l), Mockito.isNull());
     }
 
     @Test
     public void item() {
-        service.item(2l, 3l);
-        Mockito.verify(persistence, Mockito.times(1)).item(2l, 3l);
+        service.item(context, 2l, 3l);
+        Mockito.verify(persistence, Mockito.times(1)).item(Mockito.any(), Mockito.eq(2l), Mockito.eq(3l));
     }
 
     @Test
@@ -101,23 +105,23 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validation.validate(Mockito.any(), Mockito.any())).thenReturn(validationResult);
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
-        service.item(2l, null);
-        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any());
+        service.item(context, 2l, null);
+        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
     public void itemTypeUnknown() {
 
         // unknown type
-        Mockito.when(persistence.type(2l)).thenReturn(null);
+        Mockito.when(persistence.type(context, 2l)).thenReturn(null);
 
         // null type is invalid
         ValidationResult<GenericItem> validationResult = Mockito.mock(ValidationResult.class);
         Mockito.when(validation.validate(Mockito.any(), Mockito.any())).thenReturn(validationResult);
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
-        service.item(2l, new GenericItem());
-        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any());
+        service.item(context, 2l, new GenericItem());
+        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -126,7 +130,7 @@ public class GenericTypesystemServiceTest {
         // unknown type
         GenericType type = new GenericType();
         type.setId(666l);
-        Mockito.when(persistence.type(666l)).thenReturn(type);
+        Mockito.when(persistence.type(context, 666l)).thenReturn(type);
 
         // type and item are valid
         ValidationResult<GenericItem> validationResult = Mockito.mock(ValidationResult.class);
@@ -134,26 +138,26 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.TRUE);
 
         GenericItem item = new GenericItem();
-        service.item(type.getId(), item);
+        service.item(context, type.getId(), item);
         Assert.assertEquals(666l, item.getTypeId().longValue());
-        Mockito.verify(persistence, Mockito.times(1)).item(Mockito.eq(type), Mockito.eq(item));
+        Mockito.verify(persistence, Mockito.times(1)).item(Mockito.any(), Mockito.eq(type), Mockito.eq(item));
     }
 
     @Test
     public void values() {
-        service.values(0l, null);
-        Mockito.verify(persistence, Mockito.times(1)).values(0l, null);
+        service.values(context, 0l, null);
+        Mockito.verify(persistence, Mockito.times(1)).values(context, 0l, null);
     }
 
     @Test
     public void removeItem() {
-        service.removeItem(0l, 0l);
-        Mockito.verify(persistence, Mockito.times(1)).removeItem(0l, 0l);
+        service.removeItem(context, 0l, 0l);
+        Mockito.verify(persistence, Mockito.times(1)).removeItem(context, 0l, 0l);
     }
 
     @Test
     public void removeType() {
-        service.removeType(0l);
-        Mockito.verify(persistence, Mockito.times(1)).removeType(0l);
+        service.removeType(context, 0l);
+        Mockito.verify(persistence, Mockito.times(1)).removeType(context, 0l);
     }
 }

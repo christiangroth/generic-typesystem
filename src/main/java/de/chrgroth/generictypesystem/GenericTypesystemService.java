@@ -7,6 +7,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
@@ -20,6 +22,7 @@ import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationService;
 import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmptyHooks;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceMessageKey;
 
 /**
  * The main service dealing with generic typesystem. Most of the functionality is delegated to {@link ValidationService} and {@link PersistenceService} which
@@ -28,7 +31,6 @@ import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceEmp
  * @author Christian Groth
  */
 // TODO add createItem - also considering default values
-// TODO add security / visibility service and some kind of context ... might be placed in persistence service??
 public class GenericTypesystemService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
@@ -52,31 +54,69 @@ public class GenericTypesystemService {
     }
 
     /**
-     * Returns all type groups as defined by {@link PersistenceService#typeGroups()}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public Set<String> typeGroups() {
+        return typeGroups(new NullGenericTypesystemContext());
+    }
+
+    /**
+     * Returns all type groups as defined by {@link PersistenceService#typeGroups(GenericTypesystemContext)}.
      *
+     * @param context
+     *            current context
      * @return type groups
      */
-    public Set<String> typeGroups() {
-        return persistence.typeGroups();
+    public Set<String> typeGroups(GenericTypesystemContext context) {
+        return persistence.typeGroups(context);
     }
 
     /**
-     * Returns all types as defined by {@link PersistenceService#types()}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public Set<GenericType> types() {
+        return types(new NullGenericTypesystemContext());
+    }
+
+    /**
+     * Returns all types as defined by {@link PersistenceService#types(GenericTypesystemContext)}.
      *
+     * @param context
+     *            current context
      * @return type
      */
-    public Set<GenericType> types() {
-        return persistence.types();
+    public Set<GenericType> types(GenericTypesystemContext context) {
+        return persistence.types(context);
     }
 
     /**
-     * Ensures an unique id for all type attributes, validates the type and if the type is valid {@link PersistenceService#type(GenericType)} will be invoked.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public ValidationResult<GenericType> type(GenericType type) {
+        return type(new NullGenericTypesystemContext(), type);
+    }
+
+    /**
+     * Ensures an unique id for all type attributes, validates the type and if the type is valid
+     * {@link PersistenceService#type(GenericTypesystemContext, GenericType)} will be invoked.
      *
+     * @param context
+     *            current context
      * @param type
      *            type to be handled
      * @return validation result
      */
-    public ValidationResult<GenericType> type(GenericType type) {
+    public ValidationResult<GenericType> type(GenericTypesystemContext context, GenericType type) {
+
+        // check type accessibility
+        if (!context.isTypeAccessible(type)) {
+            final ValidationResult<GenericType> validationResult = new ValidationResult<>(type);
+            validationResult.error("", DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
+            return validationResult;
+        }
 
         // ensure all type attributes have an id
         if (type != null && type.getAttributes() != null) {
@@ -101,7 +141,7 @@ public class GenericTypesystemService {
 
         // save / update
         if (validationResult.isValid()) {
-            persistence.type(type);
+            persistence.type(context, type);
         } else if (LOG.isDebugEnabled()) {
             LOG.debug("skip persisting invalid type " + (type != null ? type.getId() : null));
         }
@@ -115,45 +155,89 @@ public class GenericTypesystemService {
     }
 
     /**
-     * Returns the query result as defined by {@link PersistenceService#query(long, ItemsQueryData)}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public ItemQueryResult query(long typeId, ItemsQueryData data) {
+        return query(new NullGenericTypesystemContext(), typeId, data);
+    }
+
+    /**
+     * Returns the query result as defined by {@link PersistenceService#query(GenericTypesystemContext, long, ItemsQueryData)}.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param data
      *            query data
      * @return query result
      */
-    public ItemQueryResult query(long typeId, ItemsQueryData data) {
-        return persistence.query(typeId, data);
+    public ItemQueryResult query(GenericTypesystemContext context, long typeId, ItemsQueryData data) {
+        return persistence.query(context, typeId, data);
     }
 
     /**
-     * Returns the item as defined by {@link PersistenceService#item(long, long)}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public GenericItem item(long typeId, long id) {
+        return item(new NullGenericTypesystemContext(), typeId, id);
+    }
+
+    /**
+     * Returns the item as defined by {@link PersistenceService#item(GenericTypesystemContext, long, long)}.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param id
      *            item id
      * @return item
      */
-    public GenericItem item(long typeId, long id) {
-        return persistence.item(typeId, id);
+    public GenericItem item(GenericTypesystemContext context, long typeId, long id) {
+        return persistence.item(context, typeId, id);
+    }
+
+    /**
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public ValidationResult<GenericItem> item(long typeId, GenericItem item) {
+        return item(new NullGenericTypesystemContext(), typeId, item);
     }
 
     /**
      * Ensures {@link GenericItem#getTypeId()} is set to given type, validates the type and item and if the result is valid
-     * {@link PersistenceService#item(GenericType, GenericItem)} will be invoked.
+     * {@link PersistenceService#item(GenericTypesystemContext, GenericType, GenericItem)} will be invoked.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param item
      *            optional template item
      * @return validation result
      */
-    public ValidationResult<GenericItem> item(long typeId, GenericItem item) {
+    public ValidationResult<GenericItem> item(GenericTypesystemContext context, long typeId, GenericItem item) {
 
         // get type
-        GenericType type = persistence.type(typeId);
+        GenericType type = persistence.type(context, typeId);
+
+        // check type accessibility
+        if (!context.isTypeAccessible(type)) {
+            final ValidationResult<GenericItem> validationResult = new ValidationResult<>(null);
+            validationResult.error("", DefaultValidationServiceMessageKey.GENERAL_TYPE_NOT_PROVIDED);
+            return validationResult;
+        }
+
+        // check item accessibility
+        if (!context.isItemAccessible(type, item)) {
+            final ValidationResult<GenericItem> validationResult = new ValidationResult<>(null);
+            validationResult.error("", DefaultValidationServiceMessageKey.GENERAL_ITEM_NOT_PROVIDED);
+            return validationResult;
+        }
 
         // ensure generic type id
         if (type != null && item != null) {
@@ -165,7 +249,7 @@ public class GenericTypesystemService {
 
         // save / update
         if (validationResult.isValid()) {
-            persistence.item(type, item);
+            persistence.item(context, type, item);
         } else if (LOG.isDebugEnabled()) {
             LOG.debug("skip persisting invalid item " + typeId + "/" + (item != null ? item.getId() : null));
         }
@@ -175,39 +259,69 @@ public class GenericTypesystemService {
     }
 
     /**
-     * Returns the value proposals as defined by {@link PersistenceService#values(long, GenericItem)}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public Map<String, List<?>> values(long typeId, GenericItem template) {
+        return values(new NullGenericTypesystemContext(), typeId, template);
+    }
+
+    /**
+     * Returns the value proposals as defined by {@link PersistenceService#values(GenericTypesystemContext, long, GenericItem)}.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param template
      *            optional template item
      * @return value proposals
      */
-    public Map<String, List<?>> values(long typeId, GenericItem template) {
-        return persistence.values(typeId, template);
+    public Map<String, List<?>> values(GenericTypesystemContext context, long typeId, GenericItem template) {
+        return persistence.values(context, typeId, template);
     }
 
     /**
-     * Deletes the item as defined by {@link PersistenceService#removeItem(long, long)}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public boolean removeItem(long typeId, long id) {
+        return removeItem(new NullGenericTypesystemContext(), typeId, id);
+    }
+
+    /**
+     * Deletes the item as defined by {@link PersistenceService#removeItem(GenericTypesystemContext, long, long)}.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @param id
      *            item id
      * @return true if successful, false otherwise
      */
-    public boolean removeItem(long typeId, long id) {
-        return persistence.removeItem(typeId, id);
+    public boolean removeItem(GenericTypesystemContext context, long typeId, long id) {
+        return persistence.removeItem(context, typeId, id);
     }
 
     /**
-     * Deletes the type as defined by {@link PersistenceService#removeType(long)}.
+     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
+     */
+    @Deprecated
+    public boolean removeType(long typeId) {
+        return removeType(new NullGenericTypesystemContext(), typeId);
+    }
+
+    /**
+     * Deletes the type as defined by {@link PersistenceService#removeType(GenericTypesystemContext, long)}.
      *
+     * @param context
+     *            current context
      * @param typeId
      *            type id
      * @return true if successful, false otherwise
      */
-    public boolean removeType(long typeId) {
-        return persistence.removeType(typeId);
+    public boolean removeType(GenericTypesystemContext context, long typeId) {
+        return persistence.removeType(context, typeId);
     }
 }

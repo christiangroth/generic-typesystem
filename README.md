@@ -90,6 +90,12 @@ The main service to handle generic typesystem is [GenericTypesystemService](src/
 
 Thus [GenericTypesystemService](src/main/java/de/chrgroth/generictypesystem/GenericTypesystemService.java) itself contains only a minimum amount of business logic and mainly prepares and composes or just delegates calls to defined sub-services.
 
+Every public method takes an instance of [GenericTypesystemContext](src/main/java/de/chrgroth/generictypesystem/context/GenericTypesystemContext.java). Currently the context is used to ensure [Ownership & Visibility](#ownership-and-visibility) concepts, but may be enhanced in future releases. There are two default context implementations available you may choose:
+- [DefaultGenericTypesystemContext](src/main/java/de/chrgroth/generictypesystem/context/impl/DefaultGenericTypesystemContext.java)
+- [NullGenericTypesystemContext](src/main/java/de/chrgroth/generictypesystem/context/impl/NullGenericTypesystemContext.java)
+
+See [Ownership & Visibility](#ownership-and-visibility) for more details.
+
 back to [top](#table-of-contents).
 
 ### Validation
@@ -131,7 +137,9 @@ Unfortunately filtering is not implemented yet but will be provided (also in an 
 back to [top](#table-of-contents).
 
 ### Ownership and visibility
-Ownership and visibility is currently unimplemented in service layer level. Datamodel provides the basic fields and thus this feature must be implemented by yourself until it is included in a future release. Sorry ;)
+Ownership and visibility concepts are used to restrict access to concrete type and item instances. An owner is represented as a Long, assuming to be a unique user id or something similar. Visibility is implemented as enum and may be public or private. Default implementation rules can be found in javadocs of [GenericTypesystemContext](src/main/java/de/chrgroth/generictypesystem/context/GenericTypesystemContext.java).
+
+If you do not want to use any ownership or visibility constraints, you may use an instance of [NullGenericTypesystemContext](src/main/java/de/chrgroth/generictypesystem/context/impl/NullGenericTypesystemContext.java) or provide your own context implementation.
 
 back to [top](#table-of-contents).
 

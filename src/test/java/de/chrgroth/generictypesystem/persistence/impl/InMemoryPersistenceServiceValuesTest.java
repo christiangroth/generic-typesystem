@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
@@ -19,7 +21,10 @@ public class InMemoryPersistenceServiceValuesTest {
 
     @Mock
     private InMemoryValueProposalService values;
+
+    private GenericTypesystemContext context;
     private InMemoryPersistenceService service;
+
     private GenericType type;
 
     @Before
@@ -28,17 +33,18 @@ public class InMemoryPersistenceServiceValuesTest {
         // init mocks
         MockitoAnnotations.initMocks(this);
 
-        // create service
+        // create context & service
+        context = new NullGenericTypesystemContext();
         service = new InMemoryPersistenceService(new InMemoryItemsQueryService(10l), values);
 
         // prepare test type
         type = new GenericType(0l, "name", "group", null, null, null, null);
-        service.type(type);
+        service.type(context, type);
     }
 
     @Test
     public void unknownTypeId() {
-        Map<String, List<?>> result = service.values(type.getId() + 1, null);
+        Map<String, List<?>> result = service.values(context, type.getId() + 1, null);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
         Mockito.verify(values, Mockito.times(0)).values(Mockito.any(), Mockito.any(), Mockito.any());
@@ -46,7 +52,7 @@ public class InMemoryPersistenceServiceValuesTest {
 
     @Test
     public void correctTypeIdNoItems() {
-        Map<String, List<?>> result = service.values(type.getId(), null);
+        Map<String, List<?>> result = service.values(context, type.getId(), null);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
         Mockito.verify(values, Mockito.times(0)).values(Mockito.any(), Mockito.any(), Mockito.any());
@@ -54,8 +60,8 @@ public class InMemoryPersistenceServiceValuesTest {
 
     @Test
     public void correctTypeIdWthItems() {
-        service.item(type, new GenericItem());
-        Map<String, List<?>> result = service.values(type.getId(), null);
+        service.item(context, type, new GenericItem());
+        Map<String, List<?>> result = service.values(context, type.getId(), null);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
         Mockito.verify(values, Mockito.times(1)).values(Mockito.any(), Mockito.any(), Mockito.any());
