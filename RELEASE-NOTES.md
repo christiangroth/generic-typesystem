@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+# 0.3.0-SNAPSHOT (in progress)
+- ...
+
 # 0.2.0
 - default value, unit value and custom properties value are of type GenericValue now. This allows to be type safe and better supports JSON marshaling and unmarshalling.
 - Introduced GenericTypesystemContext to allow type and item accessibility checks based on owner and visibility attributes.
