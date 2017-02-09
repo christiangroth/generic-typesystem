@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
-import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
@@ -54,14 +53,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public Set<String> typeGroups() {
-        return typeGroups(new NullGenericTypesystemContext());
-    }
-
-    /**
      * Returns all type groups as defined by {@link PersistenceService#typeGroups(GenericTypesystemContext)}.
      *
      * @param context
@@ -73,14 +64,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public Set<GenericType> types() {
-        return types(new NullGenericTypesystemContext());
-    }
-
-    /**
      * Returns all types as defined by {@link PersistenceService#types(GenericTypesystemContext)}.
      *
      * @param context
@@ -89,14 +72,6 @@ public class GenericTypesystemService {
      */
     public Set<GenericType> types(GenericTypesystemContext context) {
         return persistence.types(context);
-    }
-
-    /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public ValidationResult<GenericType> type(GenericType type) {
-        return type(new NullGenericTypesystemContext(), type);
     }
 
     /**
@@ -207,14 +182,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public ItemQueryResult query(long typeId, ItemsQueryData data) {
-        return query(new NullGenericTypesystemContext(), typeId, data);
-    }
-
-    /**
      * Returns the query result as defined by {@link PersistenceService#query(GenericTypesystemContext, long, ItemsQueryData)}.
      *
      * @param context
@@ -230,14 +197,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public GenericItem item(long typeId, long id) {
-        return item(new NullGenericTypesystemContext(), typeId, id);
-    }
-
-    /**
      * Returns the item as defined by {@link PersistenceService#item(GenericTypesystemContext, long, long)}.
      *
      * @param context
@@ -250,14 +209,6 @@ public class GenericTypesystemService {
      */
     public GenericItem item(GenericTypesystemContext context, long typeId, long id) {
         return persistence.item(context, typeId, id);
-    }
-
-    /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public ValidationResult<GenericItem> item(long typeId, GenericItem item) {
-        return item(new NullGenericTypesystemContext(), typeId, item);
     }
 
     /**
@@ -311,14 +262,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public Map<String, List<?>> values(long typeId, GenericItem template) {
-        return values(new NullGenericTypesystemContext(), typeId, template);
-    }
-
-    /**
      * Returns the value proposals as defined by {@link PersistenceService#values(GenericTypesystemContext, long, GenericItem)}.
      *
      * @param context
@@ -334,14 +277,6 @@ public class GenericTypesystemService {
     }
 
     /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public boolean removeItem(long typeId, long id) {
-        return removeItem(new NullGenericTypesystemContext(), typeId, id);
-    }
-
-    /**
      * Deletes the item as defined by {@link PersistenceService#removeItem(GenericTypesystemContext, long, long)}.
      *
      * @param context
@@ -354,14 +289,6 @@ public class GenericTypesystemService {
      */
     public boolean removeItem(GenericTypesystemContext context, long typeId, long id) {
         return persistence.removeItem(context, typeId, id);
-    }
-
-    /**
-     * @deprecated Please use overloaded method with {@link GenericTypesystemContext} as first parameter, this method will be removed in next release!
-     */
-    @Deprecated
-    public boolean removeType(long typeId) {
-        return removeType(new NullGenericTypesystemContext(), typeId);
     }
 
     /**
