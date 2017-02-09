@@ -8,15 +8,26 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.context.impl.DefaultGenericTypesystemContext;
 import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
+import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 import de.chrgroth.generictypesystem.validation.ValidationService;
 
 public class GenericTypesystemServiceTest {
+
+    private static final String ATTRIBUTE_DEFAULT_VALUE_VALUE = "foo";
+
+    private static final String ATTRIBUTE_NESTED = "nested";
+
+    private static final String ATTRIBUTE_DEFAULT_VALUE = "defaultValue";
+
+    private static final String ATTRIBUTE_NO_DEFAULT_VALUE = "noDefaultValue";
 
     @Mock
     private ValidationService validation;
@@ -27,6 +38,8 @@ public class GenericTypesystemServiceTest {
     private GenericTypesystemContext context;
     private GenericTypesystemService service;
 
+    private GenericType createTestType;
+
     @Before
     public void setup() {
 
@@ -36,6 +49,22 @@ public class GenericTypesystemServiceTest {
         // create context & service
         context = new NullGenericTypesystemContext();
         service = new GenericTypesystemService(validation, persistence);
+
+        // create type definition for create test
+        createTestType = new GenericType();
+        GenericAttribute noDefaultValueAttribute = new GenericAttribute();
+        noDefaultValueAttribute.setName(ATTRIBUTE_NO_DEFAULT_VALUE);
+        createTestType.getAttributes().add(noDefaultValueAttribute);
+        GenericAttribute defaultValueAttribute = new GenericAttribute();
+        defaultValueAttribute.setName(ATTRIBUTE_DEFAULT_VALUE);
+        defaultValueAttribute.setDefaultValue(new GenericValue<String>(String.class, ATTRIBUTE_DEFAULT_VALUE_VALUE));
+        createTestType.getAttributes().add(defaultValueAttribute);
+        GenericAttribute nestedStructureAttribute = new GenericAttribute();
+        nestedStructureAttribute.setName(ATTRIBUTE_NESTED);
+        nestedStructureAttribute.setStructure(new GenericStructure());
+        nestedStructureAttribute.getStructure().getAttributes().add(noDefaultValueAttribute);
+        nestedStructureAttribute.getStructure().getAttributes().add(defaultValueAttribute);
+        createTestType.getAttributes().add(nestedStructureAttribute);
     }
 
     @Test
@@ -83,6 +112,29 @@ public class GenericTypesystemServiceTest {
         long attributesWithoutId = type.getAttributes().stream().filter(a -> a.getId() == null).count();
         Assert.assertEquals(0, attributesWithoutId);
         Mockito.verify(persistence, Mockito.times(1)).type(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void createNullType() {
+        Mockito.when(persistence.type(Mockito.any(), Mockito.any(Long.class))).thenReturn(null);
+        Assert.assertNull(service.create(context, 0l));
+    }
+
+    @Test
+    public void createOwner() {
+        Mockito.when(persistence.type(Mockito.any(), Mockito.any(Long.class))).thenReturn(createTestType);
+        Long currentUser = 13l;
+        Long typeId = 7l;
+        final GenericItem item = service.create(new DefaultGenericTypesystemContext(currentUser), typeId);
+        Assert.assertNotNull(item);
+        Assert.assertNull(item.getId());
+        Assert.assertEquals(typeId, item.getTypeId());
+        Assert.assertEquals(currentUser, item.getOwner());
+        Assert.assertNull(item.getVisibility());
+        Assert.assertNull(item.get(ATTRIBUTE_NO_DEFAULT_VALUE));
+        Assert.assertEquals(ATTRIBUTE_DEFAULT_VALUE_VALUE, item.get(ATTRIBUTE_DEFAULT_VALUE));
+        Assert.assertNull(item.get(ATTRIBUTE_NESTED + "." + ATTRIBUTE_NO_DEFAULT_VALUE));
+        Assert.assertEquals(ATTRIBUTE_DEFAULT_VALUE_VALUE, item.get(ATTRIBUTE_NESTED + "." + ATTRIBUTE_DEFAULT_VALUE));
     }
 
     @Test

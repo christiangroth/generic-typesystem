@@ -16,6 +16,7 @@ import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
  *
  * @author Christian Groth
  */
+// TODO add unit tests with visibility checks
 public interface PersistenceService {
 
     /**

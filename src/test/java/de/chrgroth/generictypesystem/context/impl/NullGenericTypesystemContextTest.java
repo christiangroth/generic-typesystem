@@ -6,6 +6,11 @@ import org.junit.Test;
 public class NullGenericTypesystemContextTest {
 
     @Test
+    public void noUser() {
+        Assert.assertNull(new NullGenericTypesystemContext().currentUser());
+    }
+
+    @Test
     public void typeAccessible() {
         Assert.assertTrue(new NullGenericTypesystemContext().isTypeAccessible(null));
     }

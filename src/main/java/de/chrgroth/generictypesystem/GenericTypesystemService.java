@@ -11,6 +11,7 @@ import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
+import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.persistence.impl.InMemoryPersistenceService;
@@ -30,7 +31,6 @@ import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceMes
  *
  * @author Christian Groth
  */
-// TODO add createItem - also considering default values
 public class GenericTypesystemService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericTypesystemService.class);
@@ -152,6 +152,58 @@ public class GenericTypesystemService {
 
     private long nextTypeAttributeId(List<GenericAttribute> allAttributes) {
         return allAttributes.stream().filter(a -> a.getId() != null).mapToLong(a -> a.getId()).max().orElse(0) + 1;
+    }
+
+    /**
+     * Create a new item for given type. Configured default values are already set in returned item.
+     *
+     * @param context
+     *            current context
+     * @param typeId
+     *            type id
+     * @return new item with pre-configured default values or null if type is unknown or not accessible
+     */
+    public GenericItem create(GenericTypesystemContext context, long typeId) {
+
+        // get type
+        GenericType type = persistence.type(context, typeId);
+        if (type == null) {
+            return null;
+        }
+
+        // create item
+        GenericItem item = new GenericItem();
+        item.setTypeId(typeId);
+        item.setOwner(context.currentUser());
+
+        // fill default values
+        create(item, "", type);
+
+        // done
+        return item;
+    }
+
+    private void create(GenericItem item, String pathPrefix, GenericStructure structure) {
+
+        // null guard
+        if (structure == null || structure.getAttributes() == null) {
+            return;
+        }
+
+        // walk all attributes
+        for (GenericAttribute attribute : structure.getAttributes()) {
+
+            // recurse
+            if (attribute.getStructure() != null) {
+                create(item, pathPrefix + attribute.getName() + ".", attribute.getStructure());
+                continue;
+            }
+
+            // set default value
+            if (attribute.getDefaultValue() != null && attribute.getDefaultValue().getValue() != null) {
+                item.set(pathPrefix + attribute.getName(), attribute.getDefaultValue().getValue());
+            }
+        }
     }
 
     /**
