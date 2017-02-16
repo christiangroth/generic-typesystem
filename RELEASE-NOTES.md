@@ -4,6 +4,8 @@ Release Notes
 # 0.3.0-SNAPSHOT (in progress)
 - removed deprecated methods without context parameter
 - updated dependencies to latest version
+- added AbstractPersistenceService to allow easier persistence customization
+- added parse method to GenericTypeAttribute
 - ...
 
 # 0.2.0

@@ -3,6 +3,7 @@ package de.chrgroth.generictypesystem.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,8 +14,19 @@ import java.util.List;
  */
 public enum DefaultGenericAttributeType implements GenericAttributeType {
 
-    STRING(String.class),
+    STRING(String.class) {
+
+        @Override
+        public Object parse(String value) {
+            return value;
+        }
+    },
     LONG(Long.class, Integer.class) {
+
+        @Override
+        public Object parse(String value) {
+            return Long.parseLong(value);
+        }
 
         @Override
         protected Object convertAssignableValueForMultipleTypes(Class<?> valueClass, Object value) {
@@ -29,6 +41,11 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
         }
     },
     DOUBLE(Double.class, Float.class, Long.class, Integer.class) {
+
+        @Override
+        public Object parse(String value) {
+            return Double.parseDouble(value);
+        }
 
         @Override
         protected Object convertAssignableValueForMultipleTypes(Class<?> valueClass, Object value) {
@@ -52,17 +69,58 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
             return value;
         }
     },
-    BOOLEAN(Boolean.class),
-    DATE(LocalDate.class, String.class),
-    TIME(LocalTime.class, String.class),
-    DATETIME(LocalDateTime.class, String.class),
-    STRUCTURE(GenericItem.class),
-    LIST(List.class);
+    BOOLEAN(Boolean.class) {
+
+        @Override
+        public Object parse(String value) {
+            return Boolean.parseBoolean(value);
+        }
+    },
+    DATE(LocalDate.class, String.class) {
+
+        @Override
+        public Object parse(String value) {
+            return null;
+        }
+    },
+    TIME(LocalTime.class, String.class) {
+
+        @Override
+        public Object parse(String value) {
+            return null;
+        }
+    },
+    DATETIME(LocalDateTime.class, String.class) {
+
+        @Override
+        public Object parse(String value) {
+            return null;
+        }
+    },
+    STRUCTURE(GenericItem.class) {
+
+        @Override
+        public Object parse(String value) {
+            return null;
+        }
+    },
+    LIST(List.class) {
+
+        @Override
+        public Object parse(String value) {
+            return null;
+        }
+    };
 
     private final List<Class<?>> typeClasses;
 
     DefaultGenericAttributeType(Class<?>... typeClasses) {
         this.typeClasses = Arrays.asList(typeClasses);
+    }
+
+    @Override
+    public List<Class<?>> getTypeClasses() {
+        return new ArrayList<>(typeClasses);
     }
 
     @Override
@@ -130,7 +188,7 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
     }
 
     @Override
-    public Object convert(java.lang.Object value) {
+    public Object convert(Object value) {
 
         // check value is assignable
         if (value == null || !isAssignableFrom(value.getClass())) {

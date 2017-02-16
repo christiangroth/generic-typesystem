@@ -1,11 +1,20 @@
 package de.chrgroth.generictypesystem.model;
 
+import java.util.List;
+
 /**
  * The base interface for all attribute types.
  *
  * @author Christian Groth
  */
 public interface GenericAttributeType {
+
+    /**
+     * Returns all valid java classe for this type.
+     *
+     * @return type classes
+     */
+    List<Class<?>> getTypeClasses();
 
     /**
      * Checks if the type is numeric.
@@ -87,9 +96,18 @@ public interface GenericAttributeType {
     boolean isAssignableFrom(Class<?> actualClass);
 
     /**
-     * Converts the given value from any class returning true for {@link #isAssignableFrom(Class)} to the java main type. Unfortunately the main type can't b
+     * Tries to parse the given string value to an instance of the main type. If the value can't be parsed nul will be returned.
+     *
+     * @param value
+     *            value to be parsed
+     * @return parsed value or null
+     */
+    Object parse(String value);
+
+    /**
+     * Converts the given value from any class returning true for {@link #isAssignableFrom(Class)} to the java main type. Unfortunately the main type can't be
      * expressed as generic on enumerations because of java language specification boundaries, so we need to return object. Sorry for that!! If
-     * {@link #isDefaultValueCapable()} returns fale this method will always return null!
+     * {@link #isDefaultValueCapable()} returns false this method will always return null!
      *
      * @param value
      *            value to be converted
