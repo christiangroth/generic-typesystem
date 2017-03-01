@@ -1,13 +1,12 @@
 Release Notes
 =============
 
-# 0.3.0-SNAPSHOT (in progress)
+# 0.3.0-SNAPSHOT
 - removed deprecated methods without context parameter
 - updated dependencies to latest version
 - added AbstractPersistenceService to allow easier persistence customization
 - added parse method to GenericTypeAttribute
 - fixed NPE when validating null default values
-- ...
 
 # 0.2.0
 - default value, unit value and custom properties value are of type GenericValue now. This allows to be type safe and better supports JSON marshaling and unmarshalling.
