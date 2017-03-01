@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-# 0.3.0-SNAPSHOT
+# 0.3.0
 - removed deprecated methods without context parameter
 - updated dependencies to latest version
 - added AbstractPersistenceService to allow easier persistence customization
