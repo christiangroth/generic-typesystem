@@ -222,7 +222,7 @@ public class DefaultValidationService implements ValidationService {
 
         // validate default value
         GenericValue<?> defaultValue = a.getDefaultValue();
-        if (defaultValue != null) {
+        if (defaultValue != null && defaultValue.getValue() != null) {
 
             // check if type is default value capable
             if (!a.getType().isDefaultValueCapable()) {

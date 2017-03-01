@@ -6,6 +6,7 @@ Release Notes
 - updated dependencies to latest version
 - added AbstractPersistenceService to allow easier persistence customization
 - added parse method to GenericTypeAttribute
+- fixed NPE when validating null default values
 - ...
 
 # 0.2.0
