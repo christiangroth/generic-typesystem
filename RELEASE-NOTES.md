@@ -1,6 +1,9 @@
 Release Notes
 =============
 
+# 0.4.0-SNAPSHOT (in progress)
+- ...
+
 # 0.3.0-SNAPSHOT
 - removed deprecated methods without context parameter
 - updated dependencies to latest version
