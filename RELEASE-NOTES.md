@@ -1,9 +1,8 @@
 Release Notes
 =============
 
-# 0.4.0-SNAPSHOT (in progress)
+# 0.4.0
 - fixed item sorting in case of integer/long or float/double clash
-- ...
 
 # 0.3.0
 - removed deprecated methods without context parameter
