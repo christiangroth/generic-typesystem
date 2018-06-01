@@ -39,19 +39,46 @@ public class CascadingAttributeComparator implements Serializable, Comparator<Ge
 
         // sort by parameters
         for (ItemSortData sort : sorts) {
-            @SuppressWarnings("unchecked")
-            Comparable<Object> firstObject = (Comparable<Object>) o1.get(sort.getPath());
-            @SuppressWarnings("unchecked")
-            Comparable<Object> secondObject = (Comparable<Object>) o2.get(sort.getPath());
+            @SuppressWarnings({ "rawtypes" })
+            Comparable firstObject = (Comparable) o1.get(sort.getPath());
+            @SuppressWarnings({ "rawtypes" })
+            Comparable secondObject = (Comparable) o2.get(sort.getPath());
 
             // swap for non ascending compare
             if (!sort.isAscending()) {
-                Comparable<Object> swapObject = firstObject;
+                @SuppressWarnings("rawtypes")
+                Comparable swapObject = firstObject;
                 firstObject = secondObject;
                 secondObject = swapObject;
             }
 
+            // ensure same types for ambigious cases
+            if (firstObject != null && secondObject != null && !firstObject.getClass().equals(secondObject.getClass())) {
+
+                // check types
+                final boolean haveOneLong = isType(Long.class, firstObject) || isType(Long.class, secondObject);
+                final boolean haveOneInteger = isType(Integer.class, firstObject) || isType(Integer.class, secondObject);
+                final boolean haveOneDouble = isType(Double.class, firstObject) || isType(Double.class, secondObject);
+                final boolean haveOneFloat = isType(Float.class, firstObject) || isType(Float.class, secondObject);
+
+                // try to repair
+                if (haveOneLong && haveOneInteger) {
+                    if (isType(Integer.class, firstObject)) {
+                        firstObject = Long.valueOf(((Integer) firstObject).longValue());
+                    } else {
+                        secondObject = Long.valueOf(((Integer) secondObject).longValue());
+                    }
+                } else if (haveOneDouble && haveOneFloat) {
+                    if (isType(Float.class, firstObject)) {
+                        firstObject = Double.valueOf(((Float) firstObject).doubleValue());
+                    } else {
+                        secondObject = Double.valueOf(((Float) secondObject).doubleValue());
+                    }
+                }
+            }
+
             // compare
+            @SuppressWarnings("unchecked")
             int compare = ObjectUtils.compare(firstObject, secondObject, true);
             if (compare != 0) {
 
@@ -62,5 +89,9 @@ public class CascadingAttributeComparator implements Serializable, Comparator<Ge
 
         // fallback to id sort, desc
         return ObjectUtils.compare(o2.getId(), o1.getId());
+    }
+
+    private boolean isType(Class<?> type, Object object) {
+        return type != null && type == object.getClass();
     }
 }
