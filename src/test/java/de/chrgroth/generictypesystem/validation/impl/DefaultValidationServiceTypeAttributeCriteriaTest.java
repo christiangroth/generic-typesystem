@@ -207,19 +207,28 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         if (!testType.isUnitCapable()) {
             return;
         }
+
+        // create invalid unit
+        clearAttributes();
+        createAttribute(null, false, false, null, null, null, null, null, null, null, null, nonBase(units()));
+
+        // validate type
+        errorKeys.clear();
+        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNITS_INVALID, 0l));
+        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
-    public GenericUnits units() {
+    private GenericUnits units() {
         GenericUnits units = new GenericUnits(0l, "units", "desc");
         return units;
     }
 
-    public GenericUnits base(GenericUnits units) {
+    private GenericUnits base(GenericUnits units) {
         units.getUnits().add(new GenericUnit(0l, "base", "b", GenericUnits.FACTOR_BASE));
         return units;
     }
 
-    public GenericUnits nonBase(GenericUnits units) {
+    private GenericUnits nonBase(GenericUnits units) {
         units.getUnits().add(new GenericUnit(1l, "nonbase", "x", 2.0d));
         return units;
     }

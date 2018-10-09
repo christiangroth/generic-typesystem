@@ -280,7 +280,7 @@ public class DefaultValidationService implements ValidationService {
         // validate units
         ValidationResult<GenericUnits> unitsValidationResult = validate(unitsLookup.apply(a.getUnitsId()));
         if (!unitsValidationResult.isValid()) {
-            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNITS_INVALID, a.getType().toString());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNITS_INVALID, a.getUnitsId());
         }
     }
 
