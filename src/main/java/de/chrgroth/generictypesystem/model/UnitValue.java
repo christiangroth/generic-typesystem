@@ -6,24 +6,35 @@ package de.chrgroth.generictypesystem.model;
  * @author Christian Groth
  */
 public final class UnitValue {
-    private String unit;
+
+    private Long unitsId;
+    private Long unitId;
     private GenericValue<?> value;
 
     public UnitValue() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public UnitValue(String unit, GenericValue<?> value) {
-        this.unit = unit;
+    public UnitValue(Long unitsId, Long unitId, GenericValue<?> value) {
+        this.unitsId = unitsId;
+        this.unitId = unitId;
         this.value = value;
     }
 
-    public String getUnit() {
-        return unit;
+    public Long getUnitsId() {
+        return unitsId;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setUnitsId(Long unitsId) {
+        this.unitsId = unitsId;
+    }
+
+    public Long getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(Long unitId) {
+        this.unitId = unitId;
     }
 
     public GenericValue<?> getValue() {
@@ -36,6 +47,6 @@ public final class UnitValue {
 
     @Override
     public String toString() {
-        return "UnitValue [unit=" + unit + ", value=" + value + "]";
+        return "UnitValue [unitsId=" + unitsId + ", unitId=" + unitId + ", value=" + value + "]";
     }
 }

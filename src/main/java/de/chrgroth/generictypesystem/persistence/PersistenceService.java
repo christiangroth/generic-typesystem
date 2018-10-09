@@ -8,6 +8,7 @@ import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
 import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
 
@@ -18,6 +19,36 @@ import de.chrgroth.generictypesystem.persistence.query.ItemsQueryData;
  */
 // TODO add unit tests with visibility checks
 public interface PersistenceService {
+
+    /**
+     * Returns all known units.
+     *
+     * @param context
+     *            current context
+     * @return known units
+     */
+    Set<GenericUnits> units(GenericTypesystemContext context);
+
+    /**
+     * Returns the units with given id..
+     *
+     * @param context
+     *            current context
+     * @param unitsId
+     *            units id
+     * @return known units or null
+     */
+    GenericUnits units(GenericTypesystemContext context, long unitsId);
+
+    /**
+     * Saves the given units or updates it if units with same id are already known.
+     *
+     * @param context
+     *            current context
+     * @param units
+     *            units to be saved
+     */
+    void units(GenericTypesystemContext context, GenericUnits units);
 
     /**
      * Returns groups for all known and accessible types.
@@ -144,4 +175,15 @@ public interface PersistenceService {
      * @return true if type is no longer known after this operation, false otherwise
      */
     boolean removeType(GenericTypesystemContext context, long typeId);
+
+    /**
+     * Removes the units with given id. If the type is not accessible the operation will be ignored.
+     *
+     * @param context
+     *            current context
+     * @param unitsId
+     *            units id
+     * @return true if units is no longer known after this operation, false otherwise
+     */
+    boolean removeUnits(GenericTypesystemContext context, long unitsId);
 }

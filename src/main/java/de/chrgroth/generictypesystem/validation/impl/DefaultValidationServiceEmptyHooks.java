@@ -6,6 +6,8 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 
 /**
@@ -14,6 +16,18 @@ import de.chrgroth.generictypesystem.validation.ValidationResult;
  * @author Christian Groth
  */
 public class DefaultValidationServiceEmptyHooks implements DefaultValidationServiceHooks {
+
+    @Override
+    public void unitsValidation(ValidationResult<GenericUnits> result, GenericUnits units) {
+
+        // empty implementation
+    }
+
+    @Override
+    public void unitsUnitValidation(ValidationResult<GenericUnits> result, GenericUnits units, GenericUnit unit) {
+
+        // empty implementation
+    }
 
     @Override
     public void typeValidation(ValidationResult<GenericType> result, GenericType type) {

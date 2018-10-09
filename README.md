@@ -1,4 +1,4 @@
-Development: [![Build Status](https://secure.travis-ci.org/christiangroth/generic-typesystem.svg)](http://travis-ci.org/christiangroth/generic-typesystem) [![Coverage Status](https://coveralls.io/repos/github/christiangroth/generic-typesystem/badge.svg?branch=develop)](https://coveralls.io/github/christiangroth/generic-typesystem?branch=develop) [![Dependency Status](https://www.versioneye.com/user/projects/57d99a5d4307470032353ca5/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57d99a5d4307470032353ca5)
+Development: [![Build Status](https://secure.travis-ci.org/christiangroth/generic-typesystem.svg)](http://travis-ci.org/christiangroth/generic-typesystem) [![Coverage Status](https://coveralls.io/repos/github/christiangroth/generic-typesystem/badge.svg?branch=develop)](https://coveralls.io/github/christiangroth/generic-typesystem?branch=develop)
 
 Stable: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/generic-typesystem/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.chrgroth.generic-typesystem/generic-typesystem)
 
@@ -12,7 +12,7 @@ Although this project was extracted from a single personal project the datamodel
 - [Datamodel](#datamodel)
   - [Types](#types)
   - [Attributes](#attributes)
-  - [Units](#attribute-units)
+  - [Units](#units)
   - [Items](#items)
 - [Services](#services)
   - [Validation](#validation)
@@ -44,7 +44,7 @@ Beside attributes a type is defined using the following properties:
 - name, group: human readable type name and optional group for organizational purposes
 - owner, visibility: see [Ownership & Visibility](#ownership-and-visibility)
 - pageSize: optional default page size, see [Persistence](#persistence)
-- customProperties: optional *java.util.Map* of custom properties to be used for project based customization  
+- customProperties: optional *java.util.Map* of custom properties to be used for project based customization
 
 back to [top](#table-of-contents).
 
@@ -59,17 +59,29 @@ A type attribute is defined by the following properties:
 - pattern: an optional pattern to be validated against
 - defaultValue, defaultValueCallback: optional default values and default value callback which may be invoked somwhere outside this framework on client side.
 - valueProposalDependencies: a list of attribute ids considered for value proposal. See [value proposals section](#value-proposals) under [persistence](#persistence)
-- units: defines if the attribute is unit based if any unit definitions are provided. See [below](#attribute-units)
-- customProperties: optional *java.util.Map* of custom properties to be used for project based customization  
+- unitsId: defines if the attribute references a units definition. See [below](#units) for more information.
+- customProperties: optional *java.util.Map* of custom properties to be used for project based customization
 
 Further more each attribute has a unique path in context of a type. The path is formed using the attribute name and a dot for nested structures. The path is relevant when working with [items](#items).
 
 back to [top](#table-of-contents).
 
-### Attribute Units
-Attribute values may be unit based and the definition of units is fairly simple at the moment:
-- name: a unique name (per attribute)
-- factor: the units factor to allow conversion between units 
+### Units
+Values may be unit based and the definition of units is a quite simple one at the moment:
+- id: a unique numeric identifier
+- name: a name
+- description: an description
+- units: definition of concrete units
+
+Each unit is defined using the following data:
+- id: a unique numeric identifier (per units)
+- name: a name
+- symbol: a symbol representation
+- factor: the factor related to the base unit
+
+Each units definition must contain a single unit using the base factor (1.0), also defined as constant in [GenericUnits](/generic-typesystem/src/main/java/de/chrgroth/generictypesystem/model/GenericUnits.java). Examples for unit definitions and used conversions can be found in the unit tests, e.g. [GenericTypesystemServiceTest](/generic-typesystem/src/test/java/de/chrgroth/generictypesystem/GenericTypesystemServiceTest.java).
+
+Conversion of units can be achieved using the corresponding method in [GenericTypesystemService](src/main/java/de/chrgroth/generictypesystem/GenericTypesystemService.java). See [below](#services) for more information regarding services.
 
 back to [top](#table-of-contents).
 

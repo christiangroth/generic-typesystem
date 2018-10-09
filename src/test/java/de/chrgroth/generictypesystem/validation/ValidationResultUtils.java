@@ -8,26 +8,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
-import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericItem;
-import de.chrgroth.generictypesystem.model.GenericType;
+public class ValidationResultUtils {
 
-public class BaseValidationServiceTest {
-
-    protected ValidationService service;
-    protected GenericType type;
-    protected GenericAttribute attribute;
-    protected GenericItem item;
-
-    protected void validateType(ValidationError... errors) {
-        assertValidationResult(service.validate(type), type, errors);
-    }
-
-    protected void validateItem(ValidationError... errors) {
-        assertValidationResult(service.validate(type, item), item, errors);
-    }
-
-    private <T> void assertValidationResult(ValidationResult<T> result, T validatedItem, ValidationError... errors) {
+    public static <T> void assertValidationResult(ValidationResult<T> result, T validatedItem, ValidationError... errors) {
 
         // check validated item
         Assert.assertEquals("validated item does not match", validatedItem, result.getItem());

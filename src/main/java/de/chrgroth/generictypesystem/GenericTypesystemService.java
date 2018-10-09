@@ -1,5 +1,6 @@
 package de.chrgroth.generictypesystem;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,10 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
+import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
+import de.chrgroth.generictypesystem.model.GenericValue;
+import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.persistence.impl.InMemoryPersistenceService;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
@@ -36,8 +42,8 @@ public class GenericTypesystemService {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    private final ValidationService validation;
     private final PersistenceService persistence;
+    private final ValidationService validation;
 
     /**
      * Creates a new service instance with the given validation and persistence services.
@@ -48,8 +54,188 @@ public class GenericTypesystemService {
      *            persistence service , null will create a new instance of {@link InMemoryPersistenceService}
      */
     public GenericTypesystemService(ValidationService validation, PersistenceService persistence) {
-        this.validation = validation != null ? validation : new DefaultValidationService(new DefaultValidationServiceEmptyHooks());
         this.persistence = persistence != null ? persistence : new InMemoryPersistenceService(new InMemoryItemsQueryService(DEFAULT_PAGE_SIZE), new InMemoryValueProposalService());
+        this.validation = validation != null ? validation : new DefaultValidationService(unitsId -> persistence.units(null, unitsId), new DefaultValidationServiceEmptyHooks());
+    }
+
+    /**
+     * Returns all units as defined by {@link PersistenceService#units(GenericTypesystemContext)}.
+     *
+     * @param context
+     *            current context
+     * @return units
+     */
+    public Set<GenericUnits> units(GenericTypesystemContext context) {
+        return persistence.units(context);
+    }
+
+    /**
+     * Ensures an unique id for all sub units, validates the units and if the resulz is valid
+     * {@link PersistenceService#units(GenericTypesystemContext, GenericUnits)} will be invoked.
+     *
+     * @param context
+     *            current context
+     * @param units
+     *            units to be handled
+     * @return validation result
+     */
+    public ValidationResult<GenericUnits> units(GenericTypesystemContext context, GenericUnits units) {
+
+        // ensure all type attributes have an id
+        if (units != null && units.getUnits() != null) {
+            Set<GenericUnit> allUnits = units.getUnits();
+            for (GenericUnit unit : allUnits) {
+                if (unit.getId() == null || unit.getId().longValue() < 1) {
+
+                    // get next unique id
+                    long nextUnitsUnitId = nextUnitsUnitId(allUnits);
+
+                    // set id
+                    unit.setId(nextUnitsUnitId);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("unit " + unit.getName() + " id resolved to " + nextUnitsUnitId);
+                    }
+                }
+            }
+        }
+
+        // validate
+        ValidationResult<GenericUnits> validationResult = validation.validate(units);
+
+        // save / update
+        if (validationResult.isValid()) {
+            persistence.units(context, units);
+        } else if (LOG.isDebugEnabled()) {
+            LOG.debug("skip persisting invalid units " + (units != null ? units.getId() : null));
+        }
+
+        // done
+        return validationResult;
+    }
+
+    private long nextUnitsUnitId(Set<GenericUnit> allUnits) {
+        return allUnits.stream().filter(u -> u.getId() != null).mapToLong(u -> u.getId()).max().orElse(0) + 1;
+    }
+
+    /**
+     * Converts the given value to the target value. The return value is wrapped into a validation result an in case the target unit does not exist, the result
+     * will be not valid. The type of the converted value will be as follows
+     * <table summary="Type mapping">
+     * <tr>
+     * <th>Input type</th>
+     * <th>Output type</th>
+     * </tr>
+     * <tr>
+     * <td>Integer</td>
+     * <td>Integer if no rounding required, Double otherwise</td>
+     * </tr>
+     * <tr>
+     * <td>Long</td>
+     * <td>Long if no rounding required, Double otherwise</td>
+     * </tr>
+     * <tr>
+     * <td>Float</td>
+     * <td>Float</td>
+     * </tr>
+     * <tr>
+     * <td>Double</td>
+     * <td>Double</td>
+     * </tr>
+     * </table>
+     *
+     * @param context
+     *            current context
+     * @param value
+     *            value to be converted
+     * @param targetUnitId
+     *            id of target unit from same units
+     * @return result of conversion
+     */
+    public ValidationResult<UnitValue> convert(GenericTypesystemContext context, UnitValue value, long targetUnitId) {
+        final ValidationResult<UnitValue> validationResult = new ValidationResult<>(value);
+
+        // null guard
+        if (value == null || value.getValue() == null || value.getValue().getValue() == null) {
+            validationResult.error("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_NOT_AVAILABLE);
+            return validationResult;
+        }
+
+        // type check
+        final Class<?> inputType = value.getValue().getType();
+        if (!DefaultGenericAttributeType.DOUBLE.getTypeClasses().contains(inputType)) {
+            validationResult.error("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_TYPE_NOT_SUPPORTED);
+            return validationResult;
+        }
+
+        // ensure units
+        final Long unitsId = value.getUnitsId();
+        GenericUnits units = unitsId == null ? null : persistence.units(context, unitsId);
+        if (units == null) {
+            validationResult.error("unitsId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNITS_NOT_AVAILABLE);
+            return validationResult;
+        }
+
+        // ensure units valid
+        ValidationResult<GenericUnits> unitsValidationResult = validation.validate(units);
+        if (!unitsValidationResult.isValid()) {
+            validationResult.error("unitsId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNITS_NOT_VALID);
+            return validationResult;
+        }
+
+        // ensure source and target unit
+        GenericUnit source = value.getUnitId() == null ? null : units.unit(value.getUnitId());
+        if (source == null) {
+            validationResult.error("unitId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNIT_SOURCE_NOT_AVAILABLE);
+            return validationResult;
+        }
+        GenericUnit target = units.unit(targetUnitId);
+        if (target == null) {
+            validationResult.error("", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNIT_TARGET_NOT_AVAILABLE);
+            return validationResult;
+        }
+
+        // calculate new value
+        BigDecimal convertedValue = BigDecimal.valueOf(((Number) value.getValue().getValue()).doubleValue());
+        if (!source.isBase()) {
+            convertedValue = convertedValue.divide(BigDecimal.valueOf(source.getFactor()));
+        }
+        if (!target.isBase()) {
+            convertedValue = convertedValue.multiply(BigDecimal.valueOf(target.getFactor()));
+        }
+
+        // create resulting value
+        final GenericValue<? extends Number> resultingValue;
+        if (Integer.class.equals(inputType) || Long.class.equals(inputType)) {
+
+            // check if rounding is required
+            boolean roundingRequired;
+            try {
+                convertedValue = convertedValue.setScale(0);
+                roundingRequired = false;
+            } catch (ArithmeticException e) {
+                roundingRequired = true;
+            }
+
+            // convert
+            if (!roundingRequired) {
+                if (Integer.class.equals(inputType)) {
+                    resultingValue = new GenericValue<>(Integer.class, convertedValue.intValue());
+                } else {
+                    resultingValue = new GenericValue<>(Long.class, convertedValue.longValue());
+                }
+            } else {
+
+                // fallback - stay with double value
+                resultingValue = new GenericValue<>(Double.class, convertedValue.doubleValue());
+            }
+        } else if (Float.class.equals(inputType)) {
+            resultingValue = new GenericValue<>(Float.class, convertedValue.floatValue());
+        } else {
+            resultingValue = new GenericValue<>(Double.class, convertedValue.doubleValue());
+        }
+
+        // done
+        return new ValidationResult<>(new UnitValue(unitsId, targetUnitId, resultingValue));
     }
 
     /**
@@ -68,7 +254,7 @@ public class GenericTypesystemService {
      *
      * @param context
      *            current context
-     * @return type
+     * @return types
      */
     public Set<GenericType> types(GenericTypesystemContext context) {
         return persistence.types(context);
@@ -302,5 +488,18 @@ public class GenericTypesystemService {
      */
     public boolean removeType(GenericTypesystemContext context, long typeId) {
         return persistence.removeType(context, typeId);
+    }
+
+    /**
+     * Deletes the units as defined by {@link PersistenceService#removeUnits(GenericTypesystemContext, long)}.
+     *
+     * @param context
+     *            current context
+     * @param unitsId
+     *            units id
+     * @return true if successful, false otherwise
+     */
+    public boolean removeUnits(GenericTypesystemContext context, long unitsId) {
+        return persistence.removeUnits(context, unitsId);
     }
 }

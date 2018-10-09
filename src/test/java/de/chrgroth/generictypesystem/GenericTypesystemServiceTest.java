@@ -14,10 +14,16 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
+import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
+import de.chrgroth.generictypesystem.validation.ValidationError;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
+import de.chrgroth.generictypesystem.validation.ValidationResultUtils;
 import de.chrgroth.generictypesystem.validation.ValidationService;
+import de.chrgroth.generictypesystem.validation.impl.DefaultValidationServiceMessageKey;
 
 public class GenericTypesystemServiceTest {
 
@@ -68,6 +74,222 @@ public class GenericTypesystemServiceTest {
     }
 
     @Test
+    public void units() {
+        service.units(context);
+        Mockito.verify(persistence, Mockito.times(1)).units(context);
+    }
+
+    @Test
+    public void unitsNull() {
+
+        // null is invalid units
+        ValidationResult<GenericUnits> validationResult = Mockito.mock(ValidationResult.class);
+        Mockito.when(validation.validate(Mockito.nullable(GenericUnits.class))).thenReturn(validationResult);
+        Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
+
+        service.units(context, null);
+        Mockito.verify(persistence, Mockito.times(0)).units(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void unitsUnitIdsMissing() {
+
+        // create type
+        GenericUnits units = new GenericUnits();
+        units.getUnits().add(new GenericUnit(0l, "seconds", "s", GenericUnits.FACTOR_BASE));
+        units.getUnits().add(new GenericUnit(null, "minutes", "m", 60));
+        units.getUnits().add(new GenericUnit(null, "hours", "h", 60 * 60));
+        units.getUnits().add(new GenericUnit(2l, "days", "d", 60 * 60 * 24));
+
+        // units is valid
+        ValidationResult<GenericUnits> validationResult = Mockito.mock(ValidationResult.class);
+        Mockito.when(validation.validate(Mockito.any(GenericUnits.class))).thenReturn(validationResult);
+        Mockito.when(validationResult.isValid()).thenReturn(Boolean.TRUE);
+
+        // call service
+        service.units(context, units);
+        long unitsWithoutId = units.getUnits().stream().filter(u -> u.getId() == null).count();
+        Assert.assertEquals(0, unitsWithoutId);
+        Mockito.verify(persistence, Mockito.times(1)).units(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void convertNull() {
+        ValidationResult<UnitValue> result = service.convert(context, null, 0l);
+        ValidationResultUtils.assertValidationResult(result, null, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertValueNull() {
+        final UnitValue value = new UnitValue(0l, 0l, null);
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertValueValueNull() {
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(Double.class, null));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertValueTypeNull() {
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(null, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_TYPE_NOT_SUPPORTED));
+    }
+
+    @Test
+    public void convertValueTypeNonNumeric() {
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(String.class, "12.34d"));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_VALUE_TYPE_NOT_SUPPORTED));
+    }
+
+    @Test
+    public void convertUnitsIdNull() {
+        final UnitValue value = new UnitValue(null, 0l, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("unitsId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNITS_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertUnitsNotExistent() {
+        mockUnits(null);
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("unitsId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNITS_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertUnitsInvalid() {
+        mockUnits(Mockito.mock(GenericUnits.class));
+        mockUnitsResult(false);
+
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("unitsId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNITS_NOT_VALID));
+    }
+
+    @Test
+    public void convertSourceUnitIdNull() {
+        GenericUnits units = Mockito.mock(GenericUnits.class);
+        mockUnits(units);
+        mockUnitsResult(true);
+
+        final UnitValue value = new UnitValue(0l, null, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("unitId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNIT_SOURCE_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertSourceUnitNotAvailable() {
+        GenericUnits units = Mockito.mock(GenericUnits.class);
+        Mockito.when(units.unit(Mockito.anyLong())).thenReturn(null);
+        mockUnits(units);
+        mockUnitsResult(true);
+
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("unitId", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNIT_SOURCE_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertTargetUnitNotAvailable() {
+        GenericUnits units = Mockito.mock(GenericUnits.class);
+        GenericUnit sourceUnit = Mockito.mock(GenericUnit.class);
+        Mockito.when(units.unit(Mockito.eq(0l))).thenReturn(sourceUnit);
+        Mockito.when(units.unit(Mockito.longThat(l -> l != null && l != 0l))).thenReturn(null);
+        mockUnits(units);
+        mockUnitsResult(true);
+
+        final UnitValue value = new UnitValue(0l, 0l, new GenericValue<>(Double.class, 12.34d));
+        ValidationResult<UnitValue> result = service.convert(context, value, 1l);
+        ValidationResultUtils.assertValidationResult(result, value, new ValidationError("", DefaultValidationServiceMessageKey.UNITS_CONVERT_UNIT_TARGET_NOT_AVAILABLE));
+    }
+
+    @Test
+    public void convertSomeUnitsMinorToMinor() {
+        assertConversion(new UnitValue(someUnits().getId(), 0l, new GenericValue<>(Integer.class, 1)), 0l, 1);
+    }
+
+    @Test
+    public void convertSomeUnitsMinorToBase() {
+        assertConversion(new UnitValue(someUnits().getId(), 0l, new GenericValue<>(Long.class, 1l)), 1l, 10l);
+    }
+
+    @Test
+    public void convertSomeUnitsMinorToMajor() {
+        assertConversion(new UnitValue(someUnits().getId(), 0l, new GenericValue<>(Float.class, 1.0f)), 2l, 100.0f);
+    }
+
+    @Test
+    public void convertSomeUnitsBaseToMinor() {
+        assertConversion(new UnitValue(someUnits().getId(), 1l, new GenericValue<>(Double.class, 1.0d)), 0l, 0.1d);
+    }
+
+    @Test
+    public void convertSomeUnitsBaseToBase() {
+        assertConversion(new UnitValue(someUnits().getId(), 1l, new GenericValue<>(Long.class, 1l)), 1l, 1l);
+    }
+
+    @Test
+    public void convertSomeUnitsBaseToMajor() {
+        assertConversion(new UnitValue(someUnits().getId(), 1l, new GenericValue<>(Long.class, 1l)), 2l, 10l);
+    }
+
+    @Test
+    public void convertSomeUnitsMajorToMinor() {
+        assertConversion(new UnitValue(someUnits().getId(), 2l, new GenericValue<>(Integer.class, 1)), 0l, 0.01d);
+    }
+
+    @Test
+    public void convertSomeUnitsMajorToBase() {
+        assertConversion(new UnitValue(someUnits().getId(), 2l, new GenericValue<>(Long.class, 1l)), 1l, 0.1d);
+    }
+
+    @Test
+    public void convertSomeUnitsMajorToMajor() {
+        assertConversion(new UnitValue(someUnits().getId(), 2l, new GenericValue<>(Long.class, 1l)), 2l, 1l);
+    }
+
+    private GenericUnits someUnits() {
+        GenericUnits units = new GenericUnits(0l, null, null);
+        GenericUnit minor = new GenericUnit(0l, "minor", null, 0.1d);
+        GenericUnit base = new GenericUnit(1l, "base", null, GenericUnits.FACTOR_BASE);
+        GenericUnit major = new GenericUnit(2l, "major", null, 10);
+        units.getUnits().add(minor);
+        units.getUnits().add(base);
+        units.getUnits().add(major);
+        mockUnits(units);
+        mockUnitsResult(true);
+        return units;
+    }
+
+    private void assertConversion(final UnitValue value, long targetUnitId, Number expectedValue) {
+        ValidationResult<UnitValue> result = service.convert(context, value, targetUnitId);
+        Assert.assertTrue(result.isValid());
+        final UnitValue item = result.getItem();
+        Assert.assertNotNull(item);
+        Assert.assertNotEquals(value, item);
+        Assert.assertEquals(value.getUnitsId(), item.getUnitsId());
+        Assert.assertEquals(Long.valueOf(targetUnitId), item.getUnitId());
+        Assert.assertEquals(expectedValue, item.getValue().getValue());
+        Assert.assertEquals(expectedValue.getClass(), item.getValue().getType());
+    }
+
+    private void mockUnits(GenericUnits units) {
+        Mockito.when(persistence.units(Mockito.any(), Mockito.anyLong())).thenReturn(units);
+    }
+
+    private void mockUnitsResult(boolean valid) {
+        ValidationResult<GenericUnits> unitsResult = Mockito.mock(ValidationResult.class);
+        Mockito.when(validation.validate(Mockito.any(GenericUnits.class))).thenReturn(unitsResult);
+        Mockito.when(unitsResult.isValid()).thenReturn(valid);
+    }
+
+    @Test
     public void typeGroups() {
         service.typeGroups(context);
         Mockito.verify(persistence, Mockito.times(1)).typeGroups(context);
@@ -84,7 +306,7 @@ public class GenericTypesystemServiceTest {
 
         // null is invalid type
         ValidationResult<GenericType> validationResult = Mockito.mock(ValidationResult.class);
-        Mockito.when(validation.validate(Mockito.any())).thenReturn(validationResult);
+        Mockito.when(validation.validate(Mockito.nullable(GenericType.class))).thenReturn(validationResult);
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
         service.type(context, null);
@@ -104,7 +326,7 @@ public class GenericTypesystemServiceTest {
 
         // type is valid
         ValidationResult<GenericType> validationResult = Mockito.mock(ValidationResult.class);
-        Mockito.when(validation.validate(Mockito.any())).thenReturn(validationResult);
+        Mockito.when(validation.validate(Mockito.any(GenericType.class))).thenReturn(validationResult);
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.TRUE);
 
         // call service
@@ -211,5 +433,11 @@ public class GenericTypesystemServiceTest {
     public void removeType() {
         service.removeType(context, 0l);
         Mockito.verify(persistence, Mockito.times(1)).removeType(context, 0l);
+    }
+
+    @Test
+    public void removeUnits() {
+        service.removeUnits(context, 0l);
+        Mockito.verify(persistence, Mockito.times(1)).removeUnits(context, 0l);
     }
 }

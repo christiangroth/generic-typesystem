@@ -9,6 +9,7 @@ import java.util.Set;
 
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
 import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
@@ -19,6 +20,7 @@ import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValuePropos
  */
 public class InMemoryPersistenceService extends AbstractPersistenceService {
 
+    private final Set<GenericUnits> units;
     private final Set<GenericType> types;
     private final Map<Long, Set<GenericItem>> items;
 
@@ -26,8 +28,29 @@ public class InMemoryPersistenceService extends AbstractPersistenceService {
         super(query, values);
 
         // storage
+        units = new HashSet<>();
         types = new HashSet<>();
         items = new HashMap<>();
+    }
+
+    @Override
+    protected Set<GenericUnits> units() {
+        return new HashSet<>(units);
+    }
+
+    @Override
+    protected long nextUnitsId() {
+        return units.stream().mapToLong(u -> u.getId()).max().orElse(0) + 1;
+    }
+
+    @Override
+    protected void addUnits(GenericUnits units) {
+        this.units.add(units);
+    }
+
+    @Override
+    protected boolean removeUnits(long id) {
+        return units.removeIf(u -> u.getId() != null && u.getId().longValue() == id);
     }
 
     @Override

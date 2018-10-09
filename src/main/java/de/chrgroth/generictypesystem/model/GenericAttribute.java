@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * A simple POJO class holding all information about attribute definitions.
  * <dl>
@@ -38,8 +36,8 @@ import org.apache.commons.lang3.StringUtils;
  * <dd>An optional default value callback script to be executed.</dd>
  * <dt>valueProposalDependencies</dt>
  * <dd>An optional list of value proposal dependencies, referencing other attribute ids. Primarily used for UI purposes.</dd>
- * <dt>units</dt>
- * <dd>An optional list of attribute value units.</dd>
+ * <dt>unitsId</dt>
+ * <dd>An optional units id to be used for attribute values.</dd>
  * <dt>customProperties</dt>
  * <dd>A map holding optional custom properties to be used by concrete projects for simple type attribute extension.</dd>
  * </dl>
@@ -66,7 +64,7 @@ public class GenericAttribute {
 
     private Set<Long> valueProposalDependencies;
 
-    private Set<GenericAttributeUnit> units;
+    private Long unitsId;
 
     private Map<String, GenericValue<?>> customProperties;
 
@@ -75,8 +73,7 @@ public class GenericAttribute {
     }
 
     public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure,
-            Double min, Double max, Double step, String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies,
-            Set<GenericAttributeUnit> units) {
+            Double min, Double max, Double step, String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Long unitsId) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -93,9 +90,7 @@ public class GenericAttribute {
         if (valueProposalDependencies != null) {
             this.valueProposalDependencies = new HashSet<>(valueProposalDependencies);
         }
-        if (units != null) {
-            this.units = new HashSet<>(units);
-        }
+        this.unitsId = unitsId;
         customProperties = new HashMap<>();
     }
 
@@ -123,23 +118,12 @@ public class GenericAttribute {
     }
 
     /**
-     * Returns true if the attribute definition contains at least one unit definition.
+     * Returns true if the attribute definition is based on units definition.
      *
      * @return true if unit base, false otherwise
      */
     public boolean isUnitBased() {
-        return units != null && !units.isEmpty();
-    }
-
-    /**
-     * Returns the attribute unit definition with the given name or null if the attribute is not unit based or if no unit with given name is defined.
-     *
-     * @param name
-     *            unit name to match
-     * @return unit definition or null
-     */
-    public GenericAttributeUnit getUnit(String name) {
-        return isUnitBased() ? units.stream().filter(u -> StringUtils.equals(u.getName(), name)).findFirst().orElse(null) : null;
+        return unitsId != null;
     }
 
     public Long getId() {
@@ -254,12 +238,12 @@ public class GenericAttribute {
         this.valueProposalDependencies = valueProposalDependencies;
     }
 
-    public Set<GenericAttributeUnit> getUnits() {
-        return units;
+    public Long getUnitsId() {
+        return unitsId;
     }
 
-    public void setUnits(Set<GenericAttributeUnit> units) {
-        this.units = units;
+    public void setUnitsId(Long unitsId) {
+        this.unitsId = unitsId;
     }
 
     public Map<String, GenericValue<?>> getCustomProperties() {
@@ -304,6 +288,6 @@ public class GenericAttribute {
     public String toString() {
         return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", mandatory=" + mandatory + ", structure="
                 + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultValueCallback="
-                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", units=" + units + ", customProperties=" + customProperties + "]";
+                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", unitsId=" + unitsId + ", customProperties=" + customProperties + "]";
     }
 }

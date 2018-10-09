@@ -9,22 +9,26 @@ import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.model.UnitValue;
-import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTypeAndItemTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-public class DefaultValidationServiceItemTest extends BaseValidationServiceTest {
+public class DefaultValidationServiceItemTest extends BaseValidationServiceTypeAndItemTest {
 
     private static final String ATTRIBUTE_NAME = "name";
 
+    private UnitsLookupTestHelper unitsLookupTestHelper;
+
     @Before
     public void setup() {
-        service = new DefaultValidationService(null);
+        unitsLookupTestHelper = new UnitsLookupTestHelper();
+        service = new DefaultValidationService(unitsLookupTestHelper, null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         item = new GenericItem(0l, type.getId(), null, null, null);
     }
@@ -69,7 +73,8 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     public void unitValueForNonUnitBasedAttribute() {
         attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
         UnitValue value = new UnitValue();
-        value.setUnit("minutes");
+        value.setUnitsId(0l);
+        value.setUnitId(0l);
         value.setValue(new GenericValue<>(Double.class, 1.0d));
         value(value);
         validateItem(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_BASED),
@@ -79,15 +84,8 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Test
     public void nonUnitValueForUnitBasedAttribute() {
         GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
-        attribute.setUnits(new HashSet<>());
-        GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
-        minutesUnit.setName("minutes");
-        minutesUnit.setFactor(60);
-        attribute.getUnits().add(minutesUnit);
-        GenericAttributeUnit secondsUnit = new GenericAttributeUnit();
-        secondsUnit.setName("seconds");
-        secondsUnit.setFactor(GenericAttributeUnit.FACTOR_BASE);
-        attribute.getUnits().add(secondsUnit);
+        GenericUnits units = mockUnits();
+        attribute.setUnitsId(units.getId());
         value(60);
         validateItem(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_NOT_UNIT_BASED));
     }
@@ -95,20 +93,22 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTest 
     @Test
     public void validUnitBasedValue() {
         GenericAttribute attribute = attribute(DefaultGenericAttributeType.DOUBLE, null, true, null);
-        attribute.setUnits(new HashSet<>());
-        GenericAttributeUnit minutesUnit = new GenericAttributeUnit();
-        minutesUnit.setName("minutes");
-        minutesUnit.setFactor(60);
-        attribute.getUnits().add(minutesUnit);
-        GenericAttributeUnit secondsUnit = new GenericAttributeUnit();
-        secondsUnit.setName("seconds");
-        secondsUnit.setFactor(GenericAttributeUnit.FACTOR_BASE);
-        attribute.getUnits().add(secondsUnit);
+        GenericUnits units = mockUnits();
+        attribute.setUnitsId(units.getId());
         UnitValue value = new UnitValue();
-        value.setUnit("minutes");
+        value.setUnitsId(0l);
+        value.setUnitId(1l);
         value.setValue(new GenericValue<>(Double.class, 1.0d));
         value(value);
         validateItem();
+    }
+
+    private GenericUnits mockUnits() {
+        GenericUnits units = new GenericUnits(0l, "mock_units", null);
+        units.getUnits().add(new GenericUnit(0l, "seconds", "s", GenericUnits.FACTOR_BASE));
+        units.getUnits().add(new GenericUnit(1l, "minutes", "m", 60));
+        unitsLookupTestHelper.register(units);
+        return units;
     }
 
     @Test

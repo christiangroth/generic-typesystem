@@ -6,6 +6,8 @@ import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
 
 /**
@@ -14,6 +16,28 @@ import de.chrgroth.generictypesystem.validation.ValidationResult;
  * @author Christian Groth
  */
 public interface DefaultValidationServiceHooks {
+
+    /**
+     * Called to validate the given units.
+     *
+     * @param result
+     *            the result to be updated
+     * @param units
+     *            the units to be validated
+     */
+    void unitsValidation(ValidationResult<GenericUnits> result, GenericUnits units);
+
+    /**
+     * Called to validate the given unit for given units.
+     *
+     * @param result
+     *            the result to be updated
+     * @param units
+     *            units to unit belongs to
+     * @param unit
+     *            the unit to be validated
+     */
+    void unitsUnitValidation(ValidationResult<GenericUnits> result, GenericUnits units, GenericUnit unit);
 
     /**
      * Called to validate the given type.

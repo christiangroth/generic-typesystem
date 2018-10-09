@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.persistence.PersistenceService;
 import de.chrgroth.generictypesystem.persistence.query.ItemPagingData;
 import de.chrgroth.generictypesystem.persistence.query.ItemQueryResult;
@@ -41,6 +43,34 @@ public abstract class AbstractPersistenceService implements PersistenceService {
         }
         this.query = query;
         this.values = values;
+    }
+
+    @Override
+    public Set<GenericUnits> units(GenericTypesystemContext context) {
+        return units();
+    }
+
+    @Override
+    public GenericUnits units(GenericTypesystemContext context, long unitsId) {
+        return units(context).stream().filter(u -> Objects.equals(u.getId(), unitsId)).findFirst().orElse(null);
+    }
+
+    @Override
+    public void units(GenericTypesystemContext context, GenericUnits units) {
+        if (units != null) {
+
+            // ensure id
+            if (units.getId() == null) {
+                units.setId(nextUnitsId());
+            }
+
+            // re-add
+            boolean removed = removeUnits(units.getId().longValue());
+            addUnits(units);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug((removed ? "updated" : "added") + " units " + units);
+            }
+        }
     }
 
     @Override
@@ -234,6 +264,27 @@ public abstract class AbstractPersistenceService implements PersistenceService {
         }
         return true;
     }
+
+    @Override
+    public boolean removeUnits(GenericTypesystemContext context, long unitsId) {
+
+        // just remove
+        removeUnits(unitsId);
+
+        // always success, no error handling
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removed units " + unitsId);
+        }
+        return true;
+    }
+
+    protected abstract Set<GenericUnits> units();
+
+    protected abstract long nextUnitsId();
+
+    protected abstract void addUnits(GenericUnits units);
+
+    protected abstract boolean removeUnits(long id);
 
     protected abstract Collection<GenericType> types();
 

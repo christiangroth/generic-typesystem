@@ -8,16 +8,19 @@ import org.junit.Test;
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
 import de.chrgroth.generictypesystem.model.GenericType;
-import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTypeAndItemTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-public class DefaultValidationServiceTypeTest extends BaseValidationServiceTest {
+public class DefaultValidationServiceTypeTest extends BaseValidationServiceTypeAndItemTest {
 
     private static final String ATTRIBUTE_NAME = "foo";
 
+    private UnitsLookupTestHelper unitsLookupTestHelper;
+
     @Before
     public void setup() {
-        service = new DefaultValidationService(null);
+        unitsLookupTestHelper = new UnitsLookupTestHelper();
+        service = new DefaultValidationService(unitsLookupTestHelper, null);
         attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null);
         type = new GenericType(0l, "testType", "testGroup", Arrays.asList(attribute), null, null, null);
     }

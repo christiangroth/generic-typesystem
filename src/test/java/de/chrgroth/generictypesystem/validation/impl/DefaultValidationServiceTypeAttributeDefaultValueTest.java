@@ -1,27 +1,29 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
-import java.util.HashSet;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.model.UnitValue;
-import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTypeAndItemTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
-public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseValidationServiceTest {
+public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseValidationServiceTypeAndItemTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
 
+    private UnitsLookupTestHelper unitsLookupTestHelper;
+
     @Before
     public void setup() {
-        service = new DefaultValidationService(null);
+        unitsLookupTestHelper = new UnitsLookupTestHelper();
+        service = new DefaultValidationService(unitsLookupTestHelper, null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, null, null, null, null, null, null, null, null, null);
         type.getAttributes().add(attribute);
@@ -207,13 +209,25 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue("base", new GenericValue<>(Long.class, 12l))));
+        GenericUnits units = timeUnits();
+        type.attribute(ATTRIBUTE_NAME).setUnitsId(units.getId());
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue(0l, 0l, new GenericValue<>(Long.class, 12l))));
 
         // validate type
         validateType(new ValidationError[] {});
+    }
+
+    @Test
+    public void unitBasedValueUnknownUnits() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
+        GenericUnits units = timeUnits();
+        type.attribute(ATTRIBUTE_NAME).setUnitsId(units.getId());
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue(1l, 0l, new GenericValue<>(Long.class, 12l))));
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNITS) });
     }
 
     @Test
@@ -221,10 +235,9 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
-        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue("unknown", new GenericValue<>(Long.class, 12l))));
+        GenericUnits units = timeUnits();
+        type.attribute(ATTRIBUTE_NAME).setUnitsId(units.getId());
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(UnitValue.class, new UnitValue(0l, 2l, new GenericValue<>(Long.class, 12l))));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT) });
@@ -235,12 +248,19 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
 
         // set data
         type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.LONG);
-        type.attribute(ATTRIBUTE_NAME).setUnits(new HashSet<>());
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("base", GenericAttributeUnit.FACTOR_BASE));
-        type.attribute(ATTRIBUTE_NAME).getUnits().add(new GenericAttributeUnit("nonBase", 2));
+        GenericUnits units = timeUnits();
+        type.attribute(ATTRIBUTE_NAME).setUnitsId(units.getId());
         type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(Long.class, 12l));
 
         // validate type
         validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED) });
+    }
+
+    private GenericUnits timeUnits() {
+        GenericUnits units = new GenericUnits(0l, "time", "time stuff");
+        units.getUnits().add(new GenericUnit(0l, "seconds", "s", GenericUnits.FACTOR_BASE));
+        units.getUnits().add(new GenericUnit(1l, "minutes", "m", 60));
+        unitsLookupTestHelper.register(units);
+        return units;
     }
 }

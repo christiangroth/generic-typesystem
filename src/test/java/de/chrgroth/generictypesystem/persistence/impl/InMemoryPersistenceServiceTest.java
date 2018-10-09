@@ -8,6 +8,8 @@ import de.chrgroth.generictypesystem.context.GenericTypesystemContext;
 import de.chrgroth.generictypesystem.context.impl.NullGenericTypesystemContext;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.persistence.query.impl.InMemoryItemsQueryService;
 import de.chrgroth.generictypesystem.persistence.values.impl.InMemoryValueProposalService;
 
@@ -32,6 +34,43 @@ public class InMemoryPersistenceServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void missingValuesService() {
         new InMemoryPersistenceService(new InMemoryItemsQueryService(10l), null);
+    }
+
+    @Test
+    public void unitsLifecycle() {
+
+        // assert empty
+        Assert.assertTrue(service.units(context).isEmpty());
+
+        // add units
+        GenericUnits units = new GenericUnits(null, "time", "time units");
+        units.getUnits().add(new GenericUnit(0l, "seconds", "s", GenericUnits.FACTOR_BASE));
+        units.getUnits().add(new GenericUnit(1l, "minutes", "m", 60));
+        service.units(context, units);
+
+        // ensure id was set
+        Assert.assertEquals(1l, units.getId().longValue());
+
+        // assert units data
+        Assert.assertFalse(service.units(context).isEmpty());
+        Assert.assertEquals(1, service.units(context).size());
+        Assert.assertEquals(units, service.units(context).iterator().next());
+        Assert.assertNotNull(service.units(context, units.getId()));
+
+        // add type again
+        service.units(context, units);
+
+        // assert type data not duplicate
+        Assert.assertEquals(1, service.units(context).size());
+
+        // remove non existing units
+        Assert.assertTrue(service.removeUnits(context, Long.MAX_VALUE));
+        Assert.assertEquals(1, service.units(context).size());
+
+        // remove type
+        service.removeUnits(context, units.getId().longValue());
+        Assert.assertTrue(service.units(context).isEmpty());
+        Assert.assertNull(service.units(context, units.getId()));
     }
 
     @Test

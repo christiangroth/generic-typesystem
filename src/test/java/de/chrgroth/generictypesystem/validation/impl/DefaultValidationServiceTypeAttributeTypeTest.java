@@ -13,21 +13,24 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
-import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTypeAndItemTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
 @RunWith(Parameterized.class)
-public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidationServiceTest {
+public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidationServiceTypeAndItemTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
 
+    private UnitsLookupTestHelper unitsLookupTestHelper;
+
     @Before
     public void setup() {
-        service = new DefaultValidationService(null);
+        unitsLookupTestHelper = new UnitsLookupTestHelper();
+        service = new DefaultValidationService(unitsLookupTestHelper, null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
     }
 
@@ -129,9 +132,12 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     }
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
-            String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
+            String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, GenericUnits units) {
         attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback,
-                valueProposalDependencies, units);
+                valueProposalDependencies, units != null ? units.getId() : null);
+        if (units != null) {
+            unitsLookupTestHelper.register(units);
+        }
         type.getAttributes().add(attribute);
     }
 

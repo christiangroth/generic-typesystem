@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -14,10 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericItem;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
 import de.chrgroth.generictypesystem.model.UnitValue;
 import de.chrgroth.generictypesystem.validation.ValidationResult;
@@ -33,10 +35,81 @@ public class DefaultValidationService implements ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultValidationService.class);
 
+    private final Function<Long, GenericUnits> unitsLookup;
     private final DefaultValidationServiceHooks hooks;
 
-    public DefaultValidationService(DefaultValidationServiceHooks hooks) {
+    public DefaultValidationService(Function<Long, GenericUnits> unitsLookup, DefaultValidationServiceHooks hooks) {
+        Objects.requireNonNull(unitsLookup);
+        this.unitsLookup = unitsLookup;
         this.hooks = hooks != null ? hooks : new DefaultValidationServiceEmptyHooks();
+    }
+
+    @Override
+    public ValidationResult<GenericUnits> validate(GenericUnits units) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("validating units: " + units);
+        }
+
+        // null guard
+        ValidationResult<GenericUnits> result = new ValidationResult<>(units);
+        if (units == null) {
+            result.error("", DefaultValidationServiceMessageKey.GENERAL_UNITS_NOT_PROVIDED);
+            return result;
+        }
+
+        // name mandatory
+        if (StringUtils.isBlank(units.getName())) {
+            result.error("", DefaultValidationServiceMessageKey.UNITS_NAME_MANDATORY);
+        }
+
+        // validate units not empty
+        if (units.getUnits() == null || units.getUnits().isEmpty()) {
+            result.error("", DefaultValidationServiceMessageKey.UNITS_UNITS_NOT_PROVIDED);
+            return result;
+        }
+
+        // validate unit ids are unique
+        Map<Long, Long> countByIds = units.getUnits().stream().map(u -> u.getId()).filter(Objects::nonNull).collect(Collectors.groupingBy(u -> u, Collectors.counting()));
+        countByIds.entrySet().stream().filter(e -> e.getValue() > 1).forEach(e -> {
+            result.error("", DefaultValidationServiceMessageKey.UNITS_AMBIGIOUS_UNIT_ID, e.getKey().longValue());
+        });
+
+        // validate base unit exists
+        if (units.getUnits().stream().filter(u -> u.isBase()).count() != 1) {
+            result.error("", DefaultValidationServiceMessageKey.UNITS_UNITS_EXACTLY_ONE_BASE_UNIT_MANDATORY);
+        }
+
+        // validate units
+        for (GenericUnit unit : units.getUnits()) {
+            validateUnitsUnit(result, units, unit, "");
+        }
+
+        // call units hook
+        hooks.unitsValidation(result, units);
+
+        // done
+        return result;
+    }
+
+    private void validateUnitsUnit(ValidationResult<GenericUnits> result, GenericUnits units, GenericUnit unit, String path) {
+
+        // id mandatory
+        if (unit.getId() == null) {
+            result.error(path + unit.getName(), DefaultValidationServiceMessageKey.UNITS_UNIT_ID_MANDATORY);
+        }
+
+        // name mandatory
+        if (StringUtils.isBlank(unit.getName())) {
+            result.error(path, DefaultValidationServiceMessageKey.UNITS_UNIT_NAME_MANDATORY);
+        }
+
+        // factor positive
+        if (unit.getFactor() <= 0.0d) {
+            result.error(path + unit.getName(), DefaultValidationServiceMessageKey.UNITS_UNIT_FACTOR_NOT_POSITIVE, unit.getFactor());
+        }
+
+        // call units unit hook
+        hooks.unitsUnitValidation(result, units, unit);
     }
 
     @Override
@@ -149,7 +222,7 @@ public class DefaultValidationService implements ValidationService {
         validateTypeAttributeValueProposalDependencyDefinitions(result, allAttributes, a, path);
 
         // validate units
-        validateTypeAttributeUnitDefinitions(result, a, path);
+        validateTypeAttributeUnits(result, a, path);
 
         // validate default value
         validateTypeAttributeDefaultValueDefinition(result, a, path);
@@ -192,29 +265,22 @@ public class DefaultValidationService implements ValidationService {
         }
     }
 
-    private void validateTypeAttributeUnitDefinitions(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+    private void validateTypeAttributeUnits(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+
+        // exit if not unit based
+        if (!a.isUnitBased()) {
+            return;
+        }
+
+        // check if unit capable
+        if (!a.getType().isUnitCapable()) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, a.getType().toString());
+        }
 
         // validate units
-        if (a.isUnitBased()) {
-            if (!a.getType().isUnitCapable()) {
-                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_NOT_UNIT_CAPABLE, a.getType().toString());
-            } else {
-
-                // be sure to have a base unit
-                if (a.getUnits().stream().filter(u -> u.isBase()).count() != 1) {
-                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_EXACTLY_ONE_BASE_UNIT_MANDATORY);
-                }
-
-                // be sure all units are named
-                if (a.getUnits().stream().filter(u -> StringUtils.isBlank(u.getName())).count() > 0) {
-                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY);
-                }
-
-                // be sure all unit names are distinct
-                if (a.getUnits().size() != a.getUnits().stream().map(u -> u.getName()).distinct().count()) {
-                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME);
-                }
-            }
+        ValidationResult<GenericUnits> unitsValidationResult = validate(unitsLookup.apply(a.getUnitsId()));
+        if (!unitsValidationResult.isValid()) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNITS_INVALID, a.getType().toString());
         }
     }
 
@@ -240,10 +306,15 @@ public class DefaultValidationService implements ValidationService {
                         skipDefaultValueCheck = true;
                     } else {
 
-                        // ensure unit reference is valid
-                        final String unitName = ((UnitValue) defaultValueToBeChecked).getUnit();
-                        GenericAttributeUnit referencedAttributeUnit = a.getUnit(unitName);
-                        if (!skipDefaultValueCheck && referencedAttributeUnit == null) {
+                        // ensure units and unit references are valid
+                        final Long unitsId = ((UnitValue) defaultValueToBeChecked).getUnitsId();
+                        if (!skipDefaultValueCheck && !Objects.equals(a.getUnitsId(), unitsId)) {
+                            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNITS);
+                            skipDefaultValueCheck = true;
+                        }
+
+                        final Long unitId = ((UnitValue) defaultValueToBeChecked).getUnitId();
+                        if (!skipDefaultValueCheck && unitsLookup.apply(unitsId).unit(unitId) == null) {
                             result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
                             skipDefaultValueCheck = true;
                         }
@@ -502,9 +573,8 @@ public class DefaultValidationService implements ValidationService {
         if (isUnitValue) {
             UnitValue unitValue = (UnitValue) value;
 
-            // check unit is registered for attribute
-            GenericAttributeUnit attributeUnit = !a.isUnitBased() ? null : a.getUnit(unitValue.getUnit());
-            if (attributeUnit == null) {
+            // check units and unit are registered for attribute
+            if (!a.isUnitBased() || !Objects.equals(a.getUnitsId(), unitValue.getUnitsId()) || unitsLookup.apply(a.getUnitsId()).unit(unitValue.getUnitId()) == null) {
                 result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_UNIT_INVALID);
             }
         }

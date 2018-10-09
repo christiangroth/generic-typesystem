@@ -15,15 +15,16 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.chrgroth.generictypesystem.model.DefaultGenericAttributeType;
 import de.chrgroth.generictypesystem.model.GenericAttribute;
-import de.chrgroth.generictypesystem.model.GenericAttributeUnit;
 import de.chrgroth.generictypesystem.model.GenericStructure;
 import de.chrgroth.generictypesystem.model.GenericType;
+import de.chrgroth.generictypesystem.model.GenericUnit;
+import de.chrgroth.generictypesystem.model.GenericUnits;
 import de.chrgroth.generictypesystem.model.GenericValue;
-import de.chrgroth.generictypesystem.validation.BaseValidationServiceTest;
+import de.chrgroth.generictypesystem.validation.BaseValidationServiceTypeAndItemTest;
 import de.chrgroth.generictypesystem.validation.ValidationError;
 
 @RunWith(Parameterized.class)
-public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTest {
+public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValidationServiceTypeAndItemTest {
 
     private static final String ATTRIBUTE_NAME = "dummy";
 
@@ -35,11 +36,13 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     @Parameter
     public DefaultGenericAttributeType testType;
 
+    private UnitsLookupTestHelper unitsLookupTestHelper;
     private List<ValidationError> errorKeys = new ArrayList<>();
 
     @Before
     public void setup() {
-        service = new DefaultValidationService(null);
+        unitsLookupTestHelper = new UnitsLookupTestHelper();
+        service = new DefaultValidationService(unitsLookupTestHelper, null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         errorKeys = new ArrayList<>();
         if (testType.isList()) {
@@ -190,7 +193,7 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
     public void unitsTest() {
 
         // create attribute with base unit only
-        createAttribute(null, false, false, null, null, null, null, null, null, null, null, new HashSet<>(Arrays.asList(baseUnit())));
+        createAttribute(null, false, false, null, null, null, null, null, null, null, null, base(units()));
 
         // define expected error message keys
         if (!testType.isUnitCapable()) {
@@ -204,67 +207,30 @@ public class DefaultValidationServiceTypeAttributeCriteriaTest extends BaseValid
         if (!testType.isUnitCapable()) {
             return;
         }
-
-        // create attribute with base unit only
-        clearAttributes();
-        createAttribute(null, false, false, null, null, null, null, null, null, null, null, new HashSet<>(Arrays.asList(nonBaseUnit())));
-
-        // define expected error message keys
-        errorKeys.clear();
-        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_EXACTLY_ONE_BASE_UNIT_MANDATORY));
-
-        // validate type
-        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
-
-        // create attribute with both units - name missing
-        clearAttributes();
-        GenericAttributeUnit nonBaseUnitWithoutName = nonBaseUnit();
-        nonBaseUnitWithoutName.setName(null);
-        createAttribute(null, false, false, null, null, null, null, null, null, null, null, new HashSet<>(Arrays.asList(baseUnit(), nonBaseUnitWithoutName)));
-
-        // define expected error message keys
-        errorKeys.clear();
-        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_NAME_MANDATORY));
-
-        // validate type
-        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
-
-        // create attribute with both units - ambigious name
-        clearAttributes();
-        GenericAttributeUnit nonBaseUnitAmbigiousName = nonBaseUnit();
-        nonBaseUnitAmbigiousName.setName(baseUnit().getName());
-        createAttribute(null, false, false, null, null, null, null, null, null, null, null, new HashSet<>(Arrays.asList(baseUnit(), nonBaseUnitAmbigiousName)));
-
-        // define expected error message keys
-        errorKeys.clear();
-        errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_UNIT_AMBIGIOUS_NAME));
-
-        // validate type
-        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
-
-        // create attribute with both units
-        clearAttributes();
-        createAttribute(null, false, false, null, null, null, null, null, null, null, null, new HashSet<>(Arrays.asList(baseUnit(), nonBaseUnit())));
-
-        // define expected error message keys
-        errorKeys.clear();
-
-        // validate type
-        validateType(errorKeys.toArray(new ValidationError[errorKeys.size()]));
     }
 
-    public GenericAttributeUnit baseUnit() {
-        return new GenericAttributeUnit("baseUnit", GenericAttributeUnit.FACTOR_BASE);
+    public GenericUnits units() {
+        GenericUnits units = new GenericUnits(0l, "units", "desc");
+        return units;
     }
 
-    public GenericAttributeUnit nonBaseUnit() {
-        return new GenericAttributeUnit("nonBaseUnit", GenericAttributeUnit.FACTOR_BASE + 1);
+    public GenericUnits base(GenericUnits units) {
+        units.getUnits().add(new GenericUnit(0l, "base", "b", GenericUnits.FACTOR_BASE));
+        return units;
+    }
+
+    public GenericUnits nonBase(GenericUnits units) {
+        units.getUnits().add(new GenericUnit(1l, "nonbase", "x", 2.0d));
+        return units;
     }
 
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
-            String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Set<GenericAttributeUnit> units) {
+            String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, GenericUnits units) {
         attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback,
-                valueProposalDependencies, units);
+                valueProposalDependencies, units != null ? units.getId() : null);
+        if (units != null) {
+            unitsLookupTestHelper.register(units);
+        }
         type.getAttributes().add(attribute);
     }
 

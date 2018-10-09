@@ -24,7 +24,7 @@ public class ValidationError {
      *            the message parameters
      */
     public ValidationError(String path, ValidationMessageKey messageKey, Object... messageParameters) {
-        this.path = path;
+        this.path = path != null ? path.trim() : "";
         this.messageKey = messageKey;
         this.messageParameters = messageParameters;
     }

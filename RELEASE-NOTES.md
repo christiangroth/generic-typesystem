@@ -2,6 +2,8 @@ Release Notes
 =============
 
 # 0.5.0-SNAPSHOT (in progress)
+- refactored units to be a standalone top-level type
+- added conversion function for unit based values
 - ...
 
 # 0.4.0
