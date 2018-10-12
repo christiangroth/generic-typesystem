@@ -38,23 +38,23 @@ public class DefaultValidationServiceHooksTest extends BaseValidationServiceType
 
         // type
         List<GenericAttribute> typeAttributes = new ArrayList<>();
-        typeAttributes.add(new GenericAttribute(0l, "simple", DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null));
+        typeAttributes.add(new GenericAttribute(0l, "simple", DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null, null));
 
         GenericUnits units = new GenericUnits(0l, "units", "desc");
         units.getUnits().add(new GenericUnit(0l, "base", null, GenericUnits.FACTOR_BASE));
         unitsLookupTestHelper.register(units);
-        typeAttributes
-                .add(new GenericAttribute(1l, "units", DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, units.getId()));
+        typeAttributes.add(
+                new GenericAttribute(1l, "units", DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, units.getId(), null));
 
         typeAttributes.add(new GenericAttribute(2l, "list", DefaultGenericAttributeType.LIST, DefaultGenericAttributeType.LONG, false, false, null, null, null, null, null, null,
-                null, null, null));
+                null, null, null, null));
 
         List<GenericAttribute> subStructureAttributes = new ArrayList<>();
         subStructureAttributes
-                .add(new GenericAttribute(4l, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(4l, "sub-simple", DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, null, null));
         GenericStructure subStructure = new GenericStructure(subStructureAttributes);
-        typeAttributes
-                .add(new GenericAttribute(3l, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, subStructure, null, null, null, null, null, null, null, null));
+        typeAttributes.add(
+                new GenericAttribute(3l, "struct", DefaultGenericAttributeType.STRUCTURE, null, false, false, subStructure, null, null, null, null, null, null, null, null, null));
 
         type = new GenericType(0l, "testType", "testGroup", typeAttributes, null, null, null);
 

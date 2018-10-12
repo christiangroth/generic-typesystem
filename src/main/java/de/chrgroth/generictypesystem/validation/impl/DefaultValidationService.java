@@ -227,6 +227,9 @@ public class DefaultValidationService implements ValidationService {
         // validate default value
         validateTypeAttributeDefaultValueDefinition(result, a, path);
 
+        // validate enum values
+        validateTypeAttributeEnumValues(result, a, path);
+
         // call type attribute hook
         hooks.typeAttributeValidation(result, a, path);
 
@@ -288,79 +291,82 @@ public class DefaultValidationService implements ValidationService {
 
         // validate default value
         GenericValue<?> defaultValue = a.getDefaultValue();
-        if (defaultValue != null && defaultValue.getValue() != null) {
+        if (defaultValue == null || defaultValue.getValue() == null) {
+            return;
+        }
 
-            // check if type is default value capable
-            if (!a.getType().isDefaultValueCapable()) {
-                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
-            } else if (a.getType() instanceof DefaultGenericAttributeType) {
+        // check if type is default value capable
+        if (!a.getType().isDefaultValueCapable()) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_ALLOWED);
+            return;
+        }
 
-                // check for unit based attribute
-                Object defaultValueToBeChecked = defaultValue.getValue();
-                boolean skipDefaultValueCheck = false;
-                if (a.isUnitBased()) {
+        // stop validation if using custom attribute types
+        if (!(a.getType() instanceof DefaultGenericAttributeType)) {
+            return;
+        }
 
-                    // check for unit value
-                    if (!(defaultValueToBeChecked instanceof UnitValue)) {
-                        result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED);
-                        skipDefaultValueCheck = true;
-                    } else {
+        // check for unit based attribute
+        Object defaultValueToBeChecked = defaultValue.getValue();
+        if (a.isUnitBased()) {
 
-                        // ensure units and unit references are valid
-                        final Long unitsId = ((UnitValue) defaultValueToBeChecked).getUnitsId();
-                        if (!skipDefaultValueCheck && !Objects.equals(a.getUnitsId(), unitsId)) {
-                            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNITS);
-                            skipDefaultValueCheck = true;
-                        }
+            // check for unit value
+            if (!(defaultValueToBeChecked instanceof UnitValue)) {
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_NOT_UNIT_BASED);
+                return;
+            } else {
 
-                        final Long unitId = ((UnitValue) defaultValueToBeChecked).getUnitId();
-                        if (!skipDefaultValueCheck && unitsLookup.apply(unitsId).unit(unitId) == null) {
-                            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
-                            skipDefaultValueCheck = true;
-                        }
-                    }
-
-                    // replace default value to be checked
-                    if (!skipDefaultValueCheck) {
-                        defaultValueToBeChecked = ((UnitValue) defaultValueToBeChecked).getValue().getValue();
-                    }
+                // ensure units and unit references are valid
+                final Long unitsId = ((UnitValue) defaultValueToBeChecked).getUnitsId();
+                if (!Objects.equals(a.getUnitsId(), unitsId)) {
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNITS);
+                    return;
                 }
 
-                if (!skipDefaultValueCheck) {
-
-                    // validate default value is of correct type
-                    boolean defaultValueTypeValid = validateDefaultValueType(result, a, (DefaultGenericAttributeType) a.getType(), defaultValueToBeChecked);
-
-                    // validate default attribute types
-                    if (defaultValueTypeValid) {
-                        switch ((DefaultGenericAttributeType) a.getType()) {
-                            case BOOLEAN:
-                                // fine, nothing to validate for Booleans
-                                break;
-                            case STRING:
-                                validateTypeAttributeDefaultValue(result, a, (String) a.getType().convert(defaultValueToBeChecked));
-                                break;
-                            case LONG:
-                                validateTypeAttributeDefaultValue(result, a, (Long) a.getType().convert(defaultValueToBeChecked));
-                                break;
-                            case DOUBLE:
-                                validateTypeAttributeDefaultValue(result, a, (Double) a.getType().convert(defaultValueToBeChecked));
-                                break;
-                            default:
-                                // all other types do not need to be validated because they are not capable of default values. So nothing to do here.
-                                break;
-                        }
-                    }
+                final Long unitId = ((UnitValue) defaultValueToBeChecked).getUnitId();
+                if (unitsLookup.apply(unitsId).unit(unitId) == null) {
+                    result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_INVALID_UNIT);
+                    return;
                 }
+            }
+
+            // replace default value to be checked
+            defaultValueToBeChecked = ((UnitValue) defaultValueToBeChecked).getValue().getValue();
+        }
+
+        // validate default value is of correct type
+        boolean defaultValueTypeValid = validateDefaultValueType(result, a, path, (DefaultGenericAttributeType) a.getType(), defaultValueToBeChecked);
+
+        // validate default attribute types
+        if (defaultValueTypeValid) {
+            switch ((DefaultGenericAttributeType) a.getType()) {
+                case BOOLEAN:
+                    // fine, nothing to validate for Booleans
+                    break;
+                case STRING:
+                    validateTypeAttributeDefaultValue(result, a, path, (String) a.getType().convert(defaultValueToBeChecked));
+                    break;
+                case ENUM:
+                    validateTypeAttributeEnumDefaultValue(result, a, path, (String) a.getType().convert(defaultValueToBeChecked));
+                    break;
+                case LONG:
+                    validateTypeAttributeDefaultValue(result, a, path, (Long) a.getType().convert(defaultValueToBeChecked));
+                    break;
+                case DOUBLE:
+                    validateTypeAttributeDefaultValue(result, a, path, (Double) a.getType().convert(defaultValueToBeChecked));
+                    break;
+                default:
+                    // all other types do not need to be validated because they are not capable of default values. So nothing to do here.
+                    break;
             }
         }
     }
 
-    private boolean validateDefaultValueType(ValidationResult<GenericType> result, GenericAttribute a, DefaultGenericAttributeType type, Object defaultValue) {
+    private boolean validateDefaultValueType(ValidationResult<GenericType> result, GenericAttribute a, String path, DefaultGenericAttributeType type, Object defaultValue) {
 
         // check type is applicable to defined ones
         if (!type.isAssignableFrom(defaultValue.getClass())) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_TYPE_INVALID, defaultValue.getClass());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_TYPE_INVALID, defaultValue.getClass());
             return false;
         }
 
@@ -368,17 +374,17 @@ public class DefaultValidationService implements ValidationService {
         return true;
     }
 
-    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String defaultValue) {
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String path, String defaultValue) {
 
         // validate min
         int length = defaultValue.length();
         if (a.getMin() != null && a.getMin() > length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MIN_UNDERCUT, a.getMin());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < length) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MAX_EXCEEDED, a.getMax());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_MAX_EXCEEDED, a.getMax());
         }
 
         // validate pattern
@@ -386,34 +392,59 @@ public class DefaultValidationService implements ValidationService {
             Pattern pattern = Pattern.compile(a.getPattern());
             Matcher matcher = pattern.matcher(defaultValue);
             if (!matcher.matches()) {
-                result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_PATTERN_VIOLATED, a.getPattern());
+                result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_PATTERN_VIOLATED, a.getPattern());
             }
         }
     }
 
-    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, Long defaultValue) {
+    private void validateTypeAttributeEnumDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String path, String defaultValue) {
 
-        // validate min
-        if (a.getMin() != null && a.getMin() > defaultValue) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MIN_UNDERCUT, a.getMin());
-        }
-
-        // validate max
-        if (a.getMax() != null && a.getMax() < defaultValue) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MAX_EXCEEDED, a.getMax());
+        // validate defined enum value, if any
+        Set<String> enumValues = a.getEnumValues();
+        boolean enumValuesDefined = enumValues != null && !enumValues.isEmpty();
+        if (enumValuesDefined && !enumValues.contains(defaultValue)) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_ENUM_INVALID);
         }
     }
 
-    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, Double defaultValue) {
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String path, Long defaultValue) {
 
         // validate min
         if (a.getMin() != null && a.getMin() > defaultValue) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MIN_UNDERCUT, a.getMin());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MIN_UNDERCUT, a.getMin());
         }
 
         // validate max
         if (a.getMax() != null && a.getMax() < defaultValue) {
-            result.error(a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MAX_EXCEEDED, a.getMax());
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_LONG_MAX_EXCEEDED, a.getMax());
+        }
+    }
+
+    private void validateTypeAttributeDefaultValue(ValidationResult<GenericType> result, GenericAttribute a, String path, Double defaultValue) {
+
+        // validate min
+        if (a.getMin() != null && a.getMin() > defaultValue) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MIN_UNDERCUT, a.getMin());
+        }
+
+        // validate max
+        if (a.getMax() != null && a.getMax() < defaultValue) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_DOUBLE_MAX_EXCEEDED, a.getMax());
+        }
+    }
+
+    private void validateTypeAttributeEnumValues(ValidationResult<GenericType> result, GenericAttribute a, String path) {
+
+        // stop validation if using custom attribute types
+        Set<String> enumValues = a.getEnumValues();
+        boolean enumValuesDefined = enumValues != null && !enumValues.isEmpty();
+        boolean isEnum = a.getType().isEnum();
+
+        // ensure at least one enum value for enums and do not allow any values for non enums
+        if (isEnum && !enumValuesDefined) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE);
+        } else if (!isEnum && enumValuesDefined) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_ALLOWED);
         }
     }
 
@@ -639,6 +670,11 @@ public class DefaultValidationService implements ValidationService {
             validateItemAttributeStringValue(result, a, value.toString(), path);
         }
 
+        // enum validation
+        if (a.getType().isEnum()) {
+            validateItemAttributeEnumValue(result, a, value.toString(), path);
+        }
+
         // numeric validation
         if (a.getType().isNumeric()) {
             Double dValue = null;
@@ -678,6 +714,15 @@ public class DefaultValidationService implements ValidationService {
             if (!matcher.matches()) {
                 result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_PATTERN_VIOLATED, a.getPattern());
             }
+        }
+    }
+
+    private void validateItemAttributeEnumValue(ValidationResult<GenericItem> result, GenericAttribute a, String value, String path) {
+
+        // check if value is an allowed enum value
+        Set<String> enumValues = a.getEnumValues();
+        if (enumValues != null && !enumValues.contains(value)) {
+            result.error(path + a.getName(), DefaultValidationServiceMessageKey.ITEM_VALUE_ENUM_INVALID);
         }
     }
 

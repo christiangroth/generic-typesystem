@@ -1,5 +1,8 @@
 package de.chrgroth.generictypesystem.validation.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +28,7 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
         unitsLookupTestHelper = new UnitsLookupTestHelper();
         service = new DefaultValidationService(unitsLookupTestHelper, null);
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
-        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, null, null, null, null, null, null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, null, null, false, false, null, null, null, null, null, null, null, null, null, null);
         type.getAttributes().add(attribute);
     }
 
@@ -86,6 +89,58 @@ public class DefaultValidationServiceTypeAttributeDefaultValueTest extends BaseV
         // validate type
         validateType(
                 new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_STRING_PATTERN_VIOLATED, "\\d+") });
+    }
+
+    @Test
+    public void defaultValueEnum() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.ENUM);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
+        Set<String> enumValues = new HashSet<>();
+        enumValues.add("foo");
+        type.attribute(ATTRIBUTE_NAME).setEnumValues(enumValues);
+
+        // validate type
+        validateType(new ValidationError[] {});
+    }
+
+    @Test
+    public void defaultValueEnumNoEnumValues() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.ENUM);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
+        type.attribute(ATTRIBUTE_NAME).setEnumValues(null);
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE) });
+    }
+
+    @Test
+    public void defaultValueEnumEmptyEnumValues() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.ENUM);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "foo"));
+        type.attribute(ATTRIBUTE_NAME).setEnumValues(new HashSet<>());
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE) });
+    }
+
+    @Test
+    public void defaultValueEnumInvalid() {
+
+        // set data
+        type.attribute(ATTRIBUTE_NAME).setType(DefaultGenericAttributeType.ENUM);
+        type.attribute(ATTRIBUTE_NAME).setDefaultValue(new GenericValue<>(String.class, "bar"));
+        Set<String> enumValues = new HashSet<>();
+        enumValues.add("foo");
+        type.attribute(ATTRIBUTE_NAME).setEnumValues(enumValues);
+
+        // validate type
+        validateType(new ValidationError[] { new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_DEFAULT_VALUE_ENUM_INVALID) });
     }
 
     @Test

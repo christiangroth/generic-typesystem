@@ -21,6 +21,13 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
             return value;
         }
     },
+    ENUM(String.class) {
+
+        @Override
+        public Object parse(String value) {
+            return value;
+        }
+    },
     LONG(Long.class, Integer.class) {
 
         @Override
@@ -134,6 +141,11 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
     }
 
     @Override
+    public boolean isEnum() {
+        return this == ENUM;
+    }
+
+    @Override
     public boolean isMinMaxCapable() {
         return isNumeric() || isText();
     }
@@ -160,7 +172,7 @@ public enum DefaultGenericAttributeType implements GenericAttributeType {
 
     @Override
     public boolean isDefaultValueCapable() {
-        return this == STRING || this == LONG || this == DOUBLE || this == BOOLEAN;
+        return this == STRING || this == ENUM || this == LONG || this == DOUBLE || this == BOOLEAN;
     }
 
     @Override

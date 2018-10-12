@@ -59,7 +59,9 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // define expected error message keys
         List<ValidationError> errorKeys = new ArrayList<>();
-        if (testType.isList()) {
+        if (testType.isEnum()) {
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE));
+        } else if (testType.isList()) {
             errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
         } else if (testType.isStructure()) {
             errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_STRUCTURE_STRUCTURE_MANDATORY));
@@ -74,6 +76,9 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
+        if (testType.isEnum()) {
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE));
+        }
         if (testType.isList()) {
             if (testValueType.isList()) {
                 errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED));
@@ -98,6 +103,9 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
+        if (testType.isEnum()) {
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE));
+        }
         if (testType.isList()) {
             errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_VALUE_TYPE_MANDATORY));
         } else if (!testType.isStructure()) {
@@ -113,6 +121,9 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
 
         // define expected error message keys
         errorKeys = new ArrayList<>();
+        if (testType.isEnum()) {
+            errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_ENUM_VALUE_NOT_AVAILABLE));
+        }
         if (testType.isList()) {
             if (testValueType.isList()) {
                 errorKeys.add(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.TYPE_ATTRIBUTE_LIST_NESTED_LISTS_NOT_ALLOWED));
@@ -134,7 +145,7 @@ public class DefaultValidationServiceTypeAttributeTypeTest extends BaseValidatio
     public void createAttribute(DefaultGenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure, Double min, Double max, Double step,
             String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, GenericUnits units) {
         attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, testType, valueType, unique, mandatory, structure, min, max, step, pattern, defaultValue, defaultValueCallback,
-                valueProposalDependencies, units != null ? units.getId() : null);
+                valueProposalDependencies, units != null ? units.getId() : null, null);
         if (units != null) {
             unitsLookupTestHelper.register(units);
         }

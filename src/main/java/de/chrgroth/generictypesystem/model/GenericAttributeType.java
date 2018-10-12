@@ -31,6 +31,13 @@ public interface GenericAttributeType {
     boolean isText();
 
     /**
+     * Checks if the type is an enum.
+     *
+     * @return true if the attribute type is enum, false otherwise
+     */
+    boolean isEnum();
+
+    /**
      * Checks if the type is capable of min and max bounds.
      *
      * @return true if the attribute type is min and max capable, false otherwise

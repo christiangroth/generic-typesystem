@@ -66,14 +66,17 @@ public class GenericAttribute {
 
     private Long unitsId;
 
+    private Set<String> enumValues;
+
     private Map<String, GenericValue<?>> customProperties;
 
     public GenericAttribute() {
-        this(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, false, false, null, null, null, null, null, null, null, null, null, null);
     }
 
     public GenericAttribute(Long id, String name, GenericAttributeType type, GenericAttributeType valueType, boolean unique, boolean mandatory, GenericStructure structure,
-            Double min, Double max, Double step, String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Long unitsId) {
+            Double min, Double max, Double step, String pattern, GenericValue<?> defaultValue, String defaultValueCallback, Set<Long> valueProposalDependencies, Long unitsId,
+            Set<String> enumValues) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -91,6 +94,9 @@ public class GenericAttribute {
             this.valueProposalDependencies = new HashSet<>(valueProposalDependencies);
         }
         this.unitsId = unitsId;
+        if (enumValues != null) {
+            this.enumValues = new HashSet<>(enumValues);
+        }
         customProperties = new HashMap<>();
     }
 
@@ -246,6 +252,14 @@ public class GenericAttribute {
         this.unitsId = unitsId;
     }
 
+    public Set<String> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(Set<String> enumValues) {
+        this.enumValues = enumValues;
+    }
+
     public Map<String, GenericValue<?>> getCustomProperties() {
         return customProperties;
     }
@@ -288,6 +302,7 @@ public class GenericAttribute {
     public String toString() {
         return "GenericAttribute [id=" + id + ", name=" + name + ", type=" + type + ", valueType=" + valueType + ", unique=" + unique + ", mandatory=" + mandatory + ", structure="
                 + structure + ", min=" + min + ", max=" + max + ", step=" + step + ", pattern=" + pattern + ", defaultValue=" + defaultValue + ", defaultValueCallback="
-                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", unitsId=" + unitsId + ", customProperties=" + customProperties + "]";
+                + defaultValueCallback + ", valueProposalDependencies=" + valueProposalDependencies + ", unitsId=" + unitsId + ", enumValues=" + enumValues + ", customProperties="
+                + customProperties + "]";
     }
 }

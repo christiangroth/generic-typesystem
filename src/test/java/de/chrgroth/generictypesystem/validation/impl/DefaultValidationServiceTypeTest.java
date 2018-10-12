@@ -21,7 +21,7 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTypeA
     public void setup() {
         unitsLookupTestHelper = new UnitsLookupTestHelper();
         service = new DefaultValidationService(unitsLookupTestHelper, null);
-        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null);
+        attribute = new GenericAttribute(0l, ATTRIBUTE_NAME, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null, null);
         type = new GenericType(0l, "testType", "testGroup", Arrays.asList(attribute), null, null, null);
     }
 
@@ -88,7 +88,7 @@ public class DefaultValidationServiceTypeTest extends BaseValidationServiceTypeA
     @Test
     public void attributeAmbigiousId() {
         type.getAttributes()
-                .add(new GenericAttribute(0l, "some other", DefaultGenericAttributeType.LONG, null, false, false, null, null, null, null, null, null, null, null, null));
+                .add(new GenericAttribute(0l, "some other", DefaultGenericAttributeType.LONG, null, false, false, null, null, null, null, null, null, null, null, null, null));
         validateType(new ValidationError("", DefaultValidationServiceMessageKey.TYPE_AMBIGIOUS_ATTRIBUTE_ID, attribute.getId().longValue()));
     }
 

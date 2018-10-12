@@ -38,14 +38,14 @@ public class InMemoryValueProposalServiceTest {
         // prepare type
         type = new GenericType(0l, "testType", "testGroup", null, null, null, null);
         type.getAttributes().add(new GenericAttribute(0l, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null,
-                new HashSet<>(Arrays.asList(1l)), null));
-        type.getAttributes()
-                .add(new GenericAttribute(1l, DOUBLE_ATTRIBUTE, DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, null));
+                new HashSet<>(Arrays.asList(1l)), null, null));
+        type.getAttributes().add(
+                new GenericAttribute(1l, DOUBLE_ATTRIBUTE, DefaultGenericAttributeType.DOUBLE, null, false, false, null, null, null, null, null, null, null, null, null, null));
         GenericStructure nestedStructure = new GenericStructure();
-        nestedStructure.getAttributes()
-                .add(new GenericAttribute(2l, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null));
+        nestedStructure.getAttributes().add(
+                new GenericAttribute(2l, STRING_ATTRIBUTE, DefaultGenericAttributeType.STRING, null, false, false, null, null, null, null, null, null, null, null, null, null));
         type.getAttributes().add(new GenericAttribute(3l, NESTED_ATTRIBUTE, DefaultGenericAttributeType.STRUCTURE, null, false, false, nestedStructure, null, null, null, null,
-                null, null, null, null));
+                null, null, null, null, null));
 
         // prepare items
         items = new HashSet<>();

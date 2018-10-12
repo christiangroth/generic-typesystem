@@ -205,6 +205,26 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTypeA
     }
 
     @Test
+    public void enumValid() {
+        GenericAttribute a = attribute(DefaultGenericAttributeType.ENUM, null, false, null);
+        HashSet<String> enumValues = new HashSet<>();
+        enumValues.add("foo");
+        a.setEnumValues(enumValues);
+        value("foo");
+        validateItem();
+    }
+
+    @Test
+    public void enumInvalid() {
+        GenericAttribute a = attribute(DefaultGenericAttributeType.ENUM, null, false, null);
+        HashSet<String> enumValues = new HashSet<>();
+        enumValues.add("foo");
+        a.setEnumValues(enumValues);
+        value("bar");
+        validateItem(new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_ENUM_INVALID));
+    }
+
+    @Test
     public void longIntegerMinUndercut() {
         assertNumericValue(DefaultGenericAttributeType.LONG, 2.0d, null, 1, new ValidationError(ATTRIBUTE_NAME, DefaultValidationServiceMessageKey.ITEM_VALUE_MIN_UNDERCUT, 2.0d));
     }
@@ -281,7 +301,7 @@ public class DefaultValidationServiceItemTest extends BaseValidationServiceTypeA
     }
 
     private <T, K, V> GenericAttribute attribute(DefaultGenericAttributeType type, DefaultGenericAttributeType valueType, boolean mandatory, GenericStructure structure) {
-        GenericAttribute a = new GenericAttribute(0l, ATTRIBUTE_NAME, type, valueType, false, mandatory, structure, null, null, null, null, null, null, null, null);
+        GenericAttribute a = new GenericAttribute(0l, ATTRIBUTE_NAME, type, valueType, false, mandatory, structure, null, null, null, null, null, null, null, null, null);
         this.type.getAttributes().add(a);
         return a;
     }
