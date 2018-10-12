@@ -1,12 +1,11 @@
 Release Notes
 =============
 
-# 0.5.0-SNAPSHOT (in progress)
+# 0.5.0
 - refactored units to be a standalone top-level type
 - added conversion function for unit based values
 - refactored persistence service interface and abstract persistence service base implementation (breaking API changes)
 - added attribute based enum definitions
-- ...
 
 # 0.4.0
 - fixed item sorting in case of integer/long or float/double clash
