@@ -380,7 +380,7 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
         service.item(context, 2l, null);
-        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.anyLong(), Mockito.nullable(GenericItem.class));
     }
 
     @Test
@@ -395,7 +395,7 @@ public class GenericTypesystemServiceTest {
         Mockito.when(validationResult.isValid()).thenReturn(Boolean.FALSE);
 
         service.item(context, 2l, new GenericItem());
-        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(persistence, Mockito.times(0)).item(Mockito.any(), Mockito.anyLong(), Mockito.nullable(GenericItem.class));
     }
 
     @Test
@@ -414,7 +414,7 @@ public class GenericTypesystemServiceTest {
         GenericItem item = new GenericItem();
         service.item(context, type.getId(), item);
         Assert.assertEquals(666l, item.getTypeId().longValue());
-        Mockito.verify(persistence, Mockito.times(1)).item(Mockito.any(), Mockito.eq(type), Mockito.eq(item));
+        Mockito.verify(persistence, Mockito.times(1)).item(Mockito.any(), Mockito.eq(type.getId()), Mockito.eq(item));
     }
 
     @Test

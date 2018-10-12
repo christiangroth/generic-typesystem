@@ -3,6 +3,7 @@ package de.chrgroth.generictypesystem.persistence.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -46,7 +47,7 @@ public class InMemoryPersistenceServiceQueryTest {
 
         // prepare test type
         type = new GenericType(TYPE_ID, "name", "group", null, null, null, DEFAULT_PAGE_SIZE);
-        service.type(context, type);
+        Assert.assertTrue(service.type(context, type));
     }
 
     @Test

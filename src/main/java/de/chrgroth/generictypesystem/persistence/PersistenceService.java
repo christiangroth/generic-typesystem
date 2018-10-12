@@ -30,7 +30,7 @@ public interface PersistenceService {
     Set<GenericUnits> units(GenericTypesystemContext context);
 
     /**
-     * Returns the units with given id..
+     * Returns the units with given id.
      *
      * @param context
      *            current context
@@ -47,8 +47,9 @@ public interface PersistenceService {
      *            current context
      * @param units
      *            units to be saved
+     * @return true if successful, false otherwise
      */
-    void units(GenericTypesystemContext context, GenericUnits units);
+    boolean units(GenericTypesystemContext context, GenericUnits units);
 
     /**
      * Returns groups for all known and accessible types.
@@ -86,8 +87,9 @@ public interface PersistenceService {
      *            current context
      * @param type
      *            type to be saved
+     * @return true if successful, false otherwise
      */
-    void type(GenericTypesystemContext context, GenericType type);
+    boolean type(GenericTypesystemContext context, GenericType type);
 
     /**
      * Returns all known and accessible items for given type id.
@@ -145,12 +147,13 @@ public interface PersistenceService {
      *
      * @param context
      *            current context
-     * @param type
-     *            type the item belongs to
+     * @param typeId
+     *            type id the item belongs to
      * @param item
      *            item to be saved
+     * @return true if successful, false otherwise
      */
-    void item(GenericTypesystemContext context, GenericType type, GenericItem item);
+    boolean item(GenericTypesystemContext context, long typeId, GenericItem item);
 
     /**
      * Removes the item for given type id and item id. If the type or item is not accessible the operation will be ignored.

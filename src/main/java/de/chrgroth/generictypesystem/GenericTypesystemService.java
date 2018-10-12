@@ -399,7 +399,7 @@ public class GenericTypesystemService {
 
     /**
      * Ensures {@link GenericItem#getTypeId()} is set to given type, validates the type and item and if the result is valid
-     * {@link PersistenceService#item(GenericTypesystemContext, GenericType, GenericItem)} will be invoked.
+     * {@link PersistenceService#item(GenericTypesystemContext, long, GenericItem)} will be invoked.
      *
      * @param context
      *            current context
@@ -438,7 +438,7 @@ public class GenericTypesystemService {
 
         // save / update
         if (validationResult.isValid()) {
-            persistence.item(context, type, item);
+            persistence.item(context, typeId, item);
         } else if (LOG.isDebugEnabled()) {
             LOG.debug("skip persisting invalid item " + typeId + "/" + (item != null ? item.getId() : null));
         }

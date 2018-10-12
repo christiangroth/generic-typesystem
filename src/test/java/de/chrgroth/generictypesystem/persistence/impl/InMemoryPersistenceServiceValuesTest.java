@@ -39,7 +39,7 @@ public class InMemoryPersistenceServiceValuesTest {
 
         // prepare test type
         type = new GenericType(0l, "name", "group", null, null, null, null);
-        service.type(context, type);
+        Assert.assertTrue(service.type(context, type));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class InMemoryPersistenceServiceValuesTest {
 
     @Test
     public void correctTypeIdWthItems() {
-        service.item(context, type, new GenericItem());
+        service.item(context, type.getId(), new GenericItem());
         Map<String, List<?>> result = service.values(context, type.getId(), null);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());

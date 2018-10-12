@@ -49,6 +49,12 @@ public class InMemoryPersistenceService extends AbstractPersistenceService {
     }
 
     @Override
+    protected void updateUnits(GenericUnits units) {
+        this.units.remove(units);
+        this.units.add(units);
+    }
+
+    @Override
     protected boolean removeUnits(long id) {
         return units.removeIf(u -> u.getId() != null && u.getId().longValue() == id);
     }
@@ -65,6 +71,12 @@ public class InMemoryPersistenceService extends AbstractPersistenceService {
 
     @Override
     protected void addType(GenericType type) {
+        types.add(type);
+    }
+
+    @Override
+    protected void updateType(GenericType type) {
+        types.remove(type);
         types.add(type);
     }
 
@@ -87,12 +99,23 @@ public class InMemoryPersistenceService extends AbstractPersistenceService {
 
     @Override
     protected void addItem(long typeId, GenericItem item) {
+        ensureItemsCollection(typeId).add(item);
+    }
+
+    @Override
+    protected void updateItem(long typeId, GenericItem item) {
+        final Set<GenericItem> typeItems = ensureItemsCollection(typeId);
+        typeItems.remove(item);
+        typeItems.add(item);
+    }
+
+    private Set<GenericItem> ensureItemsCollection(long typeId) {
         Set<GenericItem> typeItems = items.get(typeId);
         if (typeItems == null) {
             typeItems = new HashSet<>();
             items.put(typeId, typeItems);
         }
-        typeItems.add(item);
+        return typeItems;
     }
 
     @Override

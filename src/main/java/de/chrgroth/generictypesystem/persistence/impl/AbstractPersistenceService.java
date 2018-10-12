@@ -56,21 +56,25 @@ public abstract class AbstractPersistenceService implements PersistenceService {
     }
 
     @Override
-    public void units(GenericTypesystemContext context, GenericUnits units) {
-        if (units != null) {
+    public boolean units(GenericTypesystemContext context, GenericUnits units) {
+        if (units == null) {
+            return false;
+        }
 
-            // ensure id
-            if (units.getId() == null) {
-                units.setId(nextUnitsId());
-            }
-
-            // re-add
-            boolean removed = removeUnits(units.getId().longValue());
+        // add or update
+        if (units.getId() == null) {
+            units.setId(nextUnitsId());
             addUnits(units);
             if (LOG.isDebugEnabled()) {
-                LOG.debug((removed ? "updated" : "added") + " units " + units);
+                LOG.debug("added units " + units);
+            }
+        } else {
+            updateUnits(units);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("updated units " + units);
             }
         }
+        return true;
     }
 
     @Override
@@ -89,27 +93,31 @@ public abstract class AbstractPersistenceService implements PersistenceService {
     }
 
     @Override
-    public void type(GenericTypesystemContext context, GenericType type) {
-        if (type != null) {
+    public boolean type(GenericTypesystemContext context, GenericType type) {
+        if (type == null) {
+            return false;
+        }
 
-            // check if accessible
-            if (!context.isTypeAccessible(type)) {
-                LOG.error("unable to save/update inaccessible type " + type + ": " + context.currentUser());
-                return;
-            }
+        // check if accessible
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to save/update inaccessible type " + type + ": " + context.currentUser());
+            return false;
+        }
 
-            // ensure id
-            if (type.getId() == null) {
-                type.setId(nextTypeId());
-            }
-
-            // re-add
-            boolean removed = removeType(type.getId().longValue());
+        // add or update
+        if (type.getId() == null) {
+            type.setId(nextTypeId());
             addType(type);
             if (LOG.isDebugEnabled()) {
-                LOG.debug((removed ? "updated" : "added") + " type " + type);
+                LOG.debug("added type " + type);
+            }
+        } else {
+            updateType(type);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("updated type " + type);
             }
         }
+        return true;
     }
 
     @Override
@@ -182,39 +190,44 @@ public abstract class AbstractPersistenceService implements PersistenceService {
     }
 
     @Override
-    public void item(GenericTypesystemContext context, GenericType type, GenericItem item) {
-        if (type != null && item != null) {
+    public boolean item(GenericTypesystemContext context, long typeId, GenericItem item) {
+        if (item == null) {
+            return false;
+        }
 
-            // check if accessible
-            if (!context.isTypeAccessible(type)) {
-                LOG.error("unable to save/update item for inaccessible type " + type + ": " + context.currentUser());
-                return;
+        // ensure type exists
+        GenericType type = type(context, typeId);
+        if (type == null) {
+            LOG.error("unable to save/update item for non existing type with id " + typeId);
+            return false;
+        }
+
+        // check if type accessible
+        if (!context.isTypeAccessible(type)) {
+            LOG.error("unable to save/update item for inaccessible type " + type + ": " + context.currentUser());
+            return false;
+        }
+
+        // check if item accessible
+        if (!context.isItemAccessible(type, item)) {
+            LOG.error("unable to save/update inaccessible item " + item + ": " + context.currentUser());
+            return false;
+        }
+
+        // add or update
+        if (item.getId() == null) {
+            item.setId(nextItemId(typeId));
+            addItem(typeId, item);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("added item " + item);
             }
-
-            // check if accessible
-            if (!context.isItemAccessible(type, item)) {
-                LOG.error("unable to save/update inaccessible item " + item + ": " + context.currentUser());
-                return;
-            }
-
-            // ensure type
-            type(context, type);
-            final Long typeId = type.getId();
-            if (typeId != null) {
-
-                // ensure id
-                if (item.getId() == null) {
-                    item.setId(nextItemId(typeId));
-                }
-
-                // re-add item
-                boolean removed = removeItem(typeId, item.getId().longValue());
-                addItem(typeId, item);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug((removed ? "updated" : "added") + " item " + item);
-                }
+        } else {
+            updateItem(typeId, item);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("updated item " + item);
             }
         }
+        return true;
     }
 
     @Override
@@ -284,6 +297,8 @@ public abstract class AbstractPersistenceService implements PersistenceService {
 
     protected abstract void addUnits(GenericUnits units);
 
+    protected abstract void updateUnits(GenericUnits units);
+
     protected abstract boolean removeUnits(long id);
 
     protected abstract Collection<GenericType> types();
@@ -292,6 +307,8 @@ public abstract class AbstractPersistenceService implements PersistenceService {
 
     protected abstract void addType(GenericType type);
 
+    protected abstract void updateType(GenericType type);
+
     protected abstract boolean removeType(long id);
 
     protected abstract Collection<GenericItem> items(long typeId);
@@ -299,6 +316,8 @@ public abstract class AbstractPersistenceService implements PersistenceService {
     protected abstract long nextItemId(long typeId);
 
     protected abstract void addItem(long typeId, GenericItem item);
+
+    protected abstract void updateItem(long typeId, GenericItem item);
 
     protected abstract boolean removeItem(long typeId, long id);
 

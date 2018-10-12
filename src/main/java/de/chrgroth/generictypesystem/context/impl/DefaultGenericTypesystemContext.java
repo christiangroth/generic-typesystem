@@ -64,7 +64,6 @@ public class DefaultGenericTypesystemContext implements GenericTypesystemContext
             return true;
         }
 
-        // TODO bug: type may also be private!!
         // other users public type and public item
         if (item.getVisibility() == null || item.getVisibility() == Visibility.PUBLIC) {
             return true;
